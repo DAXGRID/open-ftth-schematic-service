@@ -13,17 +13,23 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
         {
             Diagram diagram = new Diagram();
 
-            var lineBlock = new LineBlock(0,0);
+            var lineBlock = new LineBlock()
+            {
+                MinHeight = 200
+            };
 
             lineBlock.AddPort(new BlockPort(BlockSideEnum.Vest));
-
             lineBlock.AddPort(new BlockPort(BlockSideEnum.East));
+            lineBlock.AddPort(new BlockPort(BlockSideEnum.North));
+            lineBlock.AddPort(new BlockPort(BlockSideEnum.South));
 
-            lineBlock.AddPortConnection(BlockSideEnum.Vest, 1, BlockSideEnum.East, 1);
+            //lineBlock.AddPort(new BlockPort(BlockSideEnum.North));
+
+            //lineBlock.AddPortConnection(BlockSideEnum.Vest, 1, BlockSideEnum.East, 1);
 
             var diagramObjects = lineBlock.CreateDiagramObjects(diagram, 0, 0);
 
-            new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+            //new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
         }
     }
 }

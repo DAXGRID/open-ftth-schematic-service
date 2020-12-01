@@ -51,8 +51,9 @@ namespace OpenFTTH.Schematic.Business.Lines
         }
 
         // Desired Size property
-        private Size _desiredSize = new Size(100, 100);
-        public override Size DesiredSize => _desiredSize;
+        private Size _actualSize = new Size(0, 0);
+
+        public override Size ActualSize => _actualSize;
 
         // Block sides
         private Dictionary<BlockSideEnum, BlockSide> _sides = new Dictionary<BlockSideEnum, BlockSide>();
@@ -62,14 +63,18 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         private List<LineBlockTerminalConnection> _terminalConnections = new List<LineBlockTerminalConnection>();
 
+        /*
         private readonly double _offsetX = 0;
 
         private readonly double _offsetY = 0;
+        */
 
-        public LineBlock(double offsetX, double offsetY)
+        public LineBlock()
         {
+            /*
             _offsetX = offsetX;
             _offsetY = offsetY;
+            */
         }
 
         public void AddPort(BlockPort port)
@@ -78,19 +83,6 @@ namespace OpenFTTH.Schematic.Business.Lines
                 _sides.Add(port.Side, new BlockSide(this, port.Side));
 
             _sides[port.Side].AddPort(port);
-        }
-
-        public void SetSideMargin(double sideMargin)
-        {
-            foreach (var side in _sides)
-            {
-                side.Value.SideMargin = sideMargin;
-            }
-        }
-
-        public void SetSideCenterAllignment(BlockSideEnum side, bool center)
-        {
-            _sides[side].CenterAlignment = center;
         }
 
         public LineBlockTerminalConnection AddTerminalConnection(BlockSideEnum fromSide, int fromPortIndex, int fromTerminalIndex, BlockSideEnum toSide, int toPortIndex, int toTerminalIndex, string label = null, string style = null, LineShapeTypeEnum lineShapeType = LineShapeTypeEnum.Line)
@@ -130,7 +122,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             return connection;
         }
 
-        public override Size Measure(Size availableSize)
+        private double WidthOfChildren()
         {
             // Calculate width
             double width = 0;
@@ -141,12 +133,11 @@ namespace OpenFTTH.Schematic.Business.Lines
                     width = side.Value.Length;
             }
 
-            width += (LineBlockMargin * 2);
+            return width;
+        }
 
-            if (width < MinWidth)
-                width = MinWidth;
-
-            // Calculate height
+        private double HeightOfChildren()
+        {
             double height = 0;
 
             foreach (var side in _sides.Where(s => s.Key == BlockSideEnum.Vest || s.Key == BlockSideEnum.East))
@@ -155,24 +146,52 @@ namespace OpenFTTH.Schematic.Business.Lines
                     height = side.Value.Length;
             }
 
+            return height;
+        }
+
+
+        public override Size Measure()
+        {
+            // Calculate width
+            var width = WidthOfChildren();
+
+            // Add margin
+            width += (LineBlockMargin * 2);
+
+            // If no width, set to 100
+            if (width == 0)
+                width = 100;
+
+            // Make sure width is at least the min width specified
+            if (width < MinWidth)
+                width = MinWidth;
+
+
+            // Calculate height
+            var height = HeightOfChildren();
+
             height += (LineBlockMargin * 2);
 
+            // If no height, set to 100
+            if (height == 0)
+                height = 100;
+
+            // Make sure height is at least the min height specified
             if (height < MinHeight)
                 height = MinHeight;
 
-            _desiredSize = new Size(width, height);
+            _actualSize = new Size(height, width);
 
-            return _desiredSize;
+            return _actualSize;
         }
 
-        public override Size Arrange(Size finalSize)
-        {
-            return Measure(finalSize);
-        }
+       
 
-        public override IEnumerable<DiagramObject> CreateDiagramObjects(Diagram diagram, double offsetXparam, double offsetYparam)
+        public override IEnumerable<DiagramObject> CreateDiagramObjects(Diagram diagram, double _offsetX, double _offsetY)
         {
             List<DiagramObject> result = new List<DiagramObject>();
+
+            Measure();
 
             // Create rect to show where block is
             if (IsVisible)
@@ -180,7 +199,7 @@ namespace OpenFTTH.Schematic.Business.Lines
                 result.Add(new DiagramObject(diagram)
                 {
                     Style = this.Style,
-                    Geometry = GeometryBuilder.Rectangle(_offsetX, _offsetY, DesiredSize.Height, DesiredSize.Width),
+                    Geometry = GeometryBuilder.Rectangle(_offsetX, _offsetY, ActualSize.Height, ActualSize.Width),
                     IdentifiedObject = _refClass == null ? null : new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass }
                 });
             }
@@ -188,7 +207,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             // Add all side objects
             foreach (var side in _sides.Values)
             {
-                result.AddRange(side.CreateDiagramObjects(diagram, CalculateSideXOffset(side.Side, _offsetX), CalculateSideYOffset(side.Side, _offsetY)));
+                result.AddRange(side.CreateDiagramObjects(diagram, CalculateSideXOffset(side, _offsetX), CalculateSideYOffset(side, _offsetY)));
             }
 
             // Create all port connections
@@ -206,29 +225,38 @@ namespace OpenFTTH.Schematic.Business.Lines
             return result;
         }
 
-        private double CalculateSideXOffset(BlockSideEnum side, double offsetX)
+        private double CalculateSideXOffset(BlockSide blockSide, double offsetX)
         {
-            if (side == BlockSideEnum.Vest)
-                return offsetX; 
-            else if (side == BlockSideEnum.North)
-                return offsetX + LineBlockMargin;
-            else if (side == BlockSideEnum.East)
-                return offsetX + DesiredSize.Width;
-            else if (side == BlockSideEnum.South)
-                return offsetX + LineBlockMargin;
+            if (blockSide.Side == BlockSideEnum.Vest)
+                return offsetX;
+            else if (blockSide.Side == BlockSideEnum.East)
+                return offsetX + ActualSize.Width;
+            else if (blockSide.Side == BlockSideEnum.North || blockSide.Side == BlockSideEnum.South)
+            {
+                if (blockSide.CenterAlignment)
+                {
+                    double spaceLeft = ActualSize.Width - WidthOfChildren() + (LineBlockMargin * 2);
+
+                    return offsetX + LineBlockMargin + (spaceLeft / 2);
+                }
+                else
+                {
+                    return offsetX + LineBlockMargin;
+                }
+            }
             else
                 return 0;
         }
 
-        private double CalculateSideYOffset(BlockSideEnum side, double offsetY)
+        private double CalculateSideYOffset(BlockSide blockSide, double offsetY)
         {
-            if (side == BlockSideEnum.Vest)
+            if (blockSide.Side == BlockSideEnum.Vest)
                 return offsetY + LineBlockMargin;
-            else if (side == BlockSideEnum.North)
-                return offsetY + DesiredSize.Height;
-            else if (side == BlockSideEnum.East)
+            else if (blockSide.Side == BlockSideEnum.North)
+                return offsetY + ActualSize.Height;
+            else if (blockSide.Side == BlockSideEnum.East)
                 return offsetY + LineBlockMargin;
-            else if (side == BlockSideEnum.South)
+            else if (blockSide.Side == BlockSideEnum.South)
                 return offsetY;
             else
                 return 0;

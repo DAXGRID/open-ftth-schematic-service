@@ -38,7 +38,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public bool CenterAlignment = false;
 
-        private double _sideMargin = 40;
+        private double _sideMargin = 20;
 
         private double _sideThickness = 10;
 
@@ -85,13 +85,18 @@ namespace OpenFTTH.Schematic.Business.Lines
                 if (_ports.Count > 0)
                     length += (_ports.Count - 1) * _spaceBetweenPorts;
 
-                return length + (_sideMargin * 2);
+                // Add side margins
+                length += (_sideMargin * 2);
+
+                return length;
             }
         }
 
         public List<DiagramObject> CreateDiagramObjects(Diagram diagram, double offsetX, double offsetY)
         {
             List<DiagramObject> result = new List<DiagramObject>();
+
+            //double sideOffset = IsVertical ? _lineBlock.ActualHeight;
 
             if (IsVisible)
             {
@@ -103,7 +108,7 @@ namespace OpenFTTH.Schematic.Business.Lines
                 var rectWidth = IsVertical ? _sideThickness : Length;
                 var rectHeight = IsVertical ? Length : _sideThickness;
 
-                poly.Geometry = GeometryBuilder.Rectangle(offsetX, offsetY, rectHeight, rectWidth);
+                poly.Geometry = GeometryBuilder.Rectangle(CalculateRectOffsetX(offsetX, rectWidth), CalculateRectOffsetY(offsetY, rectHeight), rectHeight, rectWidth);
 
                 result.Add(poly);
             }
@@ -169,6 +174,22 @@ namespace OpenFTTH.Schematic.Business.Lines
                 else
                     return false;
             }
+        }
+
+        private double CalculateRectOffsetX(double offsetX, double rectWidth)
+        {
+            if (Side == BlockSideEnum.East)
+                return offsetX - rectWidth;
+            else
+                return offsetX;
+        }
+
+        private double CalculateRectOffsetY(double offsetY, double rectHeight)
+        {
+            if (Side == BlockSideEnum.North)
+                return offsetY - rectHeight;
+            else
+                return offsetY;
         }
 
     }
