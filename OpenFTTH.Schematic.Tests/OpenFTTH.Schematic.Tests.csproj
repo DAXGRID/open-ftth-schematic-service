@@ -19,4 +19,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OpenFTTH.Schematic.API\OpenFTTH.Schematic.API.csproj" />
+    <ProjectReference Include="..\OpenFTTH.Schematic.Business\OpenFTTH.Schematic.Business.csproj" />
+  </ItemGroup>
+
 </Project>
