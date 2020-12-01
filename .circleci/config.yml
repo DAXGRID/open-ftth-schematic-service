@@ -1,0 +1,153 @@
+version: 2.1
+
+executors:
+  dotnet-core-sdk:
+    docker:
+    - image: mcr.microsoft.com/dotnet/sdk:5.0
+  docker-publisher:
+    environment:
+      IMAGE_NAME: openftth/schematic-service
+    docker:
+      - image: cimg/base:2020.09
+  alpine-git:
+    environment:
+      IMAGE_NAME: openftth/schematic-service
+    docker:
+    - image: alpine/git
+
+jobs:
+  build-app:
+    executor: dotnet-core-sdk
+    steps:
+      - checkout
+      - run:
+          name: apt update
+          command: apt-get update;
+      - run:
+          name: restore
+          command: dotnet restore
+      - run:
+          name: build
+          command: dotnet build -c Release
+
+  test-app:
+    executor: dotnet-core-sdk
+    steps:
+      - checkout
+      - run:
+          name: apt update
+          command: apt-get update;
+      - run:
+          name: test
+          command: dotnet test
+
+  build-docker-image:
+    executor: docker-publisher
+    steps:
+     - checkout
+     - setup_remote_docker
+     - run:
+         name: Build docker image
+         command: |
+            docker build -t $IMAGE_NAME:latest .
+     - run:
+         name: Archive docker image
+         command: docker save -o image.tar $IMAGE_NAME
+     - persist_to_workspace:
+         root: .
+         paths:
+          - ./image.tar
+
+  docker-publish-image:
+    executor: docker-publisher
+    steps:
+     - attach_workspace:
+         at: /tmp/workspace
+     - setup_remote_docker
+     - run:
+         name: Load archived Docker image
+         command: docker load -i /tmp/workspace/image.tar
+     - run:
+         name: Publish Docker Image to Docker Hub
+         command: |
+           echo "$DOCKER_ACCESSTOKEN" | docker login -u $DOCKER_LOGIN --password-stdin
+           IMAGE_TAG=${CIRCLE_TAG}
+           docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
+           docker push $IMAGE_NAME:latest
+           docker push $IMAGE_NAME:$IMAGE_TAG
+  update-helm-chart:
+    executor: alpine-git
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "a4:3a:60:ba:46:97:73:43:a0:dc:9e:e3:ac:f3:26:71"
+      - run:
+          name: key-scan
+          command: ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
+          name: git clone open-ftth-chart
+          command: git clone git@github.com:DAXGRID/open-ftth-chart.git
+      - run:
+          name: package and push
+          command: |
+             apk add bash
+             IMAGE_TAG_NO_V=${CIRCLE_TAG:1}
+             cd ./open-ftth-chart
+             git config user.email "admin@dax.dk"
+             git config user.name "dax-bot"
+             sed -i "/appVersion:.*/c\appVersion: \"$IMAGE_TAG_NO_V\"" ./openftth/charts/schematic-service/Chart.yaml
+             sed -i "/  tag:.*/c\  tag: v$IMAGE_TAG_NO_V" ./openftth/charts/schematic-service/values.yaml
+             CHART_VERSION="$(./scripts/increment-chart-number.sh "$(grep -w '^version:' ./openftth/Chart.yaml)" bug)"
+             sed -i "/^version:.*/c\version: $CHART_VERSION" ./openftth/Chart.yaml
+             git add .
+             git commit -m "upgrades $IMAGE_NAME to version $IMAGE_TAG"
+             git push
+  publish-nuget:
+    executor: dotnet-core-sdk
+    steps:
+      - checkout
+      - run:
+          name: Push to NuGet
+          command: |
+            dotnet pack --output ./publish --configuration Release -p:PackageVersion=${CIRCLE_TAG:1}
+            dotnet nuget push --source "${NUGET_FEED_URL}" --api-key="${NUGET_KEY}" "./publish/*.nupkg"
+workflows:
+  build-test-upload_image:
+    jobs:
+      - build-app:
+          filters:
+            tags:
+              only: /.*/
+      - test-app:
+          requires:
+            - build-app
+          filters:
+            tags:
+              only: /.*/
+      - build-docker-image:
+          requires:
+            - test-app
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - docker-publish-image:
+          context: docker
+          requires:
+           - build-docker-image
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - publish-nuget:
+          context: nuget
+          requires:
+            - test-app
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
