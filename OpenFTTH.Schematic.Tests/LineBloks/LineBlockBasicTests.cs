@@ -68,7 +68,7 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
 
             var diagramObjects = lineBlock.CreateDiagramObjects(diagram, 0, 0);
 
-            new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+            //new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
         }
 
         private void AddThreeTerminalsToPort(BlockPort port)
