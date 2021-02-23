@@ -97,7 +97,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             get { return _terminals; }
         }
 
-        internal void AddTerminal(BlockPortTerminal terminal)
+        public void AddTerminal(BlockPortTerminal terminal)
         {
             _terminals.Add(terminal);
             terminal.Index = _terminals.Count;
@@ -176,12 +176,20 @@ namespace OpenFTTH.Schematic.Business.Lines
                     yStep = terminal.Length + _spaceBetweenTerminals;
                 }
 
-                if (_side == BlockSideEnum.North || _side == BlockSideEnum.South)
+                if (_side == BlockSideEnum.North)
                 {
                     // goes right along x
                     xStep = terminal.Length + _spaceBetweenTerminals;
                     yStep = 0;
                 }
+
+                if (_side == BlockSideEnum.South)
+                {
+                    // goes right along x
+                    xStep = terminal.Length + _spaceBetweenTerminals;
+                    yStep = 0;
+                }
+
 
                 result.AddRange(terminal.CreateDiagramObjects(diagram, terminalX, terminalY));
 

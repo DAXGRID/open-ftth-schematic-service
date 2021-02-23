@@ -96,8 +96,6 @@ namespace OpenFTTH.Schematic.Business.Lines
         {
             List<DiagramObject> result = new List<DiagramObject>();
 
-            //double sideOffset = IsVertical ? _lineBlock.ActualHeight;
-
             if (IsVisible)
             {
                 // Create rect diagram object representing the side
@@ -115,20 +113,6 @@ namespace OpenFTTH.Schematic.Business.Lines
 
             double portX = offsetX;
             double portY = offsetY;
-
-            if (CenterAlignment && (Side == BlockSideEnum.North || Side == BlockSideEnum.South))
-            {
-                double totalPortLength = 0;
-
-                foreach (var port in _ports)
-                    totalPortLength += port.Length;
-
-                double spaceLeft = _lineBlock.MinWidth - totalPortLength;
-
-                double portSpace = spaceLeft / (_ports.Count + 1);
-                _sideMargin = portSpace;
-                _spaceBetweenPorts = portSpace;
-            }
 
             if (Side == BlockSideEnum.Vest || Side == BlockSideEnum.East)
                 portY += _sideMargin;

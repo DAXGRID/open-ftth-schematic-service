@@ -41,6 +41,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public BlockPortTerminal(BlockPort port)
         {
+            this.Port = port;
             port.AddTerminal(this);
         }
 
@@ -111,9 +112,6 @@ namespace OpenFTTH.Schematic.Business.Lines
             }
             else if (Port.Side == BlockSideEnum.South)
             {
-                terminalOffsetX -= Length;
-                terminalOffsetY += (Port.PortThickness / 2);
-
                 ConnectionPointX = offsetX + (Length / 2);
                 ConnectionPointY = offsetY;
             }

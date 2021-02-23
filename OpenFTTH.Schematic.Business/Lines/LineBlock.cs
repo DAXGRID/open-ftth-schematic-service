@@ -235,7 +235,8 @@ namespace OpenFTTH.Schematic.Business.Lines
             {
                 if (blockSide.CenterAlignment)
                 {
-                    double spaceLeft = ActualSize.Width - WidthOfChildren() + (LineBlockMargin * 2);
+                    double width = WidthOfChildren();
+                    double spaceLeft = ActualSize.Width - (width + (LineBlockMargin * 2));
 
                     return offsetX + LineBlockMargin + (spaceLeft / 2);
                 }
@@ -265,6 +266,11 @@ namespace OpenFTTH.Schematic.Business.Lines
         public void SetSideMargin(BlockSideEnum side, int margin)
         {
             _sides[side].SideMargin = margin;
+        }
+
+        public void SetSideCenterAlignment(BlockSideEnum side)
+        {
+            _sides[side].CenterAlignment = true;
         }
     }
 }
