@@ -13,6 +13,8 @@ namespace OpenFTTH.Schematic.API.Model.DiagramLayout
         private readonly Diagram _diagram;
         public Diagram Diagram => _diagram;
 
+        public UInt16 DrawingOrder { get; set; }
+
         // Geometry
         public Geometry Geometry { get; set; }
 

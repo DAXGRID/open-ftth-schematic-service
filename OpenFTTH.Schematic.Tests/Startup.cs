@@ -3,12 +3,9 @@ using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.EventSourcing.InMem;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
+using OpenFTTH.TestData;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenFTTH.Schematic.Tests
 {
@@ -36,7 +33,7 @@ namespace OpenFTTH.Schematic.Tests
             services.AddProjections(businessAssemblies);
 
             // Test Route Network Data
-            //services.AddSingleton<ITestRouteNetworkData, TestRouteNetwork>();
+            services.AddSingleton<ITestRouteNetworkData, TestRouteNetwork>();
         }
     }
 }
