@@ -20,8 +20,4 @@
     <ProjectReference Include="..\OpenFTTH.Schematic.API\OpenFTTH.Schematic.API.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DiagramEngine\IO\" />
-  </ItemGroup>
-
 </Project>
