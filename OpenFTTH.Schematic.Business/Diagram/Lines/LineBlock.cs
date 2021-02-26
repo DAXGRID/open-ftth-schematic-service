@@ -63,18 +63,9 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         private List<LineBlockTerminalConnection> _terminalConnections = new List<LineBlockTerminalConnection>();
 
-        /*
-        private readonly double _offsetX = 0;
-
-        private readonly double _offsetY = 0;
-        */
-
-        public LineBlock()
+        public LineBlock(bool isVisible = true)
         {
-            /*
-            _offsetX = offsetX;
-            _offsetY = offsetY;
-            */
+            this.IsVisible = isVisible;
         }
 
         public void AddPort(BlockPort port)

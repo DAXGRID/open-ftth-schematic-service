@@ -85,14 +85,6 @@ namespace OpenFTTH.Schematic.Business.Lines
             ConnectionPointX = 0;
             ConnectionPointY = 0;
 
-            // Create terminal diagram object
-            var terminalPolygon = new DiagramObject(diagram);
-
-            if (_refClass != null)
-                terminalPolygon.IdentifiedObject = new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass };
-
-            terminalPolygon.Style = Style; 
-
             var rectWidth = Port.IsVertical ? Port.PortThickness + (Port.PortThickness / 2) : Length;
             var rectHeight = Port.IsVertical ? Length : Port.PortThickness + (Port.PortThickness / 2);
 
@@ -125,10 +117,17 @@ namespace OpenFTTH.Schematic.Business.Lines
 
             if (IsVisible)
             {
-                terminalPolygon.Geometry = GeometryBuilder.Rectangle(terminalOffsetX, terminalOffsetY, rectHeight, rectWidth);
+                // Create terminal polygon object
+                result.Add(
+                    new DiagramObject(diagram)
+                    {
+                        Style = Style,
+                        Geometry = GeometryBuilder.Rectangle(terminalOffsetX, terminalOffsetY, rectHeight, rectWidth),
+                        IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
+                    }
+                );
 
-                result.Add(terminalPolygon);
-
+                // Create terminal connection point object
                 result.Add(
                     new DiagramObject(diagram)
                     {

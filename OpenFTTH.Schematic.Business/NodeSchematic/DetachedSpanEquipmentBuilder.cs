@@ -7,33 +7,37 @@ using System.Collections.Generic;
 
 namespace OpenFTTH.Schematic.Business.NodeSchematic
 {
+    /// <summary>
+    ///  Diagram creation of a span equipment starting, ending or passing through a route network node or element
+    /// </summary>
     public class DetachedSpanEquipmentBuilder
     {
         private readonly LookupCollection<SpanStructureSpecification> _spanStructureSpecifications;
 
-        private double _labelBlockWidth = 100;
+        private double _spanEquipmentAreaWidth = 300;
+        private double _labelAreaWidth = 100;
+        
 
         public DetachedSpanEquipmentBuilder(LookupCollection<SpanStructureSpecification> spanStructureSpecifications)
         {
             _spanStructureSpecifications = spanStructureSpecifications;
         }
 
-        public IEnumerable<DiagramObject> CreateDiagramObjects(SpanEquipment spanEquipment, Diagram diagram, double offsetX, double offsetY)
+        public IEnumerable<DiagramObject> CreateDiagramObjects(DetachedSpanEquipmentViewModel spanEquipmentViewModel, Diagram diagram, double offsetX, double offsetY)
         {
-
             return null;
         }
 
-        private LineBlock CreateLabelBlock(List<RouteNetworkElement> routeNetworkElements)
+        private LineBlock CreateLabelBlock(List<string> labels)
         {
             var labelBlock = new LineBlock()
             {
-                MinWidth = _labelBlockWidth,
+                MinWidth = _labelAreaWidth,
             };
+
 
 
             return labelBlock;
         }
-
     }
 }

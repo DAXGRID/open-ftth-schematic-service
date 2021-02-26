@@ -7,19 +7,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 {
     public class BlockPort
     {
-        public bool _isVisible = true;
-        public bool IsVisible
-        {
-            get
-            {
-                return _isVisible;
-            }
-
-            init
-            {
-                _isVisible = value;
-            }
-        }
+        public bool IsVisible { get; set; }
 
         private double _portMargin = 4;
         private double _portThickness = 10;
@@ -118,17 +106,6 @@ namespace OpenFTTH.Schematic.Business.Lines
             var portOffsetX = offsetX;
             var portOffsetY = offsetY;
 
-            // Create port diagram object
-            var portPolygon = new DiagramObject(diagram);
-
-            if (_refClass != null)
-                portPolygon.IdentifiedObject = new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass };
-
-            if (_style != null)
-                portPolygon.Style = _style;
-            else
-                portPolygon.Style = "BlockPort";
-
             var rectWidth = IsVertical ? _portThickness : Length;
             var rectHeight = IsVertical ? Length : _portThickness;
 
@@ -145,14 +122,21 @@ namespace OpenFTTH.Schematic.Business.Lines
             {
                 portOffsetX -= _portThickness;
             }
-           
+
             if (IsVisible)
             {
+                // Create port diagram object
+                var portPolygon = new DiagramObject(diagram);
+
+                if (_refClass != null)
+                    portPolygon.IdentifiedObject = new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass };
+
+                portPolygon.Style = _style ?? "BlockPort";
+
                 portPolygon.Geometry = GeometryBuilder.Rectangle(portOffsetX, portOffsetY, rectHeight, rectWidth);
 
                 result.Add(portPolygon);
             }
-
 
             // Create terminal diagram objects
             double terminalX = offsetX;
