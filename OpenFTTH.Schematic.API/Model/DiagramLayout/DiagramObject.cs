@@ -16,7 +16,7 @@ namespace OpenFTTH.Schematic.API.Model.DiagramLayout
         public UInt16 DrawingOrder { get; set; }
 
         // Geometry
-        public Geometry Geometry { get; set; }
+        public Geometry Geometry { get; init; }
 
         // Optional stuff
         public IdentifiedObjectReference IdentifiedObject { get; set; }

@@ -6,20 +6,6 @@ namespace OpenFTTH.Schematic.Business.Lines
 {
     public class BlockSide
     {
-        public bool _isVisible = true;
-        public bool IsVisible
-        {
-            get
-            {
-                return _isVisible;
-            }
-
-            init
-            {
-                _isVisible = value;
-            }
-        }
-
         private string _style = "BlockSide";
         public string Style
         {
@@ -38,7 +24,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public bool CenterAlignment = false;
 
-        private double _sideMargin = 20;
+        private double _sideMargin = 0;
 
         private double _sideThickness = 10;
 
@@ -96,17 +82,18 @@ namespace OpenFTTH.Schematic.Business.Lines
         {
             List<DiagramObject> result = new List<DiagramObject>();
 
-            if (IsVisible)
+            if (_lineBlock.IsSidesVisible)
             {
-                // Create rect diagram object representing the side
-                var poly = new DiagramObject(diagram);
-
-                poly.Style = Style;
 
                 var rectWidth = IsVertical ? _sideThickness : Length;
                 var rectHeight = IsVertical ? Length : _sideThickness;
 
-                poly.Geometry = GeometryBuilder.Rectangle(CalculateRectOffsetX(offsetX, rectWidth), CalculateRectOffsetY(offsetY, rectHeight), rectHeight, rectWidth);
+                // Create rect diagram object representing the side
+                var poly = new DiagramObject(diagram)
+                {
+                    Geometry = GeometryBuilder.Rectangle(CalculateRectOffsetX(offsetX, rectWidth), CalculateRectOffsetY(offsetY, rectHeight), rectHeight, rectWidth),
+                    Style = Style
+                };
 
                 result.Add(poly);
             }

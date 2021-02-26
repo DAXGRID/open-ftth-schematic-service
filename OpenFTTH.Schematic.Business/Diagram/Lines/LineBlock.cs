@@ -9,19 +9,8 @@ namespace OpenFTTH.Schematic.Business.Lines
 {
     public class LineBlock : DiagramObjectContainer
     {
-        public bool _isVisible = true;
-        public bool IsVisible
-        {
-            get
-            {
-                return _isVisible;
-            }
-
-            init
-            {
-                _isVisible = value;
-            }
-        }
+        public bool IsVisible { get; set; }
+        public bool IsSidesVisible { get; set; }
 
         private string _style = "LineBlock";
         public string Style
@@ -37,7 +26,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             }
         }
            
-        public double LineBlockMargin { get; init; }
+        public double Margin { get; init; }
 
         // Reference property
         private Guid _refId = Guid.Empty;
@@ -147,7 +136,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             var width = WidthOfChildren();
 
             // Add margin
-            width += (LineBlockMargin * 2);
+            width += (Margin * 2);
 
             // If no width, set to 100
             if (width == 0)
@@ -161,7 +150,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             // Calculate height
             var height = HeightOfChildren();
 
-            height += (LineBlockMargin * 2);
+            height += (Margin * 2);
 
             // If no height, set to 100
             if (height == 0)
@@ -227,13 +216,13 @@ namespace OpenFTTH.Schematic.Business.Lines
                 if (blockSide.CenterAlignment)
                 {
                     double width = WidthOfChildren();
-                    double spaceLeft = ActualSize.Width - (width + (LineBlockMargin * 2));
+                    double spaceLeft = ActualSize.Width - (width + (Margin * 2));
 
-                    return offsetX + LineBlockMargin + (spaceLeft / 2);
+                    return offsetX + Margin + (spaceLeft / 2);
                 }
                 else
                 {
-                    return offsetX + LineBlockMargin;
+                    return offsetX + Margin;
                 }
             }
             else
@@ -243,11 +232,11 @@ namespace OpenFTTH.Schematic.Business.Lines
         private double CalculateSideYOffset(BlockSide blockSide, double offsetY)
         {
             if (blockSide.Side == BlockSideEnum.Vest)
-                return offsetY + LineBlockMargin;
+                return offsetY + Margin;
             else if (blockSide.Side == BlockSideEnum.North)
                 return offsetY + ActualSize.Height;
             else if (blockSide.Side == BlockSideEnum.East)
-                return offsetY + LineBlockMargin;
+                return offsetY + Margin;
             else if (blockSide.Side == BlockSideEnum.South)
                 return offsetY;
             else

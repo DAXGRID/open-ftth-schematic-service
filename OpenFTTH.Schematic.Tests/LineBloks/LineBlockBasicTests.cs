@@ -2,13 +2,15 @@ using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.IO;
 using OpenFTTH.Schematic.Business.Lines;
 using Xunit;
+using FluentAssertions;
+using System.Linq;
 
 namespace OpenFTTH.Schematic.Tests.LineBlocks
 {
     public class LineBlockBasicTests
     {
         [Fact]
-        public void LineWithLabelTest()
+        public void LineBlockWithLabeledLinesTest()
         {
             Diagram diagram = new Diagram();
 
@@ -16,7 +18,8 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
             {
                 MinHeight = 200,
                 MinWidth = 300,
-                LineBlockMargin = 20
+                Margin = 20,
+                IsVisible = false
             };
 
             // Vest
@@ -31,24 +34,31 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
 
             lineBlock.AddTerminalConnection(BlockSideEnum.Vest, 1, 1, BlockSideEnum.East, 1, 1, "This is a label text", "This should be a polyline", LineShapeTypeEnum.Line);
 
+            // Act
             lineBlock.CreateDiagramObjects(diagram, 0, 0);
 
             if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
                 new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
-        }
 
+            // Assert
+            diagram.DiagramObjects.Count.Should().Be(1);
+            diagram.DiagramObjects.First().Geometry.IsValid.Should().BeTrue();
+            diagram.DiagramObjects.First().Geometry.Length.Should().Be(0.03);
+            diagram.DiagramObjects.First().Label.Should().Be("This is a label text");
+            diagram.DiagramObjects.First().Style.Should().Be("This should be a polyline");
+        }
 
 
         [Fact]
         public void test2()
-        {
+        { 
             Diagram diagram = new Diagram();
 
             var lineBlock = new LineBlock()
             {
                 MinHeight = 200,
                 MinWidth = 300,
-                LineBlockMargin = 20
+                Margin = 20
             };
 
             

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,12 +9,25 @@ namespace OpenFTTH.Schematic.API.Model.DiagramLayout
     {
         List<DiagramObject> _diagramObjects = new List<DiagramObject>();
 
-        public List<DiagramObject> DiagramObjects {
+        public Envelope Envelope
+        {
+            get
+            {
+                Envelope envelope = new Envelope();
+
+                foreach (var diagramObject in DiagramObjects)
+                    envelope.ExpandToInclude(diagramObject.Geometry.EnvelopeInternal);
+
+                return envelope;
+            }
+        }
+
+        public List<DiagramObject> DiagramObjects 
+        {
             get
             {
                 return _diagramObjects;
             }
-
         }
 
         public void AddDiagramObject(DiagramObject diagramObject)

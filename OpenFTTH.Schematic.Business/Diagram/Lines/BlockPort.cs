@@ -10,6 +10,9 @@ namespace OpenFTTH.Schematic.Business.Lines
         public bool IsVisible { get; set; }
 
         private double _portMargin = 4;
+
+        public double Margin { get { return _portMargin; } set { _portMargin = value; } }
+
         private double _portThickness = 10;
         private double _spaceBetweenTerminals = 2;
         private double _terminalSize = -1;
@@ -126,14 +129,12 @@ namespace OpenFTTH.Schematic.Business.Lines
             if (IsVisible)
             {
                 // Create port diagram object
-                var portPolygon = new DiagramObject(diagram);
-
-                if (_refClass != null)
-                    portPolygon.IdentifiedObject = new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass };
-
-                portPolygon.Style = _style ?? "BlockPort";
-
-                portPolygon.Geometry = GeometryBuilder.Rectangle(portOffsetX, portOffsetY, rectHeight, rectWidth);
+                var portPolygon = new DiagramObject(diagram)
+                {
+                    Geometry = GeometryBuilder.Rectangle(portOffsetX, portOffsetY, rectHeight, rectWidth),
+                    Style = _style ?? "BlockPort",
+                    IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
+                };
 
                 result.Add(portPolygon);
             }
