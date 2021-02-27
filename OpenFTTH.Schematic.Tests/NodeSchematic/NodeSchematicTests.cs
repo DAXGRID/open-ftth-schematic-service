@@ -12,6 +12,7 @@ using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using OpenFTTH.UtilityGraphService.API.Queries;
 using System.Linq;
 using Xunit;
+using Xunit.Extensions.Ordering;
 
 namespace OpenFTTH.Schematic.Tests.NodeSchematic
 {
@@ -32,7 +33,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             _conduits = new TestConduits(commandDispatcher, queryDispatcher).Run();
         }
 
-        [Fact]
+        [Fact, Order(1)]
         public async void TestDrawingSingleDetachedMultiConduit_5x10_HH_1_to_HH_10()
         {
             var sutRouteNode = TestRouteNetwork.CC_1;
@@ -53,6 +54,9 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
                new GetEquipmentDetails(interestIdList)
             );
 
+            // Query all span equipment specifications
+            var spanEquipmentSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanEquipmentSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanEquipmentSpecification>>>(new GetSpanEquipmentSpecifications());
+
             // Query all span structure specifications
             var spanStructureSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanStructureSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanStructureSpecification>>>(new GetSpanStructureSpecifications());
 
@@ -63,7 +67,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var spanEquipment = equipmentQueryResult.Value.SpanEquipment[TestConduits.MultiConduit_5x10_HH_1_to_HH_10];
 
             // Create read model
-            var readModel = new DetachedSpanEquipmentViewModel(sutRouteNode, spanEquipment, routeElementsQueryResult.Value.RouteNetworkElements, spanStructureSpecificationsQueryResult.Value);
+            var readModel = new DetachedSpanEquipmentViewModel(sutRouteNode, spanEquipment, routeElementsQueryResult.Value.RouteNetworkElements, spanStructureSpecificationsQueryResult.Value, spanEquipmentSpecificationsQueryResult.Value);
 
             var builder = new DetachedSpanEquipmentBuilder(readModel);
 

@@ -1,4 +1,5 @@
 ﻿using OpenFTTH.Schematic.API.Model.DiagramLayout;
+using OpenFTTH.Schematic.Business.Drawing;
 using OpenFTTH.Schematic.Business.Lines;
 using System.Collections.Generic;
 
@@ -26,10 +27,25 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             // Build span equipment block
             var spanEquipmentBlock = CreateSpanEquipmentBlock("OuterConduit", _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit"));
-
             result.AddRange(spanEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
 
+            // Create label on top of span equipment block
+            var spanEquipmentLabel = CreateSpanEquipmentTypeLabel(diagram, 0, spanEquipmentBlock.ActualSize.Height + 5);
+            result.Add(spanEquipmentLabel);
+
             return result;
+        }
+
+        private DiagramObject CreateSpanEquipmentTypeLabel(Diagram diagram, double x, double y)
+        {
+            var labelDiagramObject = new DiagramObject(diagram)
+            {
+                Style = "SpanEquipmentLabel",
+                Label = _spanEquipmentViewModel.GetSpanEquipmentLabel(),
+                Geometry = GeometryBuilder.Point(x, y)
+            };
+
+            return labelDiagramObject;
         }
 
         private LineBlock CreateSpanEquipmentBlock(string spanStyle, List<SpanDiagramInfo> innerSpanData)

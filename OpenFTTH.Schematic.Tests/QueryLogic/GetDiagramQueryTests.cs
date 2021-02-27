@@ -13,6 +13,7 @@ using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using OpenFTTH.UtilityGraphService.API.Queries;
 using System.Linq;
 using Xunit;
+using Xunit.Extensions.Ordering;
 
 namespace OpenFTTH.Schematic.Tests.NodeSchematic
 {
@@ -31,7 +32,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             _conduits = new TestConduits(commandDispatcher, queryDispatcher).Run();
         }
 
-        [Fact]
+        [Fact, Order(1)]
         public async void TestGetDiagramQueryOnCC_1()
         {
             var sutRouteNetworkElement = TestRouteNetwork.CC_1;

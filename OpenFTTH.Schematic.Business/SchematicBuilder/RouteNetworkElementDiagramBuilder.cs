@@ -40,6 +40,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                new GetEquipmentDetails(interestIdList)
             );
 
+            // Query all span equipment specifications
+            var spanEquipmentSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanEquipmentSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanEquipmentSpecification>>>(new GetSpanEquipmentSpecifications());
+
             // Query all span structure specifications
             var spanStructureSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanStructureSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanStructureSpecification>>>(new GetSpanStructureSpecifications());
 
@@ -50,7 +53,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var spanEquipment = equipmentQueryResult.Value.SpanEquipment.First();
 
             // Create read model
-            var readModel = new DetachedSpanEquipmentViewModel(routeNodeElementId, spanEquipment, routeElementsQueryResult.Value.RouteNetworkElements, spanStructureSpecificationsQueryResult.Value);
+            var readModel = new DetachedSpanEquipmentViewModel(routeNodeElementId, spanEquipment, routeElementsQueryResult.Value.RouteNetworkElements, spanStructureSpecificationsQueryResult.Value, spanEquipmentSpecificationsQueryResult.Value);
 
             var builder = new DetachedSpanEquipmentBuilder(readModel);
 

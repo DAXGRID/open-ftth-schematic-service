@@ -1,6 +1,7 @@
 ﻿using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.Util;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
+using OpenFTTH.UtilityGraphService.Business.SpanEquipments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +13,19 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     /// </summary>
     public class DetachedSpanEquipmentViewModel
     {
-        private readonly SpanEquipmentWithRelatedInfo _spanEquipment;
         private readonly Guid _elementNodeId;
+        private readonly SpanEquipmentWithRelatedInfo _spanEquipment;
         private readonly LookupCollection<RouteNetworkElement> _routeNetworkElements;
         private readonly LookupCollection<SpanStructureSpecification> _spanStructureSpecifications;
+        private readonly LookupCollection<SpanEquipmentSpecification> _spanEquipmentSpecifications;
 
-        public DetachedSpanEquipmentViewModel(Guid routeElementId, SpanEquipmentWithRelatedInfo spanEquipment, LookupCollection<RouteNetworkElement> routeNetworkElements, LookupCollection<SpanStructureSpecification> spanStructureSpecifications)
+        public DetachedSpanEquipmentViewModel(Guid routeElementId, SpanEquipmentWithRelatedInfo spanEquipment, LookupCollection<RouteNetworkElement> routeNetworkElements, LookupCollection<SpanStructureSpecification> spanStructureSpecifications, LookupCollection<SpanEquipmentSpecification> spanEquipmentSpecifications)
         {
-            _spanEquipment = spanEquipment;
             _elementNodeId = routeElementId;
+            _spanEquipment = spanEquipment;
             _routeNetworkElements = routeNetworkElements;
             _spanStructureSpecifications = spanStructureSpecifications;
+            _spanEquipmentSpecifications = spanEquipmentSpecifications;
 
             //if (spanEquipment.Traces == null)
             // throw new ApplicationException("SpanEquipment passed to DetachedSpanEquipmentViewModel must contain trace information.");
@@ -34,6 +37,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var spec = _spanStructureSpecifications[spanStructure.SpecificationId];
 
             return new SpanDiagramInfo() { Position = 1, SpanSegmentId = spanStructure.Id, StyleName = stylePrefix + spec.Color };
+        }
+
+        public string GetSpanEquipmentLabel()
+        {
+            return _spanEquipmentSpecifications[_spanEquipment.SpecificationId].Name;
         }
 
         public List<string> GetInnerSpanLabels(InnerLabelDirectionEnum innerLabelDirection)
