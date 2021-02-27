@@ -32,8 +32,4 @@
     <ProjectReference Include="..\OpenFTTH.Schematic.Business\OpenFTTH.Schematic.Business.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="QueryLogic\" />
-  </ItemGroup>
-
 </Project>

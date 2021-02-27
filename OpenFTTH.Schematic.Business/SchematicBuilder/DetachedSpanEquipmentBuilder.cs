@@ -11,9 +11,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     {
         private readonly DetachedSpanEquipmentViewModel _spanEquipmentViewModel;
 
-        private double _spanEquipmentAreaWidth = 300;
-        private double _labelAreaWidth = 100;
-        private double _margin = 5;
+        private readonly double _spanEquipmentAreaWidth = 300;
+        private readonly double _margin = 5;
 
 
         public DetachedSpanEquipmentBuilder(DetachedSpanEquipmentViewModel spanEquipmentViewModel)
@@ -40,7 +39,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // Build span equipment block
             var spanEquipmentBlock = CreateSpanEquipmentBlock("OuterConduit", _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit"));
 
-            result.AddRange(spanEquipmentBlock.CreateDiagramObjects(diagram, offsetX + _labelAreaWidth, offsetY));
+            result.AddRange(spanEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
 
             return result;
         }
@@ -100,7 +99,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         {
             var labelBlock = new LineBlock()
             {
-                MinWidth = _labelAreaWidth,
+                MinWidth = 0.01,
                 IsVisible = false,
                 Margin = _margin
             };

@@ -1,6 +1,8 @@
 ﻿using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.Schematic.API.Queries;
+using OpenFTTH.Schematic.Business.SchematicBuilder;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OpenFTTH.Schematic.Business.QueryHandler
@@ -16,9 +18,23 @@ namespace OpenFTTH.Schematic.Business.QueryHandler
 
         public Task<Result<GetDiagramResult>> HandleAsync(GetDiagram query)
         {
-            // TODO change to use logic that can generate a complete diagram for a giving route element
+            var builder = new RouteNetworkElementDiagramBuilder(_queryDispatcher);
 
-            return null;
+            var diagramBuildingResult = builder.GetDiagram(query.RouteNetworkElementId).Result;
+
+            if (diagramBuildingResult.IsFailed)
+            {
+                return Task.FromResult(
+                       Result.Fail<GetDiagramResult>(new GetDiagramError(GetDiagramErrorCodes.DIAGRAM_BUILDING_FAILED, $"Error building diagram for route network element with id: {query.RouteNetworkElementId}")).
+                       WithError(diagramBuildingResult.Errors.First())
+                   );
+            }
+
+            return Task.FromResult(
+                Result.Ok<GetDiagramResult>(
+                    new GetDiagramResult(diagramBuildingResult.Value)
+                )
+            );
         }
     }
 }

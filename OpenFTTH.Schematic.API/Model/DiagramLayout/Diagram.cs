@@ -9,6 +9,8 @@ namespace OpenFTTH.Schematic.API.Model.DiagramLayout
     {
         List<DiagramObject> _diagramObjects = new List<DiagramObject>();
 
+        public double Margin { get; init; }
+
         public Envelope Envelope
         {
             get
@@ -17,6 +19,11 @@ namespace OpenFTTH.Schematic.API.Model.DiagramLayout
 
                 foreach (var diagramObject in DiagramObjects)
                     envelope.ExpandToInclude(diagramObject.Geometry.EnvelopeInternal);
+
+
+                // Set marking on left and right side
+                envelope.ExpandToInclude(0 - Margin, 0);
+                envelope.ExpandToInclude(envelope.MaxX + Margin, 0);
 
                 return envelope;
             }
