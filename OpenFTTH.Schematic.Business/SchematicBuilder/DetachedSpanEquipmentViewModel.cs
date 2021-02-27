@@ -14,18 +14,21 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     public class DetachedSpanEquipmentViewModel
     {
         private readonly Guid _elementNodeId;
-        private readonly SpanEquipmentWithRelatedInfo _spanEquipment;
-        private readonly LookupCollection<RouteNetworkElement> _routeNetworkElements;
-        private readonly LookupCollection<SpanStructureSpecification> _spanStructureSpecifications;
-        private readonly LookupCollection<SpanEquipmentSpecification> _spanEquipmentSpecifications;
+        private readonly Guid _spanEquipmentId;
+        private readonly RouteNetworkElementRelatedData _data;
 
-        public DetachedSpanEquipmentViewModel(Guid routeElementId, SpanEquipmentWithRelatedInfo spanEquipment, LookupCollection<RouteNetworkElement> routeNetworkElements, LookupCollection<SpanStructureSpecification> spanStructureSpecifications, LookupCollection<SpanEquipmentSpecification> spanEquipmentSpecifications)
+        private readonly SpanEquipment _spanEquipment;
+        private readonly RouteNetworkInterestRelationKindEnum _relationKind;
+
+
+        public DetachedSpanEquipmentViewModel(Guid routeElementId, Guid spanEquipmentId, RouteNetworkElementRelatedData data)
         {
             _elementNodeId = routeElementId;
-            _spanEquipment = spanEquipment;
-            _routeNetworkElements = routeNetworkElements;
-            _spanStructureSpecifications = spanStructureSpecifications;
-            _spanEquipmentSpecifications = spanEquipmentSpecifications;
+            _spanEquipmentId = spanEquipmentId;
+            _data = data;
+
+            _spanEquipment = data.SpanEquipments[_spanEquipmentId];
+            _relationKind = data.InterestRelations[_spanEquipment.WalkOfInterest.Id].RelationKind;
 
             //if (spanEquipment.Traces == null)
             // throw new ApplicationException("SpanEquipment passed to DetachedSpanEquipmentViewModel must contain trace information.");
@@ -34,14 +37,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public SpanDiagramInfo RootSpanDiagramInfo(string stylePrefix)
         { 
             var spanStructure = _spanEquipment.SpanStructures.First(s => s.Level == 1);
-            var spec = _spanStructureSpecifications[spanStructure.SpecificationId];
+            var spec = _data.SpanStructureSpecifications[spanStructure.SpecificationId];
 
             return new SpanDiagramInfo() { Position = 1, SpanSegmentId = spanStructure.Id, StyleName = stylePrefix + spec.Color };
         }
 
         public string GetSpanEquipmentLabel()
         {
-            return _spanEquipmentSpecifications[_spanEquipment.SpecificationId].Name;
+            return _data.SpanEquipmentSpecifications[_spanEquipment.SpecificationId].Name;
         }
 
         public List<string> GetInnerSpanLabels(InnerLabelDirectionEnum innerLabelDirection)
@@ -56,12 +59,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 {
                     if (innerLabelDirection == InnerLabelDirectionEnum.Ingoing)
                     {
-                        var routeNode = _routeNetworkElements[_spanEquipment.WalkOfInterest.RouteNetworkElementRefs.First()];
+                        var routeNode = _data.RouteNetworkElements[_spanEquipment.WalkOfInterest.RouteNetworkElementRefs.First()];
                         labels.Add(routeNode.NamingInfo?.Name);
                     }
                     else
                     {
-                        var routeNode = _routeNetworkElements[_spanEquipment.WalkOfInterest.RouteNetworkElementRefs.Last()];
+                        var routeNode = _data.RouteNetworkElements[_spanEquipment.WalkOfInterest.RouteNetworkElementRefs.Last()];
                         labels.Add(routeNode.NamingInfo?.Name);
                     }
                 }
@@ -78,7 +81,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             foreach (var structure in innerStructures)
             {
-                var spec = _spanStructureSpecifications[structure.SpecificationId];
+                var spec = _data.SpanStructureSpecifications[structure.SpecificationId];
 
                 var styleName = stylePrefix + spec.Color;
 

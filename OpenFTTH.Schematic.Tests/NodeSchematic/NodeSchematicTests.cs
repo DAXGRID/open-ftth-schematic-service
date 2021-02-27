@@ -38,36 +38,12 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         {
             var sutRouteNode = TestRouteNetwork.CC_1;
 
-            // Query all route node interests
-            var routeNetworkInterestQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { sutRouteNode })
-            {
-                RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
-            };
+            var data = RouteNetworkElementDiagramBuilder.FetchDataNeededToCreateDiagram(_queryDispatcher, sutRouteNode);
 
-            Result<GetRouteNetworkDetailsResult> interestsQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkInterestQuery);
-
-            var interestIdList = new InterestIdList();
-            interestIdList.AddRange(interestsQueryResult.Value.RouteNetworkElements.First().InterestRelations.Select(r => r.RefId));
-
-            // Query all equipments
-            var equipmentQueryResult = await _queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(
-               new GetEquipmentDetails(interestIdList)
-            );
-
-            // Query all span equipment specifications
-            var spanEquipmentSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanEquipmentSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanEquipmentSpecification>>>(new GetSpanEquipmentSpecifications());
-
-            // Query all span structure specifications
-            var spanStructureSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanStructureSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanStructureSpecification>>>(new GetSpanStructureSpecifications());
-
-            // Query all route network elements of the interests
-            var routeNetworkElementsQuery = new GetRouteNetworkDetails(interestIdList);
-            Result<GetRouteNetworkDetailsResult> routeElementsQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkElementsQuery);
-
-            var spanEquipment = equipmentQueryResult.Value.SpanEquipment[TestConduits.MultiConduit_5x10_HH_1_to_HH_10];
+            var spanEquipment = data.SpanEquipments[TestConduits.MultiConduit_5x10_HH_1_to_HH_10];
 
             // Create read model
-            var readModel = new DetachedSpanEquipmentViewModel(sutRouteNode, spanEquipment, routeElementsQueryResult.Value.RouteNetworkElements, spanStructureSpecificationsQueryResult.Value, spanEquipmentSpecificationsQueryResult.Value);
+            var readModel = new DetachedSpanEquipmentViewModel(sutRouteNode, spanEquipment.Id, data);
 
             var builder = new DetachedSpanEquipmentBuilder(readModel);
 

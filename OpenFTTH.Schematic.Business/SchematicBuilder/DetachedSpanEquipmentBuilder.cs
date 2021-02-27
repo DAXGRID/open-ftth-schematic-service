@@ -1,5 +1,6 @@
 ﻿using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.Drawing;
+using OpenFTTH.Schematic.Business.Layout;
 using OpenFTTH.Schematic.Business.Lines;
 using System.Collections.Generic;
 
@@ -13,7 +14,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly DetachedSpanEquipmentViewModel _spanEquipmentViewModel;
 
         private readonly double _spanEquipmentAreaWidth = 300;
-        private readonly double _margin = 5;
+        private readonly double _spanEquipmentBlockMargin = 5;
+        private readonly double _spanEquipmentLabelOffset = 5;
 
 
         public DetachedSpanEquipmentBuilder(DetachedSpanEquipmentViewModel spanEquipmentViewModel)
@@ -21,7 +23,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             _spanEquipmentViewModel = spanEquipmentViewModel;
         }
 
-        public IEnumerable<DiagramObject> CreateDiagramObjects(Diagram diagram, double offsetX, double offsetY)
+        public Size CreateDiagramObjects(Diagram diagram, double offsetX, double offsetY)
         {
             List<DiagramObject> result = new List<DiagramObject>();
 
@@ -30,10 +32,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             result.AddRange(spanEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
 
             // Create label on top of span equipment block
-            var spanEquipmentLabel = CreateSpanEquipmentTypeLabel(diagram, 0, spanEquipmentBlock.ActualSize.Height + 5);
+            var spanEquipmentLabel = CreateSpanEquipmentTypeLabel(diagram, offsetX, offsetY + spanEquipmentBlock.ActualSize.Height + _spanEquipmentLabelOffset);
             result.Add(spanEquipmentLabel);
 
-            return result;
+            return new Size(spanEquipmentBlock.ActualSize.Height + _spanEquipmentLabelOffset, spanEquipmentBlock.ActualSize.Width);
         }
 
         private DiagramObject CreateSpanEquipmentTypeLabel(Diagram diagram, double x, double y)
@@ -58,7 +60,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 MinWidth = _spanEquipmentAreaWidth,
                 IsVisible = true,
                 Style = rootSpanInfo.StyleName,
-                Margin = _margin
+                Margin = _spanEquipmentBlockMargin
             };
 
             spanEquipmentBlock.SetReference(rootSpanInfo.SpanSegmentId, "SpanStructure");

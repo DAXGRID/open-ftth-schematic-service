@@ -49,8 +49,27 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
         }
 
-
         [Fact, Order(2)]
+        public async void TestGetDiagramQueryOnHH_2()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.HH_2;
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            getDiagramQueryResult.Value.Diagram.DiagramObjects.Count().Should().BeGreaterThan(15);
+
+            getDiagramQueryResult.Value.Diagram.Envelope.MinX.Should().Be(-0.01);
+            getDiagramQueryResult.Value.Diagram.Envelope.MaxX.Should().Be(0.04);
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+        }
+
+
+        [Fact, Order(3)]
         public async void TestGetDiagramQueryOnNodeWithNoConduits_ShouldReturnEmptyDiagram()
         {
             var sutRouteNetworkElement = TestRouteNetwork.HH_11;

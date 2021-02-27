@@ -1,5 +1,4 @@
 ﻿using FluentResults;
-using NetTopologySuite.Geometries;
 using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
@@ -17,61 +16,102 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     {
         private readonly IQueryDispatcher _queryDispatcher;
 
+        private readonly Diagram _diagram = new Diagram()
+        {
+            Margin = 0.01
+        };
+
+        private readonly double _spaceBetweenSections = 20;
+
+        private Guid _routeNetworkElementId;
+        private RouteNetworkElementRelatedData _data;
+
         public RouteNetworkElementDiagramBuilder(IQueryDispatcher queryDispatcher)
         {
             _queryDispatcher = queryDispatcher;
         }
 
-        public async Task<Result<Diagram>> GetDiagram(Guid routeNodeElementId)
+        public async Task<Result<Diagram>> GetDiagram(Guid routeNetworkElementId)
         {
-            // Query all route node interests
-            var routeNetworkInterestQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { routeNodeElementId })
-            {
-                RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
-            };
+            _routeNetworkElementId = routeNetworkElementId;
+            _data = FetchDataNeededToCreateDiagram(_queryDispatcher, routeNetworkElementId);
 
-            Result<GetRouteNetworkDetailsResult> interestsQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkInterestQuery);
-
-            var interestIdList = new InterestIdList();
-            interestIdList.AddRange(interestsQueryResult.Value.RouteNetworkElements.First().InterestRelations.Select(r => r.RefId));
-
-            // If no equipment is related to the route network element, return empty diagram
-            if (interestIdList.Count == 0)
+            // If no equipment found, just return an empty diagram
+            if (_data.SpanEquipments.Count == 0)
             {
                 return Result.Ok<Diagram>(new Diagram());
             }
 
-            // Query all equipments
-            var equipmentQueryResult = await _queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(
-               new GetEquipmentDetails(interestIdList)
-            );
+            AddDetachedSpanEquipmentsToDiagram();
+          
+            return Result.Ok<Diagram>(_diagram);
+        }
+
+        private void AddDetachedSpanEquipmentsToDiagram()
+        {
+            var orderedInterestRelations = _data.InterestRelations.Values.OrderBy(i => i.RelationKind).Reverse();
+
+            double yOffset = 0;
+
+            foreach (var interestRelation in orderedInterestRelations)
+            {
+                var spanEquipment = _data.SpanEquipments.First(s => s.WalkOfInterest.Id == interestRelation.RefId);
+
+                var readModel = new DetachedSpanEquipmentViewModel(_routeNetworkElementId, spanEquipment.Id, _data);
+
+                var builder = new DetachedSpanEquipmentBuilder(readModel);
+
+                var size = builder.CreateDiagramObjects(_diagram, 0, yOffset);
+
+                yOffset += size.Height + _spaceBetweenSections;
+
+            }
+        }
+
+        public static RouteNetworkElementRelatedData FetchDataNeededToCreateDiagram(IQueryDispatcher queryDispatcher, Guid routeNetworkElementId)
+        {
+            RouteNetworkElementRelatedData result = new RouteNetworkElementRelatedData();
 
             // Query all span equipment specifications
-            var spanEquipmentSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanEquipmentSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanEquipmentSpecification>>>(new GetSpanEquipmentSpecifications());
+            result.SpanEquipmentSpecifications = queryDispatcher.HandleAsync<GetSpanEquipmentSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanEquipmentSpecification>>>(new GetSpanEquipmentSpecifications()).Result.Value;
 
             // Query all span structure specifications
-            var spanStructureSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanStructureSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanStructureSpecification>>>(new GetSpanStructureSpecifications());
+            result.SpanStructureSpecifications = queryDispatcher.HandleAsync<GetSpanStructureSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanStructureSpecification>>>(new GetSpanStructureSpecifications()).Result.Value;
 
-            // Query all route network elements of the interests
-            var routeNetworkElementsQuery = new GetRouteNetworkDetails(interestIdList);
-            Result<GetRouteNetworkDetailsResult> routeElementsQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkElementsQuery);
-
-            var spanEquipment = equipmentQueryResult.Value.SpanEquipment.First();
-
-            // Create read model
-            var readModel = new DetachedSpanEquipmentViewModel(routeNodeElementId, spanEquipment, routeElementsQueryResult.Value.RouteNetworkElements, spanStructureSpecificationsQueryResult.Value, spanEquipmentSpecificationsQueryResult.Value);
-
-            var builder = new DetachedSpanEquipmentBuilder(readModel);
-
-            // Create the diagram
-            Diagram diagram = new Diagram()
+            // Query all route node interests
+            var routeNetworkInterestQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { routeNetworkElementId })
             {
-                Margin = 0.01
+                RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
             };
 
-            builder.CreateDiagramObjects(diagram, 0, 0);
+            Result<GetRouteNetworkDetailsResult> interestsQueryResult = queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkInterestQuery).Result;
 
-            return Result.Ok<Diagram>(diagram);
+            result.InterestRelations = interestsQueryResult.Value.RouteNetworkElements.First().InterestRelations.ToDictionary(r => r.RefId);
+
+            var interestIdList = new InterestIdList();
+            interestIdList.AddRange(result.InterestRelations.Values.Select(r => r.RefId));
+
+            // Only query for equipments if interests are returned from the route network query
+            if (interestIdList.Count > 0)
+            {
+                // Query all the equipments related to the route network element
+                var equipmentQueryResult = queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(new GetEquipmentDetails(interestIdList)).Result;
+
+                result.SpanEquipments = equipmentQueryResult.Value.SpanEquipment;
+
+                // Query all route network elements of all the equipments
+                var routeNetworkElementsQuery = new GetRouteNetworkDetails(interestIdList);
+                Result<GetRouteNetworkDetailsResult> routeElementsQueryResult = queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkElementsQuery).Result;
+
+                result.RouteNetworkElements = routeElementsQueryResult.Value.RouteNetworkElements;
+            }
+            else
+            {
+                result.RouteNetworkElements = new LookupCollection<RouteNetworkElement>();
+                result.SpanEquipments = new LookupCollection<SpanEquipmentWithRelatedInfo>();
+            }
+
+            return result;
         }
     }
 }
