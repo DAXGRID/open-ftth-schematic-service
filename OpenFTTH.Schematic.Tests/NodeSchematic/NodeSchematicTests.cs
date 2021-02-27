@@ -60,7 +60,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var routeNetworkElementsQuery = new GetRouteNetworkDetails(interestIdList);
             Result<GetRouteNetworkDetailsResult> routeElementsQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkElementsQuery);
 
-            var spanEquipment = equipmentQueryResult.Value.SpanEquipment[_conduits.MultiConduit_5x10_HH_1_to_HH_10];
+            var spanEquipment = equipmentQueryResult.Value.SpanEquipment[TestConduits.MultiConduit_5x10_HH_1_to_HH_10];
 
             // Create read model
             var readModel = new DetachedSpanEquipmentViewModel(sutRouteNode, spanEquipment, routeElementsQueryResult.Value.RouteNetworkElements, spanStructureSpecificationsQueryResult.Value);

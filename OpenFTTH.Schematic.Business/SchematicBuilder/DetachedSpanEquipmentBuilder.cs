@@ -24,18 +24,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         {
             List<DiagramObject> result = new List<DiagramObject>();
 
-            /*
-            // Build ingoing/left label block
-            var vestLabelBlock = CreateLabelBlock(_spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Ingoing), BlockSideEnum.Vest);
-
-            result.AddRange(vestLabelBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
-
-            // Build outgoing/right label block
-            var eastLabelBlock = CreateLabelBlock(_spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Outgoing), BlockSideEnum.East);
-
-            result.AddRange(eastLabelBlock.CreateDiagramObjects(diagram, offsetX + _spanEquipmentAreaWidth + _labelAreaWidth, offsetY));
-            */
-
             // Build span equipment block
             var spanEquipmentBlock = CreateSpanEquipmentBlock("OuterConduit", _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit"));
 
@@ -93,63 +81,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             }
 
             return spanEquipmentBlock;
-        }
-
-        private LineBlock CreateLabelBlock(List<string> labels, BlockSideEnum side)
-        {
-            var labelBlock = new LineBlock()
-            {
-                MinWidth = 0.01,
-                IsVisible = false,
-                Margin = _margin
-            };
-
-            var fromPortSide = BlockSideEnum.Vest;
-            var toPortSide = BlockSideEnum.East;
-            string style = null;
-
-            if (side == BlockSideEnum.Vest)
-            {
-                fromPortSide = BlockSideEnum.Vest;
-                toPortSide = BlockSideEnum.East;
-                style = "LabelMediumTextRightAlligned";
-            }
-            else if (side == BlockSideEnum.East)
-            {
-                fromPortSide = BlockSideEnum.Vest;
-                toPortSide = BlockSideEnum.East;
-                style = "LabelMediumTextLeftAlligned";
-            }
-            else if (side == BlockSideEnum.North)
-            {
-                fromPortSide = BlockSideEnum.South;
-                toPortSide = BlockSideEnum.North;
-                style = "LabelMediumTextRightAlligned";
-            }
-            else if (side == BlockSideEnum.South)
-            {
-                fromPortSide = BlockSideEnum.South;
-                toPortSide = BlockSideEnum.North;
-                style = "LabelMediumTextLeftAlligned";
-            }
-
-            var fromPort = new BlockPort(fromPortSide) { IsVisible = false };
-            labelBlock.AddPort(fromPort);
-
-            var toPort = new BlockPort(toPortSide) { IsVisible = false };
-            labelBlock.AddPort(toPort);
-
-            int terminalNo = 1;
-            foreach (var label in labels)
-            {
-                new BlockPortTerminal(fromPort) { IsVisible = false };
-                new BlockPortTerminal(toPort) { IsVisible = false };
-
-                labelBlock.AddTerminalConnection(fromPortSide, 1, terminalNo, toPortSide, 1, terminalNo, label, style, LineShapeTypeEnum.Line);
-                terminalNo++;
-            }
-
-            return labelBlock;
         }
     }
 }
