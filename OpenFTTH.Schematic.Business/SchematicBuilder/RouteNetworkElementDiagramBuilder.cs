@@ -35,6 +35,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var interestIdList = new InterestIdList();
             interestIdList.AddRange(interestsQueryResult.Value.RouteNetworkElements.First().InterestRelations.Select(r => r.RefId));
 
+            // If no equipment is related to the route network element, return empty diagram
+            if (interestIdList.Count == 0)
+            {
+                return Result.Ok<Diagram>(new Diagram());
+            }
+
             // Query all equipments
             var equipmentQueryResult = await _queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(
                new GetEquipmentDetails(interestIdList)

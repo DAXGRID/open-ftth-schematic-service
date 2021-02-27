@@ -48,5 +48,19 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             getDiagramQueryResult.Value.Diagram.Envelope.MaxX.Should().Be(0.04);
 
         }
+
+
+        [Fact, Order(2)]
+        public async void TestGetDiagramQueryOnNodeWithNoConduits_ShouldReturnEmptyDiagram()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.HH_11;
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            getDiagramQueryResult.Value.Diagram.DiagramObjects.Count().Should().Be(0);
+        }
     }
 }
