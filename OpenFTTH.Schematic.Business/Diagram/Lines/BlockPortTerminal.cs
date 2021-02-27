@@ -8,19 +8,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 {
     public class BlockPortTerminal
     {
-        public bool _isVisible = true;
-        public bool IsVisible
-        {
-            get
-            {
-                return _isVisible;
-            }
-
-            init
-            {
-                _isVisible = value;
-            }
-        }
+        public bool IsVisible { get; init; }
 
         private string _style = "LinkBlockTerminal";
         public string Style
@@ -36,6 +24,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             }
         }
 
+        public TerminalShapeTypeEnum ShapeType { get; init; }
 
         public string Label { get; init; }
 
@@ -117,24 +106,32 @@ namespace OpenFTTH.Schematic.Business.Lines
 
             if (IsVisible)
             {
-                // Create terminal polygon object
-                result.Add(
-                    new DiagramObject(diagram)
-                    {
-                        Style = Style,
-                        Geometry = GeometryBuilder.Rectangle(terminalOffsetX, terminalOffsetY, rectHeight, rectWidth),
-                        IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
-                    }
-                );
-
-                // Create terminal connection point object
-                result.Add(
-                    new DiagramObject(diagram)
-                    {
-                        Style = "LinkBlockTerminalConnectionPoint",
-                        Geometry = GeometryBuilder.Point(ConnectionPointX, ConnectionPointY)
-                    }
-                );
+                if (ShapeType == TerminalShapeTypeEnum.Polygon)
+                {
+                    // Create polygon object convering terminal
+                    result.Add(
+                        new DiagramObject(diagram)
+                        {
+                            Style = Style,
+                            Label = Label,
+                            Geometry = GeometryBuilder.Rectangle(terminalOffsetX, terminalOffsetY, rectHeight, rectWidth),
+                            IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
+                        }
+                    );
+                }
+                else if (ShapeType == TerminalShapeTypeEnum.Point)
+                {
+                    // Create point diagram object at connection point object
+                    result.Add(
+                        new DiagramObject(diagram)
+                        {
+                            Style = Style,
+                            Label = Label,
+                            Geometry = GeometryBuilder.Point(ConnectionPointX, ConnectionPointY),
+                            IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
+                        }
+                    );
+                }
             }
 
             return result;

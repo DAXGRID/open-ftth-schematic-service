@@ -25,6 +25,7 @@ namespace OpenFTTH.Schematic.Business.NodeSchematic
         {
             List<DiagramObject> result = new List<DiagramObject>();
 
+            /*
             // Build ingoing/left label block
             var vestLabelBlock = CreateLabelBlock(_spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Ingoing), BlockSideEnum.Vest);
 
@@ -34,6 +35,7 @@ namespace OpenFTTH.Schematic.Business.NodeSchematic
             var eastLabelBlock = CreateLabelBlock(_spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Outgoing), BlockSideEnum.East);
 
             result.AddRange(eastLabelBlock.CreateDiagramObjects(diagram, offsetX + _spanEquipmentAreaWidth + _labelAreaWidth, offsetY));
+            */
 
             // Build span equipment block
             var spanEquipmentBlock = CreateSpanEquipmentBlock("OuterConduit", _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit"));
@@ -66,13 +68,27 @@ namespace OpenFTTH.Schematic.Business.NodeSchematic
             var toPort = new BlockPort(BlockSideEnum.East) { IsVisible = false };
             spanEquipmentBlock.AddPort(toPort);
 
+            var vestLabels = _spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Ingoing);
+            var eastLabels = _spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Outgoing);
+
             int terminalNo = 1;
             foreach (var data in innerSpanData)
             {
-                new BlockPortTerminal(fromPort) { IsVisible = false };
-                new BlockPortTerminal(toPort) { IsVisible = false };
+                new BlockPortTerminal(fromPort) {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    Style = "VestTerminalLabel",
+                    Label = vestLabels[terminalNo - 1]
+                };
 
-                var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.Vest, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
+                new BlockPortTerminal(toPort) { 
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    Style = "EastTerminalLabel",
+                    Label = eastLabels[terminalNo - 1]
+                };
+
+            var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.Vest, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
                 terminalConnection.SetReference(data.SpanSegmentId, "SpanStructure");
                 terminalNo++;
             }

@@ -76,8 +76,10 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Assert
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style.Contains("InnerConduit")).Should().Be(5);
-            diagram.DiagramObjects.Count(o => o.Style.Contains("Left")).Should().Be(5);
-            diagram.DiagramObjects.Count(o => o.Style.Contains("Right")).Should().Be(5);
+            diagram.DiagramObjects.Count(o => o.Style == "VestTerminalLabel").Should().Be(5);
+            diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(5);
+            diagram.DiagramObjects.Count(o => o.Style == "EastTerminalLabel").Should().Be(5);
+            diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(5);
             diagram.DiagramObjects.Count(o => o.IdentifiedObject != null && o.IdentifiedObject.RefClass == "SpanStructure").Should().Be(6);
 
             if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
