@@ -5,7 +5,7 @@ using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.IO;
-using OpenFTTH.Schematic.Business.NodeSchematic;
+using OpenFTTH.Schematic.Business.SchematicBuilder;
 using OpenFTTH.TestData;
 using OpenFTTH.Util;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
@@ -33,7 +33,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         }
 
         [Fact]
-        public async void TestDetachedMultiConduit_5x10_HH_1_to_HH_10()
+        public async void TestDrawingSingleDetachedMultiConduit_5x10_HH_1_to_HH_10()
         {
             var sutRouteNode = TestRouteNetwork.CC_1;
 
@@ -55,7 +55,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Query all span structure specifications
             var spanStructureSpecificationsQueryResult = await _queryDispatcher.HandleAsync<GetSpanStructureSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanStructureSpecification>>>(new GetSpanStructureSpecifications());
-
 
             // Query all route network elements of the interests
             var routeNetworkElementsQuery = new GetRouteNetworkDetails(interestIdList);

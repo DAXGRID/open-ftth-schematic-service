@@ -2,7 +2,7 @@
 using OpenFTTH.Schematic.Business.Lines;
 using System.Collections.Generic;
 
-namespace OpenFTTH.Schematic.Business.NodeSchematic
+namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {
     /// <summary>
     ///  Diagram creation of a span equipment starting, ending or passing through a route network node or element

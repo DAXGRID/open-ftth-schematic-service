@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenFTTH.Schematic.Business.NodeSchematic
+namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {
     public static class SpanStructureExtensions
     {
