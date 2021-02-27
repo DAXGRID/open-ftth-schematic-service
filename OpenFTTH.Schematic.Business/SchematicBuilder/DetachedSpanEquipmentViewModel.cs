@@ -74,7 +74,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                 var styleName = stylePrefix + spec.Color;
 
-                styles.Add(new SpanDiagramInfo() { SpanSegmentId = structure.Id, Position = structure.Position, StyleName = styleName });
+                styles.Add(new SpanDiagramInfo() { SpanSegmentId = structure.SpanSegments[0].Id, Position = structure.Position, StyleName = styleName });
             }
 
             return styles;
