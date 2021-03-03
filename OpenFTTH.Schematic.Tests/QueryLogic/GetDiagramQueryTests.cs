@@ -11,6 +11,7 @@ using OpenFTTH.TestData;
 using OpenFTTH.Util;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using OpenFTTH.UtilityGraphService.API.Queries;
+using System;
 using System.Linq;
 using Xunit;
 using Xunit.Extensions.Ordering;
@@ -80,6 +81,18 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Assert
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
             getDiagramQueryResult.Value.Diagram.DiagramObjects.Count().Should().Be(0);
+        }
+
+        [Fact, Order(3)]
+        public async void TestGetDiagramForRouteNodeThatDontExist_ShouldFail()
+        {
+            var sutRouteNetworkElement = Guid.NewGuid();
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            // Assert
+            getDiagramQueryResult.IsFailed.Should().BeTrue();
         }
     }
 }

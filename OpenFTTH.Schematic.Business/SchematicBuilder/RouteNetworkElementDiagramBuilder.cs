@@ -31,20 +31,26 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             _queryDispatcher = queryDispatcher;
         }
 
-        public async Task<Result<Diagram>> GetDiagram(Guid routeNetworkElementId)
+        public Task<Result<Diagram>> GetDiagram(Guid routeNetworkElementId)
         {
             _routeNetworkElementId = routeNetworkElementId;
-            _data = FetchDataNeededToCreateDiagram(_queryDispatcher, routeNetworkElementId);
+
+            var fetchNeedeDataResult = FetchDataNeededToCreateDiagram(_queryDispatcher, routeNetworkElementId);
+
+            if (fetchNeedeDataResult.IsFailed)
+                return Task.FromResult(Result.Fail<Diagram>(fetchNeedeDataResult.Errors.First()));
+            else
+                _data = fetchNeedeDataResult.Value;
 
             // If no equipment found, just return an empty diagram
             if (_data.SpanEquipments.Count == 0)
             {
-                return Result.Ok<Diagram>(new Diagram());
+                return Task.FromResult(Result.Ok<Diagram>(new Diagram()));
             }
 
             AddDetachedSpanEquipmentsToDiagram();
           
-            return Result.Ok<Diagram>(_diagram);
+            return Task.FromResult((Result.Ok<Diagram>(_diagram)));
         }
 
         private void AddDetachedSpanEquipmentsToDiagram()
@@ -68,7 +74,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             }
         }
 
-        public static RouteNetworkElementRelatedData FetchDataNeededToCreateDiagram(IQueryDispatcher queryDispatcher, Guid routeNetworkElementId)
+        public static Result<RouteNetworkElementRelatedData> FetchDataNeededToCreateDiagram(IQueryDispatcher queryDispatcher, Guid routeNetworkElementId)
         {
             RouteNetworkElementRelatedData result = new RouteNetworkElementRelatedData();
 
@@ -86,6 +92,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             Result<GetRouteNetworkDetailsResult> interestsQueryResult = queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkInterestQuery).Result;
 
+            if (interestsQueryResult.IsFailed)
+                return Result.Fail(interestsQueryResult.Errors.First());
+
             result.InterestRelations = interestsQueryResult.Value.RouteNetworkElements.First().InterestRelations.ToDictionary(r => r.RefId);
 
             var interestIdList = new InterestIdList();
@@ -96,6 +105,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 // Query all the equipments related to the route network element
                 var equipmentQueryResult = queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(new GetEquipmentDetails(interestIdList)).Result;
+
+                if (equipmentQueryResult.IsFailed)
+                    return Result.Fail(equipmentQueryResult.Errors.First());
 
                 result.SpanEquipments = equipmentQueryResult.Value.SpanEquipment;
 
@@ -111,7 +123,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 result.SpanEquipments = new LookupCollection<SpanEquipmentWithRelatedInfo>();
             }
 
-            return result;
+            return Result.Ok(result);
         }
     }
 }

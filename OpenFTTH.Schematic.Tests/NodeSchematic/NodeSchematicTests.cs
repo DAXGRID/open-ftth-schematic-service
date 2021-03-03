@@ -38,7 +38,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         {
             var sutRouteNode = TestRouteNetwork.CC_1;
 
-            var data = RouteNetworkElementDiagramBuilder.FetchDataNeededToCreateDiagram(_queryDispatcher, sutRouteNode);
+            var data = RouteNetworkElementDiagramBuilder.FetchDataNeededToCreateDiagram(_queryDispatcher, sutRouteNode).Value;
 
             var spanEquipment = data.SpanEquipments[TestConduits.MultiConduit_5x10_HH_1_to_HH_10];
 
