@@ -120,7 +120,7 @@ namespace OpenFTTH.Schematic.Business.Lines
         {
             double height = 0;
 
-            foreach (var side in _sides.Where(s => s.Key == BlockSideEnum.Vest || s.Key == BlockSideEnum.East))
+            foreach (var side in _sides.Where(s => s.Key == BlockSideEnum.West || s.Key == BlockSideEnum.East))
             {
                 if (side.Value.Length > height)
                     height = side.Value.Length;
@@ -207,7 +207,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         private double CalculateSideXOffset(BlockSide blockSide, double offsetX)
         {
-            if (blockSide.Side == BlockSideEnum.Vest)
+            if (blockSide.Side == BlockSideEnum.West)
                 return offsetX;
             else if (blockSide.Side == BlockSideEnum.East)
                 return offsetX + ActualSize.Width;
@@ -231,7 +231,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         private double CalculateSideYOffset(BlockSide blockSide, double offsetY)
         {
-            if (blockSide.Side == BlockSideEnum.Vest)
+            if (blockSide.Side == BlockSideEnum.West)
                 return offsetY + Margin;
             else if (blockSide.Side == BlockSideEnum.North)
                 return offsetY + ActualSize.Height;

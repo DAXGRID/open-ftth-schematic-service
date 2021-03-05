@@ -9,6 +9,6 @@ namespace OpenFTTH.Schematic.Business.Lines
         North = 1,
         East = 2,
         South = 3,
-        Vest = 4
+        West = 4
     }
 }

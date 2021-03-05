@@ -77,7 +77,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             var rectWidth = Port.IsVertical ? Port.PortThickness + (Port.PortThickness / 2) : Length;
             var rectHeight = Port.IsVertical ? Length : Port.PortThickness + (Port.PortThickness / 2);
 
-            if (Port.Side == BlockSideEnum.Vest)
+            if (Port.Side == BlockSideEnum.West)
             {
                 //terminalOffsetX += (Port.PortThickness / 2);
 

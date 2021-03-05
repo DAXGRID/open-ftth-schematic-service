@@ -27,7 +27,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
 
             // Calculate from curve point
-            if (FromTerminal.Port.Side == BlockSideEnum.Vest)
+            if (FromTerminal.Port.Side == BlockSideEnum.West)
             {
                 fromCurvePointX = FromTerminal.ConnectionPointX + FromTerminal.Thickness;
                 fromCurvePointY = FromTerminal.ConnectionPointY;
@@ -52,7 +52,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             }
 
             // Calculate to curve point
-            if (ToTerminal.Port.Side == BlockSideEnum.Vest)
+            if (ToTerminal.Port.Side == BlockSideEnum.West)
             {
                 toCurvePointX = ToTerminal.ConnectionPointX + FromTerminal.Thickness;
                 toCurvePointY = ToTerminal.ConnectionPointY;
@@ -77,13 +77,13 @@ namespace OpenFTTH.Schematic.Business.Lines
             }
 
             // Calculate mid point
-            if ((FromTerminal.Port.Side == BlockSideEnum.Vest || FromTerminal.Port.Side == BlockSideEnum.East) && (ToTerminal.Port.Side == BlockSideEnum.North || ToTerminal.Port.Side == BlockSideEnum.South))
+            if ((FromTerminal.Port.Side == BlockSideEnum.West || FromTerminal.Port.Side == BlockSideEnum.East) && (ToTerminal.Port.Side == BlockSideEnum.North || ToTerminal.Port.Side == BlockSideEnum.South))
             {
                 midX = ToTerminal.ConnectionPointX;
                 midY = FromTerminal.ConnectionPointY;
             }
 
-            if (FromTerminal.Port.Side == BlockSideEnum.Vest && ToTerminal.Port.Side == BlockSideEnum.East)
+            if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.East)
             {
                 midX = FromTerminal.ConnectionPointX - ((FromTerminal.ConnectionPointY - ToTerminal.ConnectionPointY) / 2);
                 midY = FromTerminal.ConnectionPointY;

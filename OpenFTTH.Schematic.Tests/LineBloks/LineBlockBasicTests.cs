@@ -23,7 +23,7 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
             };
 
             // Vest
-            var vestPort1 = new BlockPort(BlockSideEnum.Vest) { IsVisible = false };
+            var vestPort1 = new BlockPort(BlockSideEnum.West) { IsVisible = false };
             lineBlock.AddPort(vestPort1);
             AddThreeTerminalsToPort(vestPort1);
 
@@ -32,7 +32,7 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
             lineBlock.AddPort(eastPort1);
             AddThreeTerminalsToPort(eastPort1);
 
-            lineBlock.AddTerminalConnection(BlockSideEnum.Vest, 1, 1, BlockSideEnum.East, 1, 1, "This is a label text", "This should be a polyline", LineShapeTypeEnum.Line);
+            lineBlock.AddTerminalConnection(BlockSideEnum.West, 1, 1, BlockSideEnum.East, 1, 1, "This is a label text", "This should be a polyline", LineShapeTypeEnum.Line);
 
             // Act
             lineBlock.CreateDiagramObjects(diagram, 0, 0);
@@ -63,11 +63,11 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
 
             
             // Vest
-            var vestPort1 = new BlockPort(BlockSideEnum.Vest);
+            var vestPort1 = new BlockPort(BlockSideEnum.West);
             lineBlock.AddPort(vestPort1);
             AddThreeTerminalsToPort(vestPort1);
 
-            var vestPort2 = new BlockPort(BlockSideEnum.Vest);
+            var vestPort2 = new BlockPort(BlockSideEnum.West);
             lineBlock.AddPort(vestPort2);
             AddThreeTerminalsToPort(vestPort2);
 
@@ -104,7 +104,7 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
 
 
             //lineBlock.AddPortConnection(BlockSideEnum.Vest, 1, BlockSideEnum.East, 2);
-            lineBlock.AddTerminalConnection(BlockSideEnum.Vest, 1, 1, BlockSideEnum.North, 2, 1, "Hest", "Cable", LineShapeTypeEnum.Polygon);
+            lineBlock.AddTerminalConnection(BlockSideEnum.West, 1, 1, BlockSideEnum.North, 2, 1, "Hest", "Cable", LineShapeTypeEnum.Polygon);
 
             var diagramObjects = lineBlock.CreateDiagramObjects(diagram, 0, 0);
 

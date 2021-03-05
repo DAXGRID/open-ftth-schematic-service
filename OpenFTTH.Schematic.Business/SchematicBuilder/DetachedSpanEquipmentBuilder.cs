@@ -67,7 +67,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             // Create inner conduits
 
-            var fromPort = new BlockPort(BlockSideEnum.Vest) { IsVisible = false };
+            var fromPort = new BlockPort(BlockSideEnum.West) { IsVisible = false };
             spanEquipmentBlock.AddPort(fromPort);
 
             var toPort = new BlockPort(BlockSideEnum.East) { IsVisible = false };
@@ -93,7 +93,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     Label = eastLabels[terminalNo - 1]
                 };
 
-            var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.Vest, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
+            var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
                 terminalConnection.SetReference(data.SpanSegmentId, "SpanStructure");
                 terminalNo++;
             }

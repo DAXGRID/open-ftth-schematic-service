@@ -143,7 +143,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             double terminalX = offsetX;
             double terminalY = offsetY;
 
-            if (_side == BlockSideEnum.Vest || _side == BlockSideEnum.East)
+            if (_side == BlockSideEnum.West || _side == BlockSideEnum.East)
                 terminalY += _portMargin;
             else if (_side == BlockSideEnum.North || _side == BlockSideEnum.South)
                 terminalX += _portMargin;
@@ -154,7 +154,7 @@ namespace OpenFTTH.Schematic.Business.Lines
                 double xStep = 1;
                 double yStep = 1;
 
-                if (_side == BlockSideEnum.Vest || _side == BlockSideEnum.East)
+                if (_side == BlockSideEnum.West || _side == BlockSideEnum.East)
                 {
                     // goes up y
                     xStep = 0;
@@ -189,7 +189,7 @@ namespace OpenFTTH.Schematic.Business.Lines
         {
             get
             {
-                if (Side == BlockSideEnum.East || Side == BlockSideEnum.Vest)
+                if (Side == BlockSideEnum.East || Side == BlockSideEnum.West)
                     return true;
                 else
                     return false;
