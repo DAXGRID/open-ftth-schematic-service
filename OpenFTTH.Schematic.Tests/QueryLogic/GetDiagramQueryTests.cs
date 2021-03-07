@@ -22,14 +22,14 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
     {
         private readonly IQueryDispatcher _queryDispatcher;
 
-        private static TestConduitSpecifications _conduitSpecs;
+        private static TestSpecifications _specs;
         private static TestConduits _conduits;
 
         public GetDiagramQueryTests(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
             _queryDispatcher = queryDispatcher;
 
-            _conduitSpecs = new TestConduitSpecifications(commandDispatcher, queryDispatcher).Run();
+            _specs = new TestSpecifications(commandDispatcher, queryDispatcher).Run();
             _conduits = new TestConduits(commandDispatcher, queryDispatcher).Run();
         }
 

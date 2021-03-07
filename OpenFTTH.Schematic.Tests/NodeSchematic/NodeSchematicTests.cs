@@ -21,7 +21,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IQueryDispatcher _queryDispatcher;
 
-        private static TestConduitSpecifications _conduitSpecs;
+        private static TestSpecifications _specs;
         private static TestConduits _conduits;
 
         public NodeSchematicTests(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
@@ -29,12 +29,12 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
 
-            _conduitSpecs = new TestConduitSpecifications(commandDispatcher, queryDispatcher).Run();
+            _specs = new TestSpecifications(commandDispatcher, queryDispatcher).Run();
             _conduits = new TestConduits(commandDispatcher, queryDispatcher).Run();
         }
 
         [Fact, Order(1)]
-        public async void TestDrawingSingleDetachedMultiConduit_5x10_HH_1_to_HH_10()
+        public void TestDrawingSingleDetachedMultiConduit_5x10_HH_1_to_HH_10()
         {
             var sutRouteNode = TestRouteNetwork.CC_1;
 
@@ -63,7 +63,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
                 new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
-
         }
     }
 }
