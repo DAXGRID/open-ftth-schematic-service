@@ -61,7 +61,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             foreach (var interestRelation in orderedInterestRelations)
             {
-                var spanEquipment = _data.SpanEquipments.First(s => s.WalkOfInterest.Id == interestRelation.RefId);
+                var spanEquipment = _data.SpanEquipments.First(s => s.WalkOfInterestId == interestRelation.RefId);
 
                 var readModel = new DetachedSpanEquipmentViewModel(_routeNetworkElementId, spanEquipment.Id, _data);
 

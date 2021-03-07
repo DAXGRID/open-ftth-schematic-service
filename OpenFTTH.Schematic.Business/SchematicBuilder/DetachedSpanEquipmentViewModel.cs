@@ -28,7 +28,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             _data = data;
 
             _spanEquipment = data.SpanEquipments[_spanEquipmentId];
-            _relationKind = data.InterestRelations[_spanEquipment.WalkOfInterest.Id].RelationKind;
+            _relationKind = data.InterestRelations[_spanEquipment.WalkOfInterestId].RelationKind;
 
             //if (spanEquipment.Traces == null)
             // throw new ApplicationException("SpanEquipment passed to DetachedSpanEquipmentViewModel must contain trace information.");
@@ -59,12 +59,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 {
                     if (innerLabelDirection == InnerLabelDirectionEnum.Ingoing)
                     {
-                        var routeNode = _data.RouteNetworkElements[_spanEquipment.WalkOfInterest.RouteNetworkElementRefs.First()];
+                        var routeNode = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.First()];
                         labels.Add(routeNode.NamingInfo?.Name);
                     }
                     else
                     {
-                        var routeNode = _data.RouteNetworkElements[_spanEquipment.WalkOfInterest.RouteNetworkElementRefs.Last()];
+                        var routeNode = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.Last()];
                         labels.Add(routeNode.NamingInfo?.Name);
                     }
                 }
