@@ -136,31 +136,43 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private void AffixPassThroughConduit(LineBlock nodeContainerBlock, SpanEquipmentViewModel viewModel)
         {
+            var spanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
+
             BlockSideEnum fromSide = MapFromContainerSide(viewModel.Affix.NodeContainerIngoingSide);
             BlockSideEnum toSide = OppositeSide(fromSide);
+
+            bool portsVisible = false;
+
+            // If cut we want to draw the port polygons, because otherwise the outter conduit cannot be seen on the diagram (due to missing connection between the two sides)
+            if (spanDiagramInfo.IsCut)
+                portsVisible = true;
 
             // Create outer conduit as port
             var fromPort = new BlockPort(fromSide)
             {
-                IsVisible = true,
+                IsVisible = portsVisible,
                 Margin = _portMargin,
-                Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName
+                Style = spanDiagramInfo.StyleName
             };
 
             fromPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SpanSegmentId, "SpanSegment");
-
             nodeContainerBlock.AddPort(fromPort);
 
             var toPort = new BlockPort(toSide)
             {
-                IsVisible = true,
+                IsVisible = portsVisible,
                 Margin = _portMargin,
-                Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName
+                Style = spanDiagramInfo.StyleName
             };
 
             toPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SpanSegmentId, "SpanSegment");
-
             nodeContainerBlock.AddPort(toPort);
+
+            if (!spanDiagramInfo.IsCut)
+            {
+                var portConnection = nodeContainerBlock.AddPortConnection(fromSide, fromPort.Index, toSide, toPort.Index, null, spanDiagramInfo.StyleName);
+                portConnection.SetReference(spanDiagramInfo.SpanSegmentId, "SpanSegment");
+            }
 
             // Create inner conduits as terminals
             var ingoingInnerConduitLabels = viewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Ingoing);

@@ -40,7 +40,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var spanStructure = _spanEquipment.SpanStructures.First(s => s.Level == 1);
             var spec = _data.SpanStructureSpecifications[spanStructure.SpecificationId];
 
-            return new SpanDiagramInfo() { Position = 1, SpanSegmentId = spanStructure.Id, StyleName = stylePrefix + spec.Color };
+            return new SpanDiagramInfo() { Position = 1, SpanSegmentId = spanStructure.SpanSegments[0].Id, StyleName = stylePrefix + spec.Color };
         }
 
         public string GetSpanEquipmentLabel()
