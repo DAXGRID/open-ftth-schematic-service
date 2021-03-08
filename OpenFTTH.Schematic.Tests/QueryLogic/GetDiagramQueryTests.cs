@@ -117,5 +117,18 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Assert
             getDiagramQueryResult.IsFailed.Should().BeTrue();
         }
+
+        [Fact, Order(32)]
+        public async void TestGetDiagramQueryOnNodeWithNodeContainerOnly_ShouldReturnNodeContainerInDiagram()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.J_1;
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            getDiagramQueryResult.Value.Diagram.DiagramObjects.Any(d => d.Style == "NodeContainer").Should().BeTrue();
+        }
     }
 }

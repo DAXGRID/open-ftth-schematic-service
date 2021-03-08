@@ -26,6 +26,7 @@ namespace OpenFTTH.TestData
 
         public static Guid NodeContainer_HH_1;
         public static Guid NodeContainer_CC_1;
+        public static Guid NodeContainer_J_1;
 
         public TestUtilityNetwork(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
@@ -55,6 +56,7 @@ namespace OpenFTTH.TestData
                 // Place node containers
                 NodeContainer_HH_1 = PlaceNodeContainer(TestSpecifications.Well_Fiberpowertech_37_EK_378_400x800, TestSpecifications.Manu_Fiberpowertech, TestRouteNetwork.HH_1);
                 NodeContainer_CC_1 = PlaceNodeContainer(TestSpecifications.Conduit_Closure_Emtelle_Branch_Box, TestSpecifications.Manu_Emtelle, TestRouteNetwork.CC_1);
+                NodeContainer_J_1 = PlaceNodeContainer(TestSpecifications.Conduit_Closure_Emtelle_Branch_Box, TestSpecifications.Manu_Emtelle, TestRouteNetwork.J_1);
 
                 Thread.Sleep(100);
 

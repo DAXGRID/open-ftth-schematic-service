@@ -39,7 +39,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 _data = fetchNeedeDataResult.Value;
 
             // If no equipment found, just return an empty diagram
-            if (_data.SpanEquipments.Count == 0)
+            if (_data.SpanEquipments.Count == 0 && _data.NodeContainer == null)
             {
                 return Task.FromResult(Result.Ok<Diagram>(new Diagram()));
             }
