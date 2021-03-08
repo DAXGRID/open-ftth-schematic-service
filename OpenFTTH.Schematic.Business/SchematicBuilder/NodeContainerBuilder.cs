@@ -269,7 +269,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private static BlockSideEnum MapFromContainerSide(NodeContainerSideEnum nodeContainerIngoingSide)
         {
-            if (nodeContainerIngoingSide == NodeContainerSideEnum.Vest)
+            if (nodeContainerIngoingSide == NodeContainerSideEnum.West)
                 return BlockSideEnum.West;
             else if (nodeContainerIngoingSide == NodeContainerSideEnum.North)
                 return BlockSideEnum.North;

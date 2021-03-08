@@ -79,7 +79,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var conduit1AffixCommand = new AffixSpanEquipmentToNodeContainer(
                 spanSegmentId: conduit1.SpanStructures[0].SpanSegments[0].Id,
                 nodeContainerId: TestUtilityNetwork.NodeContainer_CC_1,
-                nodeContainerIngoingSide: NodeContainerSideEnum.Vest
+                nodeContainerIngoingSide: NodeContainerSideEnum.West
             );
 
             var conduit1AffixResult = await _commandDispatcher.HandleAsync<AffixSpanEquipmentToNodeContainer, Result>(conduit1AffixCommand);
