@@ -3,6 +3,7 @@
     public enum InnerLabelDirectionEnum
     {
         Ingoing,
-        Outgoing
+        Outgoing,
+        FromOppositeEndOfNode
     }
 }

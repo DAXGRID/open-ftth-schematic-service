@@ -10,28 +10,31 @@ using System.Threading;
 
 namespace OpenFTTH.TestData
 {
-    public class TestConduits
+    public class TestUtilityNetwork
     {
         private static bool _conduitsCreated = false;
         private static object _myLock = new object();
 
-        private ICommandDispatcher _commandDispatcher;
-        private IQueryDispatcher _queryDispatcher;
-        private TestSpecifications _specs;
+        private readonly ICommandDispatcher _commandDispatcher;
+        private readonly IQueryDispatcher _queryDispatcher;
 
         public static Guid MultiConduit_5x10_HH_1_to_HH_10;
         public static Guid MultiConduit_10x10_HH_1_to_HH_10;
         public static Guid FlexConduit_40_Red_HH_2_to_FP_2;
         public static Guid FlexConduit_40_Red_CC_1_to_SP_1;
+        public static Guid MultiConduit_3x10_CC_1_to_SP_1;
 
-        public TestConduits(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
+        public static Guid NodeContainer_HH_1;
+        public static Guid NodeContainer_CC_1;
+
+        public TestUtilityNetwork(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
-            _specs = new TestSpecifications(commandDispatcher, queryDispatcher);
+            _ = new TestSpecifications(commandDispatcher, queryDispatcher);
         }
 
-        public TestConduits Run()
+        public TestUtilityNetwork Run()
         {
             if (_conduitsCreated)
                 return this;
@@ -47,6 +50,11 @@ namespace OpenFTTH.TestData
                 MultiConduit_10x10_HH_1_to_HH_10 = PlaceConduit(TestSpecifications.Multi_Ø50_10x10, new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S4, TestRouteNetwork.S13 });
                 FlexConduit_40_Red_HH_2_to_FP_2 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S3 });
                 FlexConduit_40_Red_CC_1_to_SP_1 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S5 });
+                MultiConduit_3x10_CC_1_to_SP_1 = PlaceConduit(TestSpecifications.Multi_Ø32_3x10, new RouteNetworkElementIdList() { TestRouteNetwork.S5 });
+
+                // Place node containers
+                NodeContainer_HH_1 = PlaceNodeContainer(TestSpecifications.Well_Fiberpowertech_37_EK_378_400x800, TestSpecifications.Manu_Fiberpowertech, TestRouteNetwork.HH_1);
+                NodeContainer_CC_1 = PlaceNodeContainer(TestSpecifications.Conduit_Closure_Emtelle_Branch_Box, TestSpecifications.Manu_Emtelle, TestRouteNetwork.CC_1);
 
                 Thread.Sleep(100);
 
@@ -71,6 +79,25 @@ namespace OpenFTTH.TestData
                 throw new ApplicationException(placeSpanEquipmentResult.Errors.First().Message);
 
             return placeSpanEquipmentCommand.SpanEquipmentId;
+        }
+
+        private Guid PlaceNodeContainer(Guid specificationId, Guid manufacturerId, Guid routeNodeId)
+        {
+            var nodeOfInterestId = Guid.NewGuid();
+            var registerNodeOfInterestCommand = new RegisterNodeOfInterest(nodeOfInterestId, routeNodeId);
+            var registerNodeOfInterestCommandResult = _commandDispatcher.HandleAsync<RegisterNodeOfInterest, Result<RouteNetworkInterest>>(registerNodeOfInterestCommand).Result;
+
+            var placeNodeContainerCommand = new PlaceNodeContainerInRouteNetwork(Guid.NewGuid(), specificationId, registerNodeOfInterestCommandResult.Value)
+            {
+                ManufacturerId = manufacturerId
+            };
+
+            var placeNodeContainerResult = _commandDispatcher.HandleAsync<PlaceNodeContainerInRouteNetwork, Result>(placeNodeContainerCommand).Result;
+
+            if (placeNodeContainerResult.IsFailed)
+                throw new ApplicationException(placeNodeContainerResult.Errors.First().Message);
+
+            return placeNodeContainerCommand.NodeContainerId;
         }
     }
 }

@@ -11,14 +11,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     /// </summary>
     public class DetachedSpanEquipmentBuilder
     {
-        private readonly DetachedSpanEquipmentViewModel _spanEquipmentViewModel;
+        private readonly SpanEquipmentViewModel _spanEquipmentViewModel;
 
         private readonly double _spanEquipmentAreaWidth = 300;
         private readonly double _spanEquipmentBlockMargin = 5;
         private readonly double _spanEquipmentLabelOffset = 5;
 
 
-        public DetachedSpanEquipmentBuilder(DetachedSpanEquipmentViewModel spanEquipmentViewModel)
+        public DetachedSpanEquipmentBuilder(SpanEquipmentViewModel spanEquipmentViewModel)
         {
             _spanEquipmentViewModel = spanEquipmentViewModel;
         }
@@ -28,7 +28,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             List<DiagramObject> result = new List<DiagramObject>();
 
             // Build span equipment block
-            var spanEquipmentBlock = CreateSpanEquipmentBlock("OuterConduit", _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit"));
+            var spanEquipmentBlock = CreateSpanEquipmentBlock();
             result.AddRange(spanEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
 
             // Create label on top of span equipment block
@@ -50,7 +50,15 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             return labelDiagramObject;
         }
 
-        private LineBlock CreateSpanEquipmentBlock(string spanStyle, List<SpanDiagramInfo> innerSpanData)
+        private LineBlock CreateSpanEquipmentBlock()
+        {
+            if (_spanEquipmentViewModel.IsPassThrough)
+                return CreateConduitPassThroughBlock();
+            else
+                return CreateConduitEndBlock();
+        }
+
+        private LineBlock CreateConduitPassThroughBlock()
         {
             // Create outer conduits
             var rootSpanInfo = _spanEquipmentViewModel.RootSpanDiagramInfo("OuterConduit");
@@ -63,9 +71,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Margin = _spanEquipmentBlockMargin
             };
 
-            spanEquipmentBlock.SetReference(rootSpanInfo.SpanSegmentId, "SpanStructure");
+            spanEquipmentBlock.SetReference(rootSpanInfo.SpanSegmentId, "SpanSegment");
 
             // Create inner conduits
+            var innerSpanData = _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit");
 
             var fromPort = new BlockPort(BlockSideEnum.West) { IsVisible = false };
             spanEquipmentBlock.AddPort(fromPort);
@@ -79,22 +88,75 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             int terminalNo = 1;
             foreach (var data in innerSpanData)
             {
-                new BlockPortTerminal(fromPort) {
+                new BlockPortTerminal(fromPort)
+                {
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
-                    Style = "VestTerminalLabel",
-                    Label = vestLabels[terminalNo - 1]
+                    PointStyle = "WestTerminalLabel",
+                    PointLabel = vestLabels[terminalNo - 1]
                 };
 
-                new BlockPortTerminal(toPort) { 
+                new BlockPortTerminal(toPort)
+                {
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
-                    Style = "EastTerminalLabel",
-                    Label = eastLabels[terminalNo - 1]
+                    PointStyle = "EastTerminalLabel",
+                    PointLabel = eastLabels[terminalNo - 1]
                 };
 
-            var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
-                terminalConnection.SetReference(data.SpanSegmentId, "SpanStructure");
+                var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
+                terminalConnection.SetReference(data.SpanSegmentId, "SpanSegment");
+                terminalNo++;
+            }
+
+            return spanEquipmentBlock;
+        }
+
+        private LineBlock CreateConduitEndBlock()
+        {
+            // Create outer conduits
+            var rootSpanInfo = _spanEquipmentViewModel.RootSpanDiagramInfo("OuterConduit");
+
+            var spanEquipmentBlock = new LineBlock()
+            {
+                MinWidth = _spanEquipmentAreaWidth / 2,
+                IsVisible = true,
+                Style = rootSpanInfo.StyleName,
+                Margin = _spanEquipmentBlockMargin
+            };
+
+            spanEquipmentBlock.SetReference(rootSpanInfo.SpanSegmentId, "SpanSegment");
+
+            // Create inner conduits
+            var innerSpanData = _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit");
+
+            var fromPort = new BlockPort(BlockSideEnum.West) { IsVisible = false };
+            spanEquipmentBlock.AddPort(fromPort);
+
+            var toPort = new BlockPort(BlockSideEnum.East) { IsVisible = false };
+            spanEquipmentBlock.AddPort(toPort);
+
+            var labels = _spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.FromOppositeEndOfNode);
+
+            int terminalNo = 1;
+            foreach (var data in innerSpanData)
+            {
+                new BlockPortTerminal(fromPort)
+                {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    PointStyle = "WestTerminalLabel",
+                    PointLabel = labels[terminalNo - 1]
+                };
+
+                new BlockPortTerminal(toPort)
+                {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.None,
+                };
+
+                var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
+                terminalConnection.SetReference(data.SpanSegmentId, "SpanSegment");
                 terminalNo++;
             }
 

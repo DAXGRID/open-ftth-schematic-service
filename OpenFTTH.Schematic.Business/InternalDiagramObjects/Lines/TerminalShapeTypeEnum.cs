@@ -7,6 +7,8 @@ namespace OpenFTTH.Schematic.Business.Lines
     public enum TerminalShapeTypeEnum
     {
         Point = 1,
-        Polygon = 2
+        Polygon = 2,
+        PointAndPolygon = 3,
+        None = 4
     }
 }

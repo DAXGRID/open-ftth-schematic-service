@@ -28,6 +28,16 @@ namespace OpenFTTH.Schematic.Business.Drawing
             return new Point(Convert(x), Convert(y));
         }
 
+        public static LineString StraightLine(double x1, double y1, double x2, double y2)
+        {
+            Coordinate[] pnts = new Coordinate[2];
+            pnts[0] = new Coordinate(Convert(x1), Convert(y1));
+            pnts[1] = new Coordinate(Convert(x2), Convert(y2));
+
+            return new LineString(pnts);
+        }
+
+
         public static LineString Beizer(double curveStartX, double curveStartY, double viaX, double viaY, double curveEndX, double curveEndY, double startX, double startY, double endX, double endY)
         {
             int nPoints = 50;

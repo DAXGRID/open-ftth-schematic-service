@@ -16,8 +16,9 @@ namespace OpenFTTH.Schematic.Business.Lines
         private double _portThickness = 10;
         private double _spaceBetweenTerminals = 2;
         private double _terminalSize = -1;
-        private string _style = null;
-        private string _label = null;
+
+        public string Style { get; init; }
+        public string Label { get; init; }
 
         private List<BlockPortTerminal> _terminals = new List<BlockPortTerminal>();
 
@@ -40,8 +41,8 @@ namespace OpenFTTH.Schematic.Business.Lines
         public BlockPort(BlockSideEnum side, string style = null, string label = null, double spaceBetweenTerminals = -1, double terminalSize = -1, double portMargin = -1)
         {
             _side = side;
-            _style = style;
-            _label = label;
+            Style = style;
+            Label = label;
 
             if (spaceBetweenTerminals > -1)
                 _spaceBetweenTerminals = spaceBetweenTerminals;
@@ -132,7 +133,7 @@ namespace OpenFTTH.Schematic.Business.Lines
                 var portPolygon = new DiagramObject(diagram)
                 {
                     Geometry = GeometryBuilder.Rectangle(portOffsetX, portOffsetY, rectHeight, rectWidth),
-                    Style = _style ?? "BlockPort",
+                    Style = Style ?? "BlockPort",
                     IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
                 };
 

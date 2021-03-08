@@ -9,24 +9,11 @@ namespace OpenFTTH.Schematic.Business.Lines
     public class BlockPortTerminal
     {
         public bool IsVisible { get; init; }
-
-        private string _style = "LinkBlockTerminal";
-        public string Style
-        {
-            get
-            {
-                return _style;
-            }
-
-            init
-            {
-                _style = value;
-            }
-        }
-
         public TerminalShapeTypeEnum ShapeType { get; init; }
-
-        public string Label { get; init; }
+        public string PointStyle { get; init; }
+        public string PolygonStyle { get; init; }
+        public string PointLabel { get; init; }
+        public string PolygonLabel { get; init; }
 
         public BlockPortTerminal(BlockPort port)
         {
@@ -106,27 +93,28 @@ namespace OpenFTTH.Schematic.Business.Lines
 
             if (IsVisible)
             {
-                if (ShapeType == TerminalShapeTypeEnum.Polygon)
+                if (ShapeType == TerminalShapeTypeEnum.Polygon || ShapeType == TerminalShapeTypeEnum.PointAndPolygon)
                 {
                     // Create polygon object convering terminal
                     result.Add(
                         new DiagramObject(diagram)
                         {
-                            Style = Style,
-                            Label = Label,
+                            Style = PolygonStyle,
+                            Label = PolygonLabel,
                             Geometry = GeometryBuilder.Rectangle(terminalOffsetX, terminalOffsetY, rectHeight, rectWidth),
                             IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
                         }
                     );
                 }
-                else if (ShapeType == TerminalShapeTypeEnum.Point)
+
+                if (ShapeType == TerminalShapeTypeEnum.Point || ShapeType == TerminalShapeTypeEnum.PointAndPolygon)
                 {
                     // Create point diagram object at connection point object
                     result.Add(
                         new DiagramObject(diagram)
                         {
-                            Style = Style,
-                            Label = Label,
+                            Style = PointStyle,
+                            Label = PointLabel,
                             Geometry = GeometryBuilder.Point(ConnectionPointX, ConnectionPointY),
                             IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
                         }

@@ -18,19 +18,21 @@ using Xunit.Extensions.Ordering;
 
 namespace OpenFTTH.Schematic.Tests.NodeSchematic
 {
+
+    [Order(1)]
     public class GetDiagramQueryTests
     {
         private readonly IQueryDispatcher _queryDispatcher;
 
         private static TestSpecifications _specs;
-        private static TestConduits _conduits;
+        private static TestUtilityNetwork _conduits;
 
         public GetDiagramQueryTests(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
             _queryDispatcher = queryDispatcher;
 
             _specs = new TestSpecifications(commandDispatcher, queryDispatcher).Run();
-            _conduits = new TestConduits(commandDispatcher, queryDispatcher).Run();
+            _conduits = new TestUtilityNetwork(commandDispatcher, queryDispatcher).Run();
         }
 
         [Fact, Order(1)]
@@ -43,14 +45,35 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Assert
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
-            getDiagramQueryResult.Value.Diagram.DiagramObjects.Count().Should().BeGreaterThan(15);
+            var diagram = getDiagramQueryResult.Value.Diagram;
 
-            getDiagramQueryResult.Value.Diagram.Envelope.MinX.Should().Be(-0.01);
-            getDiagramQueryResult.Value.Diagram.Envelope.MaxX.Should().Be(0.04);
+            diagram.DiagramObjects.Count().Should().BeGreaterThan(15);
+            diagram.Envelope.MinX.Should().Be(-0.01);
+            diagram.Envelope.MaxX.Should().Be(0.04);
 
+            // Check that node container has 4 sides with identified objects pointing to node container object
+            diagram.DiagramObjects.Count(o => o.Style == "NodeContainer").Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NodeContainerSideWest").Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NodeContainerSideNorth").Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NodeContainerSideEast").Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NodeContainerSideSouth").Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style.StartsWith("NodeContainerSide") && o.IdentifiedObject.RefClass == "NodeContainer" && o.IdentifiedObject.RefId != Guid.Empty).Should().Be(4);
+
+            // Check that no conduit are drawed and labelled to end in the CC-1 node (because this means they are shown as pass-throughs, instead of conduit just ending in the node, which is wrong)
+            diagram.DiagramObjects.Count(o => o.Label == "CC-1").Should().Be(0);
+
+            // Check that 3x10 is rendered as an conduit heading towards in SP-1
+            diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "SP-1").Should().Be(3);
+
+            // Check that 10x10 and 5x10 is rendered as an conduit comming fron HH-1
+            diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-1").Should().Be(15);
+
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
         }
 
-        [Fact, Order(2)]
+        [Fact, Order(20)]
         public async void TestGetDiagramQueryOnHH_2()
         {
             var sutRouteNetworkElement = TestRouteNetwork.HH_2;
@@ -70,7 +93,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         }
 
 
-        [Fact, Order(3)]
+        [Fact, Order(30)]
         public async void TestGetDiagramQueryOnNodeWithNoConduits_ShouldReturnEmptyDiagram()
         {
             var sutRouteNetworkElement = TestRouteNetwork.HH_11;
@@ -83,7 +106,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             getDiagramQueryResult.Value.Diagram.DiagramObjects.Count().Should().Be(0);
         }
 
-        [Fact, Order(3)]
+        [Fact, Order(31)]
         public async void TestGetDiagramForRouteNodeThatDontExist_ShouldFail()
         {
             var sutRouteNetworkElement = Guid.NewGuid();
