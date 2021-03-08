@@ -88,7 +88,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             int terminalNo = 1;
             foreach (var data in innerSpanData)
             {
-                new BlockPortTerminal(fromPort)
+                var fromTerminal = new BlockPortTerminal(fromPort)
                 {
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
@@ -96,13 +96,17 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     PointLabel = vestLabels[terminalNo - 1]
                 };
 
-                new BlockPortTerminal(toPort)
+                fromTerminal.SetReference(data.SpanSegmentId, "SpanSegment");
+
+                var toTerminal= new BlockPortTerminal(toPort)
                 {
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "EastTerminalLabel",
                     PointLabel = eastLabels[terminalNo - 1]
                 };
+
+                toTerminal.SetReference(data.SpanSegmentId, "SpanSegment");
 
                 var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
                 terminalConnection.SetReference(data.SpanSegmentId, "SpanSegment");
@@ -141,13 +145,15 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             int terminalNo = 1;
             foreach (var data in innerSpanData)
             {
-                new BlockPortTerminal(fromPort)
+                var fromTerminal = new BlockPortTerminal(fromPort)
                 {
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "WestTerminalLabel",
                     PointLabel = labels[terminalNo - 1]
                 };
+
+                fromTerminal.SetReference(data.SpanSegmentId, "SpanSegment");
 
                 new BlockPortTerminal(toPort)
                 {
