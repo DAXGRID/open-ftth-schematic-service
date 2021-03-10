@@ -71,7 +71,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Margin = _spanEquipmentBlockMargin
             };
 
-            spanEquipmentBlock.SetReference(rootSpanInfo.SpanSegmentId, "SpanSegment");
+            spanEquipmentBlock.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
 
             // Create inner conduits
             var innerSpanData = _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit");
@@ -82,34 +82,31 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var toPort = new BlockPort(BlockSideEnum.East) { IsVisible = false };
             spanEquipmentBlock.AddPort(toPort);
 
-            var vestLabels = _spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Ingoing);
-            var eastLabels = _spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Outgoing);
-
             int terminalNo = 1;
-            foreach (var data in innerSpanData)
+            foreach (var spanInfo in innerSpanData)
             {
                 var fromTerminal = new BlockPortTerminal(fromPort)
                 {
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "WestTerminalLabel",
-                    PointLabel = vestLabels[terminalNo - 1]
+                    PointLabel = spanInfo.IngoingRouteNodeName
                 };
 
-                fromTerminal.SetReference(data.SpanSegmentId, "SpanSegment");
+                fromTerminal.SetReference(spanInfo.IngoingSegmentId, "SpanSegment");
 
                 var toTerminal= new BlockPortTerminal(toPort)
                 {
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "EastTerminalLabel",
-                    PointLabel = eastLabels[terminalNo - 1]
+                    PointLabel = spanInfo.OutgoingRouteNodeName
                 };
 
-                toTerminal.SetReference(data.SpanSegmentId, "SpanSegment");
+                toTerminal.SetReference(spanInfo.OutgoingSegmentId, "SpanSegment");
 
-                var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
-                terminalConnection.SetReference(data.SpanSegmentId, "SpanSegment");
+                var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, spanInfo.StyleName, LineShapeTypeEnum.Polygon);
+                terminalConnection.SetReference(spanInfo.IngoingSegmentId, "SpanSegment");
                 terminalNo++;
             }
 
@@ -129,7 +126,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Margin = _spanEquipmentBlockMargin
             };
 
-            spanEquipmentBlock.SetReference(rootSpanInfo.SpanSegmentId, "SpanSegment");
+            spanEquipmentBlock.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
 
             // Create inner conduits
             var innerSpanData = _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit");
@@ -140,8 +137,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var toPort = new BlockPort(BlockSideEnum.East) { IsVisible = false };
             spanEquipmentBlock.AddPort(toPort);
 
-            var labels = _spanEquipmentViewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.FromOppositeEndOfNode);
-
             int terminalNo = 1;
             foreach (var data in innerSpanData)
             {
@@ -150,10 +145,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "WestTerminalLabel",
-                    PointLabel = labels[terminalNo - 1]
+                    PointLabel = data.IngoingRouteNodeName
                 };
 
-                fromTerminal.SetReference(data.SpanSegmentId, "SpanSegment");
+                fromTerminal.SetReference(data.IngoingSegmentId, "SpanSegment");
 
                 new BlockPortTerminal(toPort)
                 {
@@ -162,7 +157,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
-                terminalConnection.SetReference(data.SpanSegmentId, "SpanSegment");
+                terminalConnection.SetReference(data.IngoingSegmentId, "SpanSegment");
                 terminalNo++;
             }
 

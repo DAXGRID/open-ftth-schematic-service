@@ -40,51 +40,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var spanStructure = _spanEquipment.SpanStructures.First(s => s.Level == 1);
             var spec = _data.SpanStructureSpecifications[spanStructure.SpecificationId];
 
-            return new SpanDiagramInfo() { Position = 1, SpanSegmentId = spanStructure.SpanSegments[0].Id, StyleName = stylePrefix + spec.Color };
+            return GetSpanDiagramInfoForStructure(stylePrefix, spanStructure);
         }
 
         public string GetSpanEquipmentLabel()
         {
             return _data.SpanEquipmentSpecifications[_spanEquipment.SpecificationId].Name;
-        }
-
-        public List<string> GetInnerSpanLabels(InnerLabelDirectionEnum innerLabelDirection)
-        {
-            var innerStructures = _spanEquipment.SpanStructures.Where(s => s.Level == 2);
-
-            List<string> labels = new List<string>();
-
-            foreach (var structure in innerStructures)
-            {
-                if (!structure.ContainsCutOrConnectedSpanSegments())
-                {
-                    if (innerLabelDirection == InnerLabelDirectionEnum.Ingoing)
-                    {
-                        var routeNode = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.First()];
-                        labels.Add(routeNode.NamingInfo?.Name);
-                    }
-                    else if (innerLabelDirection == InnerLabelDirectionEnum.Outgoing)
-                    {
-                        var routeNode = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.Last()];
-                        labels.Add(routeNode.NamingInfo?.Name);
-                    }
-                    else if (innerLabelDirection == InnerLabelDirectionEnum.FromOppositeEndOfNode)
-                    {
-                        Guid routeNodeId;
-                        if (_spanEquipment.NodesOfInterestIds.Last() == _data.RouteNetworkElementId)
-                            routeNodeId = _spanEquipment.NodesOfInterestIds.First();
-                        else if (_spanEquipment.NodesOfInterestIds.First() == _data.RouteNetworkElementId)
-                            routeNodeId = _spanEquipment.NodesOfInterestIds.Last();
-                        else
-                            throw new ApplicationException("The FromOppositeEndOfNode option can only be used on span equipments that starts or end in the route node. Not pass-through span equipmenst!");
-
-                        var routeNode = _data.RouteNetworkElements[routeNodeId];
-                        labels.Add(routeNode.NamingInfo?.Name);
-                    }
-                }
-            }
-
-            return labels;
         }
 
         public List<SpanDiagramInfo> GetInnerSpanDiagramInfos(string stylePrefix)
@@ -95,14 +56,62 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             foreach (var structure in innerStructures)
             {
-                var spec = _data.SpanStructureSpecifications[structure.SpecificationId];
-
-                var styleName = stylePrefix + spec.Color;
-
-                styles.Add(new SpanDiagramInfo() { SpanSegmentId = structure.SpanSegments[0].Id, Position = structure.Position, StyleName = styleName });
+                styles.Add(GetSpanDiagramInfoForStructure(stylePrefix, structure));
             }
 
             return styles;
+        }
+
+        private SpanDiagramInfo GetSpanDiagramInfoForStructure(string stylePrefix, SpanStructure structure)
+        {
+            var spec = _data.SpanStructureSpecifications[structure.SpecificationId];
+
+            var spanDiagramInfo = new SpanDiagramInfo()
+            {
+                StyleName = stylePrefix + spec.Color
+            };
+
+            foreach (var spanSegment in structure.SpanSegments)
+            {
+                var spanSegmentFromRouteNodeId = _spanEquipment.NodesOfInterestIds[spanSegment.FromNodeOfInterestIndex];
+                var spanSegmentToRouteNodeId = _spanEquipment.NodesOfInterestIds[spanSegment.ToNodeOfInterestIndex];
+
+                spanDiagramInfo.IngoingRouteNodeName = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.First()].Name;
+                spanDiagramInfo.OutgoingRouteNodeName = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.Last()].Name;
+
+                if (spanSegmentToRouteNodeId == _data.RouteNetworkElementId)
+                {
+                    spanDiagramInfo.IsPassThrough = false;
+                    spanDiagramInfo.IngoingSegmentId = spanSegment.Id;
+                }
+                else if (spanSegmentFromRouteNodeId == _data.RouteNetworkElementId)
+                {
+                    spanDiagramInfo.IsPassThrough = false;
+                    spanDiagramInfo.OutgoingSegmentId = spanSegment.Id;
+
+                    // We reverse ingoing and outgoing route node names here
+                    spanDiagramInfo.IngoingRouteNodeName = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.Last()].Name;
+                    spanDiagramInfo.OutgoingRouteNodeName = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.First()].Name;
+                }
+                else
+                {
+                    spanDiagramInfo.IsPassThrough = true;
+
+                    var spanEquipmentInterest = _data.RouteNetworkInterests[_spanEquipment.WalkOfInterestId];
+
+                    var routeNodeElementIndex = spanEquipmentInterest.RouteNetworkElementRefs.IndexOf(_data.RouteNetworkElementId);
+                    var spanSegmentFromIndex = spanEquipmentInterest.RouteNetworkElementRefs.IndexOf(spanSegmentFromRouteNodeId);
+                    var spanSegmentToIndex = spanEquipmentInterest.RouteNetworkElementRefs.IndexOf(spanSegmentToRouteNodeId);
+
+                    if (spanSegmentFromIndex < routeNodeElementIndex && spanSegmentToIndex > routeNodeElementIndex)
+                    {
+                        spanDiagramInfo.IngoingSegmentId = spanSegment.Id;
+                        spanDiagramInfo.OutgoingSegmentId = spanSegment.Id;
+                    }
+                }
+            }
+
+            return spanDiagramInfo;
         }
 
         public bool IsAttachedToNodeContainer()
@@ -160,8 +169,26 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     public class SpanDiagramInfo
     {
         public int Position { get; set; }
+        public bool IsPassThrough { get; set; }
         public string StyleName { get; set; }
-        public Guid SpanSegmentId { get; set; }
-        public bool IsCut { get; set; }
+        public Guid IngoingSegmentId { get; set; }
+        public Guid OutgoingSegmentId { get; set; }
+        public string IngoingRouteNodeName { get; set; }
+        public string OutgoingRouteNodeName { get; set; }
+
+        public Guid SegmentId
+        {
+            get
+            {
+                if (IngoingSegmentId != Guid.Empty)
+                {
+                    return IngoingSegmentId;
+                }
+                else
+                {
+                    return OutgoingSegmentId;
+                }
+            }
+        }
     }
 }

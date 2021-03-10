@@ -43,6 +43,9 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Act
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
 
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
             // Assert
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
             var diagram = getDiagramQueryResult.Value.Diagram;
@@ -67,10 +70,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Check that 10x10 and 5x10 is rendered as an conduit comming fron HH-1
             diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-1").Should().Be(15);
-
-
-            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
-                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
         }
 
         [Fact, Order(20)]

@@ -141,11 +141,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             BlockSideEnum fromSide = MapFromContainerSide(viewModel.Affix.NodeContainerIngoingSide);
             BlockSideEnum toSide = OppositeSide(fromSide);
 
-            bool portsVisible = false;
+            bool portsVisible = true;
 
-            // If cut we want to draw the port polygons, because otherwise the outter conduit cannot be seen on the diagram (due to missing connection between the two sides)
-            if (spanDiagramInfo.IsCut)
-                portsVisible = true;
+            // If cut we want to draw the port polygons, because otherwise the outer conduit cannot be seen on the diagram (due to missing connection between the two sides)
+            if (spanDiagramInfo.IsPassThrough)
+                portsVisible = false;
 
             // Create outer conduit as port
             var fromPort = new BlockPort(fromSide)
@@ -155,7 +155,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = spanDiagramInfo.StyleName
             };
 
-            fromPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SpanSegmentId, "SpanSegment");
+            fromPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").IngoingSegmentId, "SpanSegment");
             nodeContainerBlock.AddPort(fromPort);
 
             var toPort = new BlockPort(toSide)
@@ -165,26 +165,22 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = spanDiagramInfo.StyleName
             };
 
-            toPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SpanSegmentId, "SpanSegment");
+            toPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").OutgoingSegmentId, "SpanSegment");
             nodeContainerBlock.AddPort(toPort);
 
-            if (!spanDiagramInfo.IsCut)
+            if (spanDiagramInfo.IsPassThrough)
             {
                 var portConnection = nodeContainerBlock.AddPortConnection(fromSide, fromPort.Index, toSide, toPort.Index, null, spanDiagramInfo.StyleName);
-                portConnection.SetReference(spanDiagramInfo.SpanSegmentId, "SpanSegment");
+                portConnection.SetReference(spanDiagramInfo.IngoingSegmentId, "SpanSegment");
             }
-
-            // Create inner conduits as terminals
-            var ingoingInnerConduitLabels = viewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Ingoing);
-            var outgoingInnerConduitLabels = viewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.Outgoing);
-
+            
             int terminalNo = 1;
             foreach (var data in viewModel.GetInnerSpanDiagramInfos("InnerConduit"))
             {
                 TerminalShapeTypeEnum terminalShapeType = TerminalShapeTypeEnum.Point;
 
                 // If cut we want to draw the terminal polygon, because otherwise the conduit cannot be seen on the diagram (due to missing connection between the two sides)
-                if (data.IsCut)
+                if (!data.IsPassThrough)
                     terminalShapeType = TerminalShapeTypeEnum.PointAndPolygon;
 
                 var fromTerminal = new BlockPortTerminal(fromPort)
@@ -192,30 +188,31 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = terminalShapeType,
                     PointStyle = fromSide.ToString() + "TerminalLabel",
-                    PointLabel = ingoingInnerConduitLabels[terminalNo - 1],
+                    PointLabel = data.IngoingRouteNodeName,
                     PolygonStyle = data.StyleName
                 };
 
-                fromTerminal.SetReference(data.SpanSegmentId, "SpanSegment");
+                fromTerminal.SetReference(data.IngoingSegmentId, "SpanSegment");
 
                 var toTerminal = new BlockPortTerminal(toPort)
                 {
                     IsVisible = true,
                     ShapeType = terminalShapeType,
                     PointStyle = toSide.ToString() + "TerminalLabel",
-                    PointLabel = outgoingInnerConduitLabels[terminalNo - 1],
+                    PointLabel = data.OutgoingRouteNodeName,
                     PolygonStyle = data.StyleName
                 };
 
-                toTerminal.SetReference(data.SpanSegmentId, "SpanSegment");
+                toTerminal.SetReference(data.OutgoingSegmentId, "SpanSegment");
 
-                // Connect the two sides, if the inner conduit is not cut
-                if (!data.IsCut)
+                // Connect the two sides, if the inner conduit is not cut / passing through
+                if (data.IsPassThrough)
                 {
                     var terminalConnection = nodeContainerBlock.AddTerminalConnection(fromSide, fromPort.Index, terminalNo, toSide, toPort.Index, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
-                    terminalConnection.SetReference(data.SpanSegmentId, "SpanSegment");
-                    terminalNo++;
+                    terminalConnection.SetReference(data.IngoingSegmentId, "SpanSegment");
                 }
+
+                terminalNo++;
             }
         }
 
@@ -231,15 +228,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName
             };
 
-            port.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SpanSegmentId, "SpanSegment");
+            port.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").IngoingSegmentId, "SpanSegment");
 
             nodeContainerBlock.AddPort(port);
 
-
             // Create inner conduits as terminals
-            var innerSpanLabels = viewModel.GetInnerSpanLabels(InnerLabelDirectionEnum.FromOppositeEndOfNode);
-            
-            int terminalNo = 1;
             foreach (var data in viewModel.GetInnerSpanDiagramInfos("InnerConduit"))
             {
                 var terminal = new BlockPortTerminal(port)
@@ -247,11 +240,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.PointAndPolygon,
                     PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = innerSpanLabels[terminalNo - 1],
+                    PointLabel = data.IngoingRouteNodeName,
                     PolygonStyle = data.StyleName
                 };
 
-                terminal.SetReference(data.SpanSegmentId, "SpanSegment");
+                terminal.SetReference(data.SegmentId, "SpanSegment");
             }
         }
 

@@ -18,6 +18,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public LookupCollection<SpanStructureSpecification> SpanStructureSpecifications { get; set; }
         public LookupCollection<NodeContainerSpecification> NodeContainerSpecifications { get; set; }
         public LookupCollection<RouteNetworkElement> RouteNetworkElements { get; set; }
+        public LookupCollection<RouteNetworkInterest> RouteNetworkInterests { get; set; }
         public LookupCollection<SpanEquipmentWithRelatedInfo> SpanEquipments { get; set; }
         public Dictionary<Guid, RouteNetworkElementInterestRelation> InterestRelations { get; set; }
         public NodeContainer NodeContainer { get; set; }
@@ -40,7 +41,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // Query all node container specifications
             result.NodeContainerSpecifications = queryDispatcher.HandleAsync<GetNodeContainerSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<NodeContainerSpecification>>>(new GetNodeContainerSpecifications()).Result.Value;
 
-
             // Query all route node interests
             var routeNetworkInterestQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { routeNetworkElementId })
             {
@@ -53,6 +53,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 return Result.Fail(interestsQueryResult.Errors.First());
 
             result.InterestRelations = interestsQueryResult.Value.RouteNetworkElements.First().InterestRelations.ToDictionary(r => r.RefId);
+
+            result.RouteNetworkInterests = interestsQueryResult.Value.Interests;
 
             var interestIdList = new InterestIdList();
             interestIdList.AddRange(result.InterestRelations.Values.Select(r => r.RefId));

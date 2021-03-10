@@ -110,10 +110,11 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             var conduit3AffixResult = await _commandDispatcher.HandleAsync<AffixSpanEquipmentToNodeContainer, Result>(conduit3AffixCommand);
 
-
-
             // Act
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.CC_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
 
             // Assert
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
@@ -129,8 +130,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Only one terminal connection should be shown in conduit 1 that is affixed to the node container
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefId == conduit1.SpanStructures[0].SpanSegments[0].Id).Should().Be(1);
 
-            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
-                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
 
         }
     }
