@@ -63,7 +63,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Label == "CC-1").Should().Be(0);
 
             // Check that 3x10 is rendered as an conduit heading towards in SP-1
-            diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "SP-1").Should().Be(3);
+            diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.Label == "SP-1").Should().Be(3);
 
             // Check that 10x10 and 5x10 is rendered as an conduit comming fron HH-1
             diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-1").Should().Be(15);
@@ -96,7 +96,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         [Fact, Order(30)]
         public async void TestGetDiagramQueryOnNodeWithNoConduits_ShouldReturnEmptyDiagram()
         {
-            var sutRouteNetworkElement = TestRouteNetwork.HH_11;
+            var sutRouteNetworkElement = TestRouteNetwork.SDU_1;
 
             // Act
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
