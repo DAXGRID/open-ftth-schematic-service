@@ -74,10 +74,10 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Affix 5x10 to west side
             var conduit1Id = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
 
-            var conduit1 = _eventStore.Projections.Get<UtilityGraphProjection>().SpanEquipments[conduit1Id];
+            var conduit1 = _eventStore.Projections.Get<UtilityNetworkProjection>().SpanEquipments[conduit1Id];
 
             var conduit1AffixCommand = new AffixSpanEquipmentToNodeContainer(
-                spanSegmentId: conduit1.SpanStructures[0].SpanSegments[0].Id,
+                spanEquipmentOrSegmentId: conduit1.SpanStructures[0].SpanSegments[0].Id,
                 nodeContainerId: TestUtilityNetwork.NodeContainer_CC_1,
                 nodeContainerIngoingSide: NodeContainerSideEnum.West
             );
@@ -87,10 +87,10 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Affix 3x10 to north side
             var conduit2Id = TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1;
 
-            var conduit2 = _eventStore.Projections.Get<UtilityGraphProjection>().SpanEquipments[conduit2Id];
+            var conduit2 = _eventStore.Projections.Get<UtilityNetworkProjection>().SpanEquipments[conduit2Id];
 
             var conduit2AffixCommand = new AffixSpanEquipmentToNodeContainer(
-                spanSegmentId: conduit2.SpanStructures[0].SpanSegments[0].Id,
+                spanEquipmentOrSegmentId: conduit2.SpanStructures[0].SpanSegments[0].Id,
                 nodeContainerId: TestUtilityNetwork.NodeContainer_CC_1,
                 nodeContainerIngoingSide: NodeContainerSideEnum.North
             );
@@ -100,10 +100,10 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Affix flex conduit to south side
             var conduit3Id = TestUtilityNetwork.FlexConduit_40_Red_CC_1_to_SP_1;
 
-            var conduit3 = _eventStore.Projections.Get<UtilityGraphProjection>().SpanEquipments[conduit3Id];
+            var conduit3 = _eventStore.Projections.Get<UtilityNetworkProjection>().SpanEquipments[conduit3Id];
 
             var conduit3AffixCommand = new AffixSpanEquipmentToNodeContainer(
-                spanSegmentId: conduit3.SpanStructures[0].SpanSegments[0].Id,
+                spanEquipmentOrSegmentId: conduit3.SpanStructures[0].SpanSegments[0].Id,
                 nodeContainerId: TestUtilityNetwork.NodeContainer_CC_1,
                 nodeContainerIngoingSide: NodeContainerSideEnum.South
             );
