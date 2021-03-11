@@ -88,10 +88,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 {
                     spanDiagramInfo.IsPassThrough = false;
                     spanDiagramInfo.OutgoingSegmentId = spanSegment.Id;
-
-                    // We reverse ingoing and outgoing route node names here
-                    spanDiagramInfo.IngoingRouteNodeName = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.Last()].Name;
-                    spanDiagramInfo.OutgoingRouteNodeName = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.First()].Name;
                 }
                 else
                 {

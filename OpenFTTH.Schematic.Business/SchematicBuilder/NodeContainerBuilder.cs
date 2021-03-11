@@ -171,7 +171,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             if (spanDiagramInfo.IsPassThrough)
             {
                 var portConnection = nodeContainerBlock.AddPortConnection(fromSide, fromPort.Index, toSide, toPort.Index, null, spanDiagramInfo.StyleName);
-                portConnection.SetReference(spanDiagramInfo.IngoingSegmentId, "SpanSegment");
+                portConnection.SetReference(spanDiagramInfo.SegmentId, "SpanSegment");
             }
             
             int terminalNo = 1;
@@ -228,7 +228,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName
             };
 
-            port.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").IngoingSegmentId, "SpanSegment");
+            port.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SegmentId, "SpanSegment");
 
             nodeContainerBlock.AddPort(port);
 
@@ -240,7 +240,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.PointAndPolygon,
                     PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = data.IngoingRouteNodeName,
+                    PointLabel = data.OutgoingRouteNodeName,
                     PolygonStyle = data.StyleName
                 };
 

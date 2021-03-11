@@ -62,13 +62,47 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
 
-            // Assert
-            cutResult.IsSuccess.Should().BeTrue();
-
             var diagram = getDiagramQueryResult.Value.Diagram;
 
             if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
                 new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            cutResult.IsSuccess.Should().BeTrue();
+
+            // Assert that north attached 3x10 has correct labels and id's
+            utilityNetwork.TryGetEquipment<SpanEquipment>(TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1, out var cc1tosp1conduit);
+            diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[0].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitBlue" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitYellow" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitWhite" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
+
+            // Assert that 5x10 passing through node container has as correct labels and id's
+            utilityNetwork.TryGetEquipment<SpanEquipment>(TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10, out var hh11tohh10conduit);
+            diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[0].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[0].SpanSegments[1].Id).Should().Be(1);
+            
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitBlue" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "EastTerminalLabel" && o.Label == "HH-10" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitYellow" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitYellow" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[2].SpanSegments[1].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "EastTerminalLabel" && o.Label == "HH-10" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[2].SpanSegments[1].Id).Should().Be(1);
+
+            // Assert that 3x10 starting in CC and ending in HH 11 has as correct labels and id's
+            utilityNetwork.TryGetEquipment<SpanEquipment>(TestUtilityNetwork.MultiConduit_3x10_CC_1_to_HH_11, out var cc1tohh1conduit);
+            diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-11" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tohh1conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-11" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tohh1conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-11" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tohh1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitBlue" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tohh1conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitYellow" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tohh1conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "InnerConduitWhite" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tohh1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
+
         }
     }
 }

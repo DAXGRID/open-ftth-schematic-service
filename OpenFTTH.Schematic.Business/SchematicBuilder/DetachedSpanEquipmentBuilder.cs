@@ -126,7 +126,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Margin = _spanEquipmentBlockMargin
             };
 
-            spanEquipmentBlock.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+            spanEquipmentBlock.SetReference(rootSpanInfo.SegmentId, "SpanSegment");
 
             // Create inner conduits
             var innerSpanData = _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit");
@@ -145,10 +145,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "WestTerminalLabel",
-                    PointLabel = data.IngoingRouteNodeName
+                    PointLabel = data.OutgoingRouteNodeName
                 };
 
-                fromTerminal.SetReference(data.IngoingSegmentId, "SpanSegment");
+                fromTerminal.SetReference(data.SegmentId, "SpanSegment");
 
                 new BlockPortTerminal(toPort)
                 {
@@ -157,7 +157,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
-                terminalConnection.SetReference(data.IngoingSegmentId, "SpanSegment");
+                terminalConnection.SetReference(data.SegmentId, "SpanSegment");
                 terminalNo++;
             }
 
