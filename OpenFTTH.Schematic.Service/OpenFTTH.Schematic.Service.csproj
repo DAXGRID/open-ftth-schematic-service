@@ -12,8 +12,8 @@
     <PackageReference Include="OpenFTTH.EventSourcing" Version="1.1.3" />
     <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="1.1.2" />
     <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="1.1.2" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="1.0.10" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="1.0.10" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="1.0.11" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="1.0.11" />
   </ItemGroup>
 
 </Project>

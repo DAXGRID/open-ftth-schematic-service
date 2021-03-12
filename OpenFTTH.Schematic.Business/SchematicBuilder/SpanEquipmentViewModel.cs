@@ -83,16 +83,18 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 {
                     spanDiagramInfo.IsPassThrough = false;
                     spanDiagramInfo.IngoingSegmentId = spanSegment.Id;
+                    spanDiagramInfo.IngoingSpanSegment = spanSegment;
                 }
                 else if (spanSegmentFromRouteNodeId == _data.RouteNetworkElementId)
                 {
                     spanDiagramInfo.IsPassThrough = false;
                     spanDiagramInfo.OutgoingSegmentId = spanSegment.Id;
+                    spanDiagramInfo.OutgoingSpanSegment = spanSegment;
                 }
                 else
                 {
                     spanDiagramInfo.IsPassThrough = true;
-
+                    
                     var spanEquipmentInterest = _data.RouteNetworkInterests[_spanEquipment.WalkOfInterestId];
 
                     var routeNodeElementIndex = spanEquipmentInterest.RouteNetworkElementRefs.IndexOf(_data.RouteNetworkElementId);
@@ -103,6 +105,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     {
                         spanDiagramInfo.IngoingSegmentId = spanSegment.Id;
                         spanDiagramInfo.OutgoingSegmentId = spanSegment.Id;
+                        spanDiagramInfo.IngoingSpanSegment = spanSegment;
+                        spanDiagramInfo.OutgoingSpanSegment = spanSegment;
                     }
                 }
             }
@@ -171,6 +175,23 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public Guid OutgoingSegmentId { get; set; }
         public string IngoingRouteNodeName { get; set; }
         public string OutgoingRouteNodeName { get; set; }
+        public SpanSegment IngoingSpanSegment { get; set; }
+        public SpanSegment OutgoingSpanSegment { get; set; }
+
+        public SpanSegment SpanSegment
+        {
+            get
+            {
+                if (IngoingSegmentId != Guid.Empty)
+                {
+                    return IngoingSpanSegment;
+                }
+                else
+                {
+                    return OutgoingSpanSegment;
+                }
+            }
+        }
 
         public Guid SegmentId
         {

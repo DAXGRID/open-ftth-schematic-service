@@ -22,6 +22,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly double _portMargin = 10;
         private readonly double _typeLabelOffset = 5;
 
+        private Dictionary<Guid, List<TerminalEndHolder>> _terminalEndsByTerminalId = new Dictionary<Guid, List<TerminalEndHolder>>();
 
         public NodeContainerBuilder(NodeContainerViewModel viewModel)
         {
@@ -108,6 +109,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             AffixConduits(nodeEquipmentBlock);
 
+            ConnectEnds(nodeEquipmentBlock);
+
             return nodeEquipmentBlock;
         }
         private void AffixConduits(LineBlock nodeContainerBlock)
@@ -131,7 +134,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 AffixConduitEnd(nodeContainerBlock, viewModel);
             }
-
         }
 
         private void AffixPassThroughConduit(LineBlock nodeContainerBlock, SpanEquipmentViewModel viewModel)
@@ -211,6 +213,22 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     var terminalConnection = nodeContainerBlock.AddTerminalConnection(fromSide, fromPort.Index, terminalNo, toSide, toPort.Index, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
                     terminalConnection.SetReference(data.IngoingSegmentId, "SpanSegment");
                 }
+                else
+                {
+                    // Add from terminal / ingoing segment to ends
+                    if (data.IngoingSpanSegment.FromTerminalId != Guid.Empty)
+                        AddToTerminalEnds(data.IngoingSpanSegment.FromTerminalId, data.IngoingSpanSegment, fromTerminal, data.StyleName);
+
+                    if (data.IngoingSpanSegment.ToTerminalId != Guid.Empty)
+                        AddToTerminalEnds(data.IngoingSpanSegment.ToTerminalId, data.IngoingSpanSegment, fromTerminal, data.StyleName);
+
+                    // Add to terminal / outgoing segment to ends
+                    if (data.OutgoingSpanSegment.FromTerminalId != Guid.Empty)
+                        AddToTerminalEnds(data.OutgoingSpanSegment.FromTerminalId, data.OutgoingSpanSegment, toTerminal, data.StyleName);
+
+                    if (data.OutgoingSpanSegment.ToTerminalId != Guid.Empty)
+                        AddToTerminalEnds(data.OutgoingSpanSegment.ToTerminalId, data.OutgoingSpanSegment, toTerminal, data.StyleName);
+                }
 
                 terminalNo++;
             }
@@ -245,6 +263,72 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 terminal.SetReference(data.SegmentId, "SpanSegment");
+
+                if (data.SpanSegment.FromTerminalId != Guid.Empty)
+                    AddToTerminalEnds(data.SpanSegment.FromTerminalId, data.SpanSegment, terminal, data.StyleName);
+
+                if (data.SpanSegment.ToTerminalId != Guid.Empty)
+                    AddToTerminalEnds(data.SpanSegment.ToTerminalId, data.SpanSegment, terminal, data.StyleName);
+            }
+        }
+
+        private void ConnectEnds(LineBlock nodeContainerBlock)
+        {
+            HashSet<BlockPortTerminal> alreadyConnected = new HashSet<BlockPortTerminal>();
+
+            foreach (var terminalEndList in _terminalEndsByTerminalId.Values)
+            {
+                foreach (var terminalEnd in terminalEndList)
+                {
+                    if (!alreadyConnected.Contains(terminalEnd.DiagramTerminal))
+                    {
+                        if (_terminalEndsByTerminalId[terminalEnd.TerminalId].Any(th => th.DiagramTerminal != terminalEnd.DiagramTerminal))
+                        {
+                            var otherDiagramTerminal = _terminalEndsByTerminalId[terminalEnd.TerminalId].First(th => th.DiagramTerminal != terminalEnd.DiagramTerminal);
+
+                            if (!alreadyConnected.Contains(otherDiagramTerminal.DiagramTerminal))
+                            {
+
+                                var terminalConnection = nodeContainerBlock.AddTerminalConnection(
+                                    fromSide: terminalEnd.DiagramTerminal.Port.Side, 
+                                    fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
+                                    fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
+                                    toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
+                                    toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
+                                    toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
+                                    label: null,
+                                    style: terminalEnd.Style,
+                                    lineShapeType: LineShapeTypeEnum.Polygon
+                                );
+
+                                terminalConnection.SetReference(terminalEnd.SpanSegment.Id, "SpanSegment");
+
+                                alreadyConnected.Add(terminalEnd.DiagramTerminal);
+                                alreadyConnected.Add(otherDiagramTerminal.DiagramTerminal);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void AddToTerminalEnds(Guid terminalId, SpanSegment spanSegment, BlockPortTerminal digramTerminal, string style)
+        {
+            var terminalEndHolder = new TerminalEndHolder()
+            {
+                TerminalId = terminalId,
+                SpanSegment = spanSegment,
+                DiagramTerminal = digramTerminal,
+                Style = style
+            };
+
+            if (_terminalEndsByTerminalId.TryGetValue(terminalId, out var terminalEndHolders))
+            {
+                terminalEndHolders.Add(terminalEndHolder);
+            }
+            else
+            {
+                _terminalEndsByTerminalId[terminalId] = new List<TerminalEndHolder>() { terminalEndHolder };
             }
         }
 
@@ -270,6 +354,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 return BlockSideEnum.East;
             else
                 return BlockSideEnum.South;
+        }
+
+        private class TerminalEndHolder
+        {
+            public Guid TerminalId { get; set; }
+            public SpanSegment  SpanSegment { get; set; }
+            public BlockPortTerminal DiagramTerminal { get; set; }
+            public string Style { get; set; }
         }
     }
 }

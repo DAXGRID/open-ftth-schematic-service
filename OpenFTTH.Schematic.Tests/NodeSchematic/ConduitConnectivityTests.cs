@@ -84,7 +84,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             utilityNetwork.TryGetEquipment<SpanEquipment>(TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10, out var hh11tohh10conduit);
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[0].SpanSegments[0].Id).Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[0].SpanSegments[1].Id).Should().Be(1);
-            
+
             diagram.DiagramObjects.Count(o => o.Style == "InnerConduitBlue" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.Label == "HH-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "EastTerminalLabel" && o.Label == "HH-10" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
@@ -104,5 +104,46 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Style == "InnerConduitWhite" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tohh1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
 
         }
+
+        [Fact, Order(2)]
+        public async void TestDrawingSpanEquipmentWithSegmentsConnected()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElement = TestRouteNetwork.CC_1;
+            var sutSpanEquipment = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+
+            var sutConnectFromSpanEquipment = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutConnectToSpanEquipment = TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutConnectFromSpanEquipment, out var sutFromSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutConnectToSpanEquipment, out var sutToSpanEquipment);
+
+            // Connect inner conduit 2 in 5x10 with inner conduit 3 in 3x10
+            var connectCmd = new ConnectSpanSegmentsAtRouteNode(
+                routeNodeId: TestRouteNetwork.CC_1,
+                spanSegmentsToConnect: new Guid[] {
+                    sutFromSpanEquipment.SpanStructures[2].SpanSegments[0].Id,
+                    sutToSpanEquipment.SpanStructures[3].SpanSegments[0].Id
+                }
+            );
+
+            var connectResult = await _commandDispatcher.HandleAsync<ConnectSpanSegmentsAtRouteNode, Result>(connectCmd);
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            // Assert
+            connectResult.IsSuccess.Should().BeTrue();
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+
+
+        }
+
     }
 }
