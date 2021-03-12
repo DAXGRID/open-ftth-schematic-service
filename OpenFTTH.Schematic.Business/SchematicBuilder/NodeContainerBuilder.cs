@@ -179,6 +179,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 var portConnection = nodeContainerBlock.AddPortConnection(fromSide, fromPort.Index, toSide, toPort.Index, null, spanDiagramInfo.StyleName);
                 portConnection.SetReference(spanDiagramInfo.SegmentId, "SpanSegment");
+                portConnection.DrawingOrder = 400;
             }
             
             int terminalNo = 1;
