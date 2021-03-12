@@ -17,8 +17,9 @@ namespace OpenFTTH.Schematic.Business.Lines
         private double _spaceBetweenTerminals = 2;
         private double _terminalSize = -1;
 
-        public string Style { get; init; }
-        public string Label { get; init; }
+        public string Style { get; set; }
+        public string Label { get; set; }
+        public ushort DrawingOrder { get; set; }
 
         private List<BlockPortTerminal> _terminals = new List<BlockPortTerminal>();
 
@@ -134,7 +135,8 @@ namespace OpenFTTH.Schematic.Business.Lines
                 {
                     Geometry = GeometryBuilder.Rectangle(portOffsetX, portOffsetY, rectHeight, rectWidth),
                     Style = Style ?? "BlockPort",
-                    IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null
+                    IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null,
+                    DrawingOrder = DrawingOrder
                 };
 
                 result.Add(portPolygon);

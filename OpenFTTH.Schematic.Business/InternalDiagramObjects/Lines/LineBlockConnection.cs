@@ -11,6 +11,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public string Label { get; set; }
         public string Style { get; set; }
+        public ushort DrawingOrder { get; set; }
 
         internal IEnumerable<DiagramObject> CreateDiagramObjects(Diagram diagram)
         {
@@ -107,7 +108,8 @@ namespace OpenFTTH.Schematic.Business.Lines
             {
                 Style = Style is null ? "Cable" : Style,
                 Label = this.Label,
-                Geometry = curve
+                Geometry = curve,
+                DrawingOrder = DrawingOrder
             }); ; 
 
             return result;

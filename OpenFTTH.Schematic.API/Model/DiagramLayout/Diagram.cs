@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace OpenFTTH.Schematic.API.Model.DiagramLayout
@@ -40,6 +41,11 @@ namespace OpenFTTH.Schematic.API.Model.DiagramLayout
         public void AddDiagramObject(DiagramObject diagramObject)
         {
             _diagramObjects.Add(diagramObject);
+        }
+
+        public void OrderDiagramObjects()
+        {
+            _diagramObjects = _diagramObjects.OrderBy(d => d.DrawingOrder).ToList();
         }
     }
 }

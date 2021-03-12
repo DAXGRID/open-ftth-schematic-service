@@ -35,6 +35,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             // Build node equipment block
             var nodeEquipmentBlock = CreateNodeEquipmentBlock();
+            nodeEquipmentBlock.DrawingOrder = 100;
+
             result.AddRange(nodeEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
 
             // Create label on top of span equipment block
@@ -157,6 +159,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = spanDiagramInfo.StyleName
             };
 
+            fromPort.DrawingOrder = 400;
             fromPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").IngoingSegmentId, "SpanSegment");
             nodeContainerBlock.AddPort(fromPort);
 
@@ -167,7 +170,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = spanDiagramInfo.StyleName
             };
 
+            toPort.DrawingOrder = 400;
             toPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").OutgoingSegmentId, "SpanSegment");
+            
             nodeContainerBlock.AddPort(toPort);
 
             if (spanDiagramInfo.IsPassThrough)
@@ -195,6 +200,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 fromTerminal.SetReference(data.IngoingSegmentId, "SpanSegment");
+                fromTerminal.DrawingOrder = 500;
 
                 var toTerminal = new BlockPortTerminal(toPort)
                 {
@@ -206,12 +212,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 toTerminal.SetReference(data.OutgoingSegmentId, "SpanSegment");
+                toTerminal.DrawingOrder = 500;
 
                 // Connect the two sides, if the inner conduit is not cut / passing through
                 if (data.IsPassThrough)
                 {
                     var terminalConnection = nodeContainerBlock.AddTerminalConnection(fromSide, fromPort.Index, terminalNo, toSide, toPort.Index, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
                     terminalConnection.SetReference(data.IngoingSegmentId, "SpanSegment");
+                    terminalConnection.DrawingOrder = 400;
                 }
                 else
                 {
@@ -246,6 +254,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName
             };
 
+            port.DrawingOrder = 400;
             port.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SegmentId, "SpanSegment");
 
             nodeContainerBlock.AddPort(port);
@@ -261,6 +270,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     PointLabel = data.OutgoingRouteNodeName,
                     PolygonStyle = data.StyleName
                 };
+
+                terminal.DrawingOrder = 500;
 
                 terminal.SetReference(data.SegmentId, "SpanSegment");
 
@@ -300,6 +311,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                     style: terminalEnd.Style,
                                     lineShapeType: LineShapeTypeEnum.Polygon
                                 );
+
+                                terminalConnection.DrawingOrder = 450;
 
                                 terminalConnection.SetReference(terminalEnd.SpanSegment.Id, "SpanSegment");
 

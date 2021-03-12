@@ -49,6 +49,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             yOffset = AddDetachedSpanEquipmentsToDiagram(yOffset);
             yOffset = AddNodeContainerToDiagram(yOffset);
 
+            // order by drawing order
+            _diagram.OrderDiagramObjects();
+
 
             return Task.FromResult((Result.Ok<Diagram>(_diagram)));
         }

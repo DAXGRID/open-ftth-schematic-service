@@ -14,6 +14,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public string Label { get; set; }
         public string Style { get; set; }
+        public ushort DrawingOrder { get; set; }
 
         private Guid _refId;
         private string _refClass;
@@ -45,7 +46,8 @@ namespace OpenFTTH.Schematic.Business.Lines
                 Style = Style is null ? "Cable" : Style,
                 Label = this.Label,
                 Geometry = poly,
-                IdentifiedObject = _refClass == null ? null : new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass }
+                IdentifiedObject = _refClass == null ? null : new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass },
+                DrawingOrder = DrawingOrder
             });
             return result;
 
