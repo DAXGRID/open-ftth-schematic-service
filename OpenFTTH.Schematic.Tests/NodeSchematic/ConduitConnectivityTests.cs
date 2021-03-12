@@ -135,11 +135,12 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             var diagram = getDiagramQueryResult.Value.Diagram;
 
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
             // Assert
             connectResult.IsSuccess.Should().BeTrue();
 
-            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
-                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
         }
 
 
