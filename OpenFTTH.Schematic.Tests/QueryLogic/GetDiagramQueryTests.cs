@@ -91,6 +91,46 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
                 new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
         }
 
+        [Fact, Order(21)]
+        public async void TestGetDiagramQueryOnHH_1()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.HH_1;
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            // Check that no conduit are drawed and labelled to end in the CC-1 node (because this means they are shown as pass-throughs, instead of conduit just ending in the node, which is wrong)
+            diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(15);
+            diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(0);
+        }
+
+        [Fact, Order(22)]
+        public async void TestGetDiagramQueryOnHH_10()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.HH_10;
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            // Check that no conduit are drawed and labelled to end in the CC-1 node (because this means they are shown as pass-throughs, instead of conduit just ending in the node, which is wrong)
+            diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(15);
+            diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(0);
+        }
+
 
         [Fact, Order(30)]
         public async void TestGetDiagramQueryOnNodeWithNoConduits_ShouldReturnEmptyDiagram()

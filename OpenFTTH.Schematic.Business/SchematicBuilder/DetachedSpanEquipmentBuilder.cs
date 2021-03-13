@@ -145,7 +145,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "WestTerminalLabel",
-                    PointLabel = data.OutgoingRouteNodeName
+                    PointLabel = data.OppositeRouteNodeName
                 };
 
                 fromTerminal.SetReference(data.SegmentId, "SpanSegment");

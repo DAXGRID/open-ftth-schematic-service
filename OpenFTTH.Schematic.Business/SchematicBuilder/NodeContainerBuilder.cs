@@ -268,7 +268,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.PointAndPolygon,
                     PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = data.OutgoingRouteNodeName,
+                    PointLabel = data.OppositeRouteNodeName,
                     PolygonStyle = data.StyleName
                 };
 

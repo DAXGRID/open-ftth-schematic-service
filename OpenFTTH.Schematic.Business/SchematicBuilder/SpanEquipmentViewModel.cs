@@ -81,12 +81,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                 if (spanSegmentToRouteNodeId == _data.RouteNetworkElementId)
                 {
+                    spanDiagramInfo.IsIngoing = true;
                     spanDiagramInfo.IsPassThrough = false;
                     spanDiagramInfo.IngoingSegmentId = spanSegment.Id;
                     spanDiagramInfo.IngoingSpanSegment = spanSegment;
                 }
                 else if (spanSegmentFromRouteNodeId == _data.RouteNetworkElementId)
                 {
+                    spanDiagramInfo.IsIngoing = false;
                     spanDiagramInfo.IsPassThrough = false;
                     spanDiagramInfo.OutgoingSegmentId = spanSegment.Id;
                     spanDiagramInfo.OutgoingSpanSegment = spanSegment;
@@ -170,6 +172,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     {
         public int Position { get; set; }
         public bool IsPassThrough { get; set; }
+        public bool IsIngoing { get; set; }
         public string StyleName { get; set; }
         public Guid IngoingSegmentId { get; set; }
         public Guid OutgoingSegmentId { get; set; }
@@ -177,6 +180,17 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public string OutgoingRouteNodeName { get; set; }
         public SpanSegment IngoingSpanSegment { get; set; }
         public SpanSegment OutgoingSpanSegment { get; set; }
+
+        public string OppositeRouteNodeName
+        {
+            get
+            {
+                if (IsIngoing)
+                    return IngoingRouteNodeName;
+                else
+                    return OutgoingRouteNodeName;
+            }
+        }
 
         public SpanSegment SpanSegment
         {
@@ -207,5 +221,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 }
             }
         }
+
+        
     }
 }
