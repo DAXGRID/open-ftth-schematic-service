@@ -20,7 +20,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly double _areaWidth = 300;
         private readonly double _nodeContainerBlockMargin = 60;
         private readonly double _portMargin = 10;
-        private readonly double _typeLabelOffset = 5;
+        private readonly double _typeLabelOffset = 8;
 
         private Dictionary<Guid, List<TerminalEndHolder>> _terminalEndsByTerminalId = new Dictionary<Guid, List<TerminalEndHolder>>();
 
