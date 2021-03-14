@@ -45,7 +45,19 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         public string GetSpanEquipmentLabel()
         {
-            return _data.SpanEquipmentSpecifications[_spanEquipment.SpecificationId].Name;
+            string label = _data.SpanEquipmentSpecifications[_spanEquipment.SpecificationId].Name;
+
+            if (_spanEquipment.MarkingInfo != null && _spanEquipment.MarkingInfo.MarkingColor != null)
+            {
+                label += " " + _spanEquipment.MarkingInfo.MarkingColor;
+            }
+
+            if (_spanEquipment.MarkingInfo != null && _spanEquipment.MarkingInfo.MarkingText != null)
+            {
+                label += " " + _spanEquipment.MarkingInfo.MarkingText;
+            }
+
+            return label;
         }
 
         public List<SpanDiagramInfo> GetInnerSpanDiagramInfos(string stylePrefix)
