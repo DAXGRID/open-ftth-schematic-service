@@ -122,12 +122,37 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         }
         private void AffixConduits(LineBlock nodeContainerBlock)
         {
-            var attachedSpanEquipments = _viewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_viewModel.Data)).OrderBy(s => s.SpecificationId);
-
-            foreach (var spanEquipment in attachedSpanEquipments)
+            foreach (var spanEquipment in GetOrderedSpanEquipmentAttachedToContainer)
             {
                 var viewModel = new SpanEquipmentViewModel(_viewModel.Data.RouteNetworkElementId, spanEquipment.Id, _viewModel.Data);
                 AffixConduit(nodeContainerBlock, viewModel);
+            }
+        }
+
+        private List<SpanEquipmentWithRelatedInfo> GetOrderedSpanEquipmentAttachedToContainer
+        {
+            get
+            {
+                List<SpanEquipmentWithRelatedInfo> toBeDrawedFirstList = new List<SpanEquipmentWithRelatedInfo>();
+                List<SpanEquipmentWithRelatedInfo> toBeDrawedSecondList = new List<SpanEquipmentWithRelatedInfo>();
+
+                var unorderedAttachedSpanEquipmentList = _viewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_viewModel.Data));
+
+                // Make sure that span equipments that have a matching pair in terms of specification is drawed first
+                foreach (var spanEquipment in unorderedAttachedSpanEquipmentList)
+                {
+                    if (unorderedAttachedSpanEquipmentList.Any(s => s.Id != spanEquipment.Id && s.SpecificationId == spanEquipment.SpecificationId))
+                        toBeDrawedFirstList.Add(spanEquipment);
+                    else
+                        toBeDrawedSecondList.Add(spanEquipment);
+                }
+
+                // Sort by marking color
+                toBeDrawedFirstList = toBeDrawedFirstList.OrderBy(s => (s.MarkingInfo != null ? null : s.MarkingInfo.MarkingColor)).ToList();
+
+                toBeDrawedFirstList.AddRange(toBeDrawedSecondList);
+
+                return toBeDrawedFirstList;
             }
         }
 
@@ -177,7 +202,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             toPort.DrawingOrder = 420;
             toPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").OutgoingSegmentId, "SpanSegment");
-            
+
             nodeContainerBlock.AddPort(toPort);
 
             if (spanDiagramInfo.IsPassThrough)
@@ -326,7 +351,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                             {
 
                                 var terminalConnection = nodeContainerBlock.AddTerminalConnection(
-                                    fromSide: terminalEnd.DiagramTerminal.Port.Side, 
+                                    fromSide: terminalEnd.DiagramTerminal.Port.Side,
                                     fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
                                     fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
                                     toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
@@ -402,7 +427,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private class TerminalEndHolder
         {
             public Guid TerminalId { get; set; }
-            public SpanSegment  SpanSegment { get; set; }
+            public SpanSegment SpanSegment { get; set; }
             public BlockPortTerminal DiagramTerminal { get; set; }
             public string Style { get; set; }
         }
