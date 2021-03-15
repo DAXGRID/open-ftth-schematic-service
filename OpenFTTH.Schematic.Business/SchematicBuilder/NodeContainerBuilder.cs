@@ -315,7 +315,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                     lineShapeType: LineShapeTypeEnum.Polygon
                                 );
 
-                                terminalConnection.DrawingOrder = 415;
+                                terminalConnection.DrawingOrder = 550;
+
+                                // This to make to show branched-out spans on top
+                                if (terminalEnd.DiagramTerminal.Port.Side != otherDiagramTerminal.DiagramTerminal.Port.Side)
+                                    terminalConnection.DrawingOrder = 560;
+
 
                                 terminalConnection.SetReference(terminalEnd.SpanSegment.Id, "SpanSegment");
 
