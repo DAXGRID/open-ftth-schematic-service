@@ -80,7 +80,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             var spanDiagramInfo = new SpanDiagramInfo()
             {
-                StyleName = stylePrefix + spec.Color
+                StyleName = stylePrefix + spec.Color,
+                Position = structure.Position
             };
 
             foreach (var spanSegment in structure.SpanSegments)

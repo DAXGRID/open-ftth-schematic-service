@@ -3,6 +3,7 @@ using OpenFTTH.Schematic.Business.Drawing;
 using OpenFTTH.Schematic.Business.Layout;
 using OpenFTTH.Schematic.Business.Lines;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {
@@ -85,7 +86,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             spanEquipmentBlock.AddPort(toPort);
 
             int terminalNo = 1;
-            foreach (var spanInfo in innerSpanData)
+
+            var orderedinnerSpanData = innerSpanData.OrderBy(i => (1000 - i.Position));
+
+            foreach (var spanInfo in orderedinnerSpanData)
             {
                 var fromTerminal = new BlockPortTerminal(fromPort)
                 {
@@ -144,7 +148,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             spanEquipmentBlock.AddPort(toPort);
 
             int terminalNo = 1;
-            foreach (var data in innerSpanData)
+
+            var orderedinnerSpanData = innerSpanData.OrderBy(i => (1000 - i.Position));
+
+            foreach (var data in orderedinnerSpanData)
             {
                 var fromTerminal = new BlockPortTerminal(fromPort)
                 {

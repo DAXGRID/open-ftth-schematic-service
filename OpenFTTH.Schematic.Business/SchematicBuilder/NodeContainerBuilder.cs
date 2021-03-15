@@ -183,9 +183,18 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 portConnection.SetReference(spanDiagramInfo.SegmentId, "SpanSegment");
                 portConnection.DrawingOrder = 410;
             }
-            
+
+            List<SpanDiagramInfo> innerSpanData = null;
+
+            // If a conduit going into west or east side, we want to have inner conduits drawed from top-down along the y-axis
+            if (fromSide == BlockSideEnum.West || fromSide == BlockSideEnum.East)
+                innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit").OrderBy(i => (1000 - i.Position)).ToList();
+            // Else we just draw them in order allong the x-axis
+            else
+                innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit");
+
             int terminalNo = 1;
-            foreach (var data in viewModel.GetInnerSpanDiagramInfos("InnerConduit"))
+            foreach (var data in innerSpanData)
             {
                 TerminalShapeTypeEnum terminalShapeType = TerminalShapeTypeEnum.Point;
 
@@ -262,8 +271,18 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             nodeContainerBlock.AddPort(port);
 
+            List<SpanDiagramInfo> innerSpanData = null;
+
+            // If a conduit going into west or east side, we want to have inner conduits drawed from top-down along the y-axis
+            if (side == BlockSideEnum.West || side == BlockSideEnum.East)
+                innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit").OrderBy(i => (1000 - i.Position)).ToList();
+            // Else we just draw them in order allong the x-axis
+            else
+                innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit");
+
+
             // Create inner conduits as terminals
-            foreach (var data in viewModel.GetInnerSpanDiagramInfos("InnerConduit"))
+            foreach (var data in innerSpanData)
             {
                 var terminal = new BlockPortTerminal(port)
                 {

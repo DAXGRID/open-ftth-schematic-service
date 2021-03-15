@@ -181,5 +181,48 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
                 new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
         }
 
+
+        [Fact, Order(10)]
+        public async void TestSpanEquipmentDrawingPositionAccordingToOrder()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElementId = TestRouteNetwork.CC_1;
+            var sutSpanEquipmentId1 = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutSpanEquipmentId2 = TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1;
+            var sutSpanEquipmentId3 = TestUtilityNetwork.MultiConduit_10x10_HH_1_to_HH_10;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentId1, out var sutWestAttachedSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentId2, out var sutNorthAttachedSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentId3, out var sutPassThroughSpanEquipment);
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElementId));
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+
+            // In west side, the span equipment must be drawed from top and down 1,2,3,4..
+            var westSegment1MaxY = diagram.DiagramObjects.Find(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutWestAttachedSpanEquipment.SpanStructures[2].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxY;
+            var westSegment2MaxY = diagram.DiagramObjects.Find(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutWestAttachedSpanEquipment.SpanStructures[3].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxY;
+            westSegment1MaxY.Should().BeGreaterThan(westSegment2MaxY);
+
+            // In north side, span equipment must be drawed from left to right 1,2,3,4..
+            var northSegment1MaxX = diagram.DiagramObjects.Find(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[2].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
+            var northsegment2MaxX = diagram.DiagramObjects.Find(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[3].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
+            northsegment2MaxX.Should().BeGreaterThan(northSegment1MaxX);
+
+            // In stand alone span equipment must be drawed from top and down 1,2,3,4..
+            var standAloneSegment1MaxY = diagram.DiagramObjects.Find(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutPassThroughSpanEquipment.SpanStructures[2].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxY;
+            var standAloneSegmentt2MaxY = diagram.DiagramObjects.Find(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutPassThroughSpanEquipment.SpanStructures[3].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxY;
+            standAloneSegment1MaxY.Should().BeGreaterThan(standAloneSegmentt2MaxY);
+
+        }
+
+
     }
 }
