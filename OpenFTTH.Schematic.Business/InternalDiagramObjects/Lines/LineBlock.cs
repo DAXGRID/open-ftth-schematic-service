@@ -248,12 +248,14 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public void SetSideMargin(BlockSideEnum side, int margin)
         {
-            _sides[side].SideMargin = margin;
+            if (_sides.ContainsKey(side))
+                _sides[side].SideMargin = margin;
         }
 
         public void SetSideCenterAlignment(BlockSideEnum side)
         {
-            _sides[side].CenterAlignment = true;
+            if (_sides.ContainsKey(side))
+                _sides[side].CenterAlignment = true;
         }
     }
 }

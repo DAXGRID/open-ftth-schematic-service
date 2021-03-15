@@ -115,11 +115,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             ConnectEnds(nodeEquipmentBlock);
 
+            nodeEquipmentBlock.SetSideCenterAlignment(BlockSideEnum.North);
+            nodeEquipmentBlock.SetSideCenterAlignment(BlockSideEnum.South);
+
             return nodeEquipmentBlock;
         }
         private void AffixConduits(LineBlock nodeContainerBlock)
         {
-            var attachedSpanEquipments = _viewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_viewModel.Data));
+            var attachedSpanEquipments = _viewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_viewModel.Data)).OrderBy(s => s.SpecificationId);
 
             foreach (var spanEquipment in attachedSpanEquipments)
             {
