@@ -39,7 +39,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             this._refClass = refClass;
         }
 
-        public ushort DrawingOrder { get; set; }
+        public int DrawingOrder { get; set; }
 
         // Desired Size property
         private Size _actualSize = new Size(0, 0);
@@ -183,7 +183,7 @@ namespace OpenFTTH.Schematic.Business.Lines
                     Style = this.Style,
                     Geometry = GeometryBuilder.Rectangle(_offsetX, _offsetY, ActualSize.Height, ActualSize.Width),
                     IdentifiedObject = _refClass == null ? null : new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass },
-                    DrawingOrder = DrawingOrder
+                    DrawingOrder = this.DrawingOrder
                 });
             }
 

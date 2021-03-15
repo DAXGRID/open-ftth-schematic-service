@@ -19,7 +19,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public string Style { get; set; }
         public string Label { get; set; }
-        public ushort DrawingOrder { get; set; }
+        public int DrawingOrder { get; set; }
 
         private List<BlockPortTerminal> _terminals = new List<BlockPortTerminal>();
 

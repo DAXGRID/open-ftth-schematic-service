@@ -92,7 +92,8 @@ namespace OpenFTTH.Schematic.Business.Lines
                 var poly = new DiagramObject(diagram)
                 {
                     Geometry = GeometryBuilder.Rectangle(CalculateRectOffsetX(offsetX, rectWidth), CalculateRectOffsetY(offsetY, rectHeight), rectHeight, rectWidth),
-                    Style = Style
+                    Style = Style,
+                    DrawingOrder = _lineBlock.DrawingOrder + (ushort)1
                 };
 
                 result.Add(poly);

@@ -35,7 +35,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             // Build node equipment block
             var nodeEquipmentBlock = CreateNodeEquipmentBlock();
-            nodeEquipmentBlock.DrawingOrder = 100;
 
             result.AddRange(nodeEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
 
@@ -58,7 +57,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 Style = "NodeContainerLabel",
                 Label = _viewModel.GetNodeContainerTypeLabel(),
-                Geometry = GeometryBuilder.Point(x, y)
+                Geometry = GeometryBuilder.Point(x, y),
+                DrawingOrder = 1000
             };
 
             return labelDiagramObject;
@@ -88,7 +88,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var containerSide = new DiagramObject(diagram)
             {
                 Style = "NodeContainerSide" + side.ToString(),
-                Geometry = lineGeometry
+                Geometry = lineGeometry,
+                DrawingOrder = 600
             };
 
             containerSide.SetReference(_viewModel.NodeContainer.Id, "NodeContainer");
@@ -104,7 +105,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 MinWidth = _areaWidth,
                 IsVisible = true,
                 Style = "NodeContainer",
-                Margin = _nodeContainerBlockMargin
+                Margin = _nodeContainerBlockMargin,
+                DrawingOrder = 100
             };
 
             nodeEquipmentBlock.SetReference(_viewModel.NodeContainer.Id, "NodeContainer");
@@ -159,7 +161,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = spanDiagramInfo.StyleName
             };
 
-            fromPort.DrawingOrder = 400;
+            fromPort.DrawingOrder = 420;
             fromPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").IngoingSegmentId, "SpanSegment");
             nodeContainerBlock.AddPort(fromPort);
 
@@ -170,7 +172,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = spanDiagramInfo.StyleName
             };
 
-            toPort.DrawingOrder = 400;
+            toPort.DrawingOrder = 420;
             toPort.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").OutgoingSegmentId, "SpanSegment");
             
             nodeContainerBlock.AddPort(toPort);
@@ -179,7 +181,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 var portConnection = nodeContainerBlock.AddPortConnection(fromSide, fromPort.Index, toSide, toPort.Index, null, spanDiagramInfo.StyleName);
                 portConnection.SetReference(spanDiagramInfo.SegmentId, "SpanSegment");
-                portConnection.DrawingOrder = 400;
+                portConnection.DrawingOrder = 410;
             }
             
             int terminalNo = 1;
@@ -201,7 +203,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 fromTerminal.SetReference(data.IngoingSegmentId, "SpanSegment");
-                fromTerminal.DrawingOrder = 500;
+                fromTerminal.DrawingOrder = 520;
 
                 var toTerminal = new BlockPortTerminal(toPort)
                 {
@@ -213,14 +215,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 toTerminal.SetReference(data.OutgoingSegmentId, "SpanSegment");
-                toTerminal.DrawingOrder = 500;
+                toTerminal.DrawingOrder = 520;
 
                 // Connect the two sides, if the inner conduit is not cut / passing through
                 if (data.IsPassThrough)
                 {
                     var terminalConnection = nodeContainerBlock.AddTerminalConnection(fromSide, fromPort.Index, terminalNo, toSide, toPort.Index, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
                     terminalConnection.SetReference(data.IngoingSegmentId, "SpanSegment");
-                    terminalConnection.DrawingOrder = 400;
+                    terminalConnection.DrawingOrder = 510;
                 }
                 else
                 {
@@ -255,7 +257,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName
             };
 
-            port.DrawingOrder = 400;
+            port.DrawingOrder = 420;
             port.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SegmentId, "SpanSegment");
 
             nodeContainerBlock.AddPort(port);
@@ -272,7 +274,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     PolygonStyle = data.StyleName
                 };
 
-                terminal.DrawingOrder = 500;
+                terminal.DrawingOrder = 520;
 
                 terminal.SetReference(data.SegmentId, "SpanSegment");
 
@@ -313,7 +315,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                     lineShapeType: LineShapeTypeEnum.Polygon
                                 );
 
-                                terminalConnection.DrawingOrder = 450;
+                                terminalConnection.DrawingOrder = 415;
 
                                 terminalConnection.SetReference(terminalEnd.SpanSegment.Id, "SpanSegment");
 

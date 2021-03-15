@@ -130,7 +130,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Only one terminal connection should be shown in conduit 1 that is affixed to the node container
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefId == conduit1.SpanStructures[0].SpanSegments[0].Id).Should().Be(1);
 
-
+            diagram.DiagramObjects.Any(d => d.DrawingOrder == 0).Should().BeFalse();
         }
     }
 }

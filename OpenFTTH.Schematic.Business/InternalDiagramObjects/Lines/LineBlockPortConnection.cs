@@ -14,7 +14,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public string Label { get; set; }
         public string Style { get; set; }
-        public ushort DrawingOrder { get; set; }
+        public int DrawingOrder { get; set; }
 
         private Guid _refId;
         private string _refClass;

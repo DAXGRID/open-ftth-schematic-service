@@ -14,7 +14,7 @@ namespace OpenFTTH.Schematic.Business.Lines
         public string PolygonStyle { get; init; }
         public string PointLabel { get; init; }
         public string PolygonLabel { get; init; }
-        public ushort DrawingOrder { get; set; }
+        public int DrawingOrder { get; set; }
 
         public BlockPortTerminal(BlockPort port)
         {
