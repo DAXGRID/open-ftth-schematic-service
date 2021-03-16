@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.EventSourcing.InMem;
+using OpenFTTH.EventSourcing.Postgres;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using OpenFTTH.TestData;
 using System;
@@ -12,6 +13,8 @@ namespace OpenFTTH.Schematic.Tests
 {
     public class Startup
     {
+        private static string _connectionString = Environment.GetEnvironmentVariable("test_event_store_connection");
+
         public void ConfigureServices(IServiceCollection services)
         {
             // Event producer
@@ -22,7 +25,16 @@ namespace OpenFTTH.Schematic.Tests
             services.AddSingleton<IRouteNetworkRepository, InMemRouteNetworkRepository>();
 
             // ES and CQRS
-            services.AddSingleton<IEventStore, InMemEventStore>();
+            if (_connectionString == null)
+            {
+                services.AddSingleton<IEventStore, InMemEventStore>();
+            }
+            else
+            {
+                services.AddSingleton<IEventStore>(e =>
+                    new PostgresEventStore(e.GetRequiredService<IServiceProvider>(), _connectionString, "schematic_test", true) as IEventStore
+                );
+            }
 
             services.AddSingleton<IQueryDispatcher, QueryDispatcher>();
             services.AddSingleton<ICommandDispatcher, CommandDispatcher>();
