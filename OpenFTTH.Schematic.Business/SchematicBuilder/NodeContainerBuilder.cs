@@ -148,7 +148,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 }
 
                 // Sort by marking color
-                toBeDrawedFirstList = toBeDrawedFirstList.OrderBy(s => (s.MarkingInfo != null ? null : s.MarkingInfo.MarkingColor)).ToList();
+                toBeDrawedFirstList = toBeDrawedFirstList.OrderBy(s => (s.MarkingInfo == null ? null : s.MarkingInfo.MarkingColor)).ToList();
 
                 toBeDrawedFirstList.AddRange(toBeDrawedSecondList);
 
