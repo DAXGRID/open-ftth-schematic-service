@@ -15,7 +15,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     /// </summary>
     public class NodeContainerBuilder
     {
-        private readonly NodeContainerViewModel _viewModel;
+        private readonly NodeContainerViewModel _nodeContainerViewModel;
 
         private readonly double _areaWidth = 300;
         private readonly double _nodeContainerBlockMargin = 60;
@@ -26,7 +26,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         public NodeContainerBuilder(NodeContainerViewModel viewModel)
         {
-            _viewModel = viewModel;
+            _nodeContainerViewModel = viewModel;
         }
 
         public Size CreateDiagramObjects(Diagram diagram, double offsetX, double offsetY)
@@ -56,7 +56,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var labelDiagramObject = new DiagramObject(diagram)
             {
                 Style = "NodeContainerLabel",
-                Label = _viewModel.GetNodeContainerTypeLabel(),
+                Label = _nodeContainerViewModel.GetNodeContainerTypeLabel(),
                 Geometry = GeometryBuilder.Point(x, y),
                 DrawingOrder = 1000
             };
@@ -92,7 +92,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 DrawingOrder = 600
             };
 
-            containerSide.SetReference(_viewModel.NodeContainer.Id, "NodeContainer");
+            containerSide.SetReference(_nodeContainerViewModel.NodeContainer.Id, "NodeContainer");
 
             return containerSide;
         }
@@ -109,7 +109,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 DrawingOrder = 100
             };
 
-            nodeEquipmentBlock.SetReference(_viewModel.NodeContainer.Id, "NodeContainer");
+            nodeEquipmentBlock.SetReference(_nodeContainerViewModel.NodeContainer.Id, "NodeContainer");
 
             AffixConduits(nodeEquipmentBlock);
 
@@ -122,38 +122,63 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         }
         private void AffixConduits(LineBlock nodeContainerBlock)
         {
-            foreach (var spanEquipment in GetOrderedSpanEquipmentAttachedToContainer)
+            var spanEquipmentViewModels = new List<SpanEquipmentViewModel>();
+                
+            foreach (var spanEquipment in _nodeContainerViewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_nodeContainerViewModel.Data)))
+                spanEquipmentViewModels.Add(new SpanEquipmentViewModel(_nodeContainerViewModel.Data.RouteNetworkElementId, spanEquipment.Id, _nodeContainerViewModel.Data));
+
+            foreach (var viewModel in GetOrderedSpanEquipmentViewModels(spanEquipmentViewModels))
             {
-                var viewModel = new SpanEquipmentViewModel(_viewModel.Data.RouteNetworkElementId, spanEquipment.Id, _viewModel.Data);
                 AffixConduit(nodeContainerBlock, viewModel);
             }
         }
 
-        private List<SpanEquipmentWithRelatedInfo> GetOrderedSpanEquipmentAttachedToContainer
+        private List<SpanEquipmentViewModel> GetOrderedSpanEquipmentViewModels(List<SpanEquipmentViewModel> spanEquipmentViewModels)
         {
-            get
+            List<SpanEquipmentViewModel> toBeDrawedFirstList = new List<SpanEquipmentViewModel>();
+            List<SpanEquipmentViewModel> toBeDrawedSecondList = new List<SpanEquipmentViewModel>();
+
+            // Make sure that span equipments that have a matching pair on oppside side with same specification is drawed first
+            foreach (var spanEquipmentViewModel in spanEquipmentViewModels)
             {
-                List<SpanEquipmentWithRelatedInfo> toBeDrawedFirstList = new List<SpanEquipmentWithRelatedInfo>();
-                List<SpanEquipmentWithRelatedInfo> toBeDrawedSecondList = new List<SpanEquipmentWithRelatedInfo>();
-
-                var unorderedAttachedSpanEquipmentList = _viewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_viewModel.Data));
-
-                // Make sure that span equipments that have a matching pair in terms of specification is drawed first
-                foreach (var spanEquipment in unorderedAttachedSpanEquipmentList)
-                {
-                    if (unorderedAttachedSpanEquipmentList.Any(s => s.Id != spanEquipment.Id && s.SpecificationId == spanEquipment.SpecificationId))
-                        toBeDrawedFirstList.Add(spanEquipment);
-                    else
-                        toBeDrawedSecondList.Add(spanEquipment);
-                }
-
-                // Sort by marking color
-                toBeDrawedFirstList = toBeDrawedFirstList.OrderBy(s => (s.MarkingInfo == null ? null : s.MarkingInfo.MarkingColor)).ToList();
-
-                toBeDrawedFirstList.AddRange(toBeDrawedSecondList);
-
-                return toBeDrawedFirstList;
+                if (spanEquipmentViewModels.Any(
+                      s => s.SpanEquipment.Id != spanEquipmentViewModel.SpanEquipment.Id && 
+                      s.SpanEquipment.SpecificationId == spanEquipmentViewModel.SpanEquipment.SpecificationId && 
+                      SidesAreOppsite(s.Affix.NodeContainerIngoingSide, spanEquipmentViewModel.Affix.NodeContainerIngoingSide)
+                ))
+                    toBeDrawedFirstList.Add(spanEquipmentViewModel);
+                else
+                    toBeDrawedSecondList.Add(spanEquipmentViewModel);
             }
+
+            // Sort by marking color
+            toBeDrawedFirstList = toBeDrawedFirstList.OrderBy(s => (GetOrderByKey(s.SpanEquipment))).ToList();
+
+            toBeDrawedFirstList.AddRange(toBeDrawedSecondList);
+
+            return toBeDrawedFirstList;
+        }
+
+        private bool SidesAreOppsite(NodeContainerSideEnum nodeContainerIngoingSide1, NodeContainerSideEnum nodeContainerIngoingSide2)
+        {
+            if (nodeContainerIngoingSide1 == NodeContainerSideEnum.West && nodeContainerIngoingSide2 == NodeContainerSideEnum.East)
+                return true;
+
+            if (nodeContainerIngoingSide1 == NodeContainerSideEnum.North && nodeContainerIngoingSide2 == NodeContainerSideEnum.South)
+                return true;
+
+            if (nodeContainerIngoingSide1 == NodeContainerSideEnum.East && nodeContainerIngoingSide2 == NodeContainerSideEnum.West)
+                return true;
+
+            if (nodeContainerIngoingSide1 == NodeContainerSideEnum.South && nodeContainerIngoingSide2 == NodeContainerSideEnum.North)
+                return true;
+
+            return false;
+        }
+
+        private string GetOrderByKey(SpanEquipment spanSegment)
+        {
+            return spanSegment.SpecificationId.ToString() + (spanSegment.MarkingInfo?.MarkingColor);
         }
 
         private void AffixConduit(LineBlock nodeContainerBlock, SpanEquipmentViewModel viewModel)
