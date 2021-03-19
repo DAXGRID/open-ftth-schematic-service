@@ -60,6 +60,8 @@ namespace OpenFTTH.Schematic.Business.IO
 
             jsonProperties.Add(new JProperty("Label", diagramObject.Label));
 
+            jsonProperties.Add(new JProperty("drawingOrder", diagramObject.DrawingOrder));
+
             if (diagramObject.IdentifiedObject != null)
             {
                 jsonProperties.Add(new JProperty("RefId", diagramObject.IdentifiedObject.RefId));

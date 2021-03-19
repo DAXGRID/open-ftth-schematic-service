@@ -89,7 +89,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 Style = "NodeContainerSide" + side.ToString(),
                 Geometry = lineGeometry,
-                DrawingOrder = 600
+                DrawingOrder = 700
             };
 
             containerSide.SetReference(_nodeContainerViewModel.NodeContainer.Id, "NodeContainer");
@@ -265,7 +265,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 fromTerminal.SetReference(data.IngoingSegmentId, "SpanSegment");
-                fromTerminal.DrawingOrder = 520;
+                fromTerminal.DrawingOrder = 620;
 
                 var toTerminal = new BlockPortTerminal(toPort)
                 {
@@ -277,7 +277,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 toTerminal.SetReference(data.OutgoingSegmentId, "SpanSegment");
-                toTerminal.DrawingOrder = 520;
+                toTerminal.DrawingOrder = 620;
 
                 // Connect the two sides, if the inner conduit is not cut / passing through
                 if (data.IsPassThrough)
@@ -346,7 +346,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     PolygonStyle = data.StyleName
                 };
 
-                terminal.DrawingOrder = 520;
+                terminal.DrawingOrder = 620;
 
                 terminal.SetReference(data.SegmentId, "SpanSegment");
 
