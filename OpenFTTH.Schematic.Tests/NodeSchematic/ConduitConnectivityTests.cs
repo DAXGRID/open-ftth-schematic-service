@@ -212,8 +212,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             westSegment1MaxY.Should().BeGreaterThan(westSegment2MaxY);
 
             // In north side, span equipment must be drawed from left to right 1,2,3,4..
-            var northSegment1MaxX = diagram.DiagramObjects.Find(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[2].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
-            var northsegment2MaxX = diagram.DiagramObjects.Find(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[3].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
+            var northSegment1MaxX = diagram.DiagramObjects.Find(d => d.Style == "NorthTerminalLabel" && d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[2].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
+            var northsegment2MaxX = diagram.DiagramObjects.Find(d => d.Style == "NorthTerminalLabel" && d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[3].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
             northsegment2MaxX.Should().BeGreaterThan(northSegment1MaxX);
 
             // In stand alone span equipment must be drawed from top and down 1,2,3,4..
