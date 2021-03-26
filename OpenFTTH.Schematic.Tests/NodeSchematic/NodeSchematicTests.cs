@@ -9,7 +9,9 @@ using OpenFTTH.Schematic.Business.SchematicBuilder;
 using OpenFTTH.TestData;
 using OpenFTTH.UtilityGraphService.API.Commands;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
+using OpenFTTH.UtilityGraphService.API.Queries;
 using OpenFTTH.UtilityGraphService.Business.Graph;
+using System;
 using System.Linq;
 using Xunit;
 using Xunit.Extensions.Ordering;
@@ -68,7 +70,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
                 new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
         }
 
-        [Fact, Order(10)]
+        [Fact, Order(2)]
         public async void TestAffixConduitInCC_1()
         {
             // Affix 5x10 to west side
@@ -132,5 +134,82 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             diagram.DiagramObjects.Any(d => d.DrawingOrder == 0).Should().BeFalse();
         }
+
+        [Fact, Order(2)]
+        public async void CutPassThroughConduitInCC1()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.CC_1;
+            var sutSpanEquipment = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            // Act
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipment, out var spanEquipment);
+
+            // Cut segments in structure 1 (the outer conduit and second inner conduit)
+            var cutCmd = new CutSpanSegmentsAtRouteNode(
+                routeNodeId: TestRouteNetwork.CC_1,
+                spanSegmentsToCut: new Guid[] {
+                    spanEquipment.SpanStructures[0].SpanSegments[0].Id,
+                    spanEquipment.SpanStructures[2].SpanSegments[0].Id
+                }
+            );
+
+            var cutResult = await _commandDispatcher.HandleAsync<CutSpanSegmentsAtRouteNode, Result>(cutCmd);
+
+            cutResult.IsSuccess.Should().BeTrue();
+        }
+
+
+        [Fact, Order(3)]
+        public async void TestAddAdditionalInnerConduitsToPassThroughConduitInCC_1()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutSpanEquipmentId = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentId, out var sutSpanEquipment);
+
+            // Add two inner conduits
+            var addStructure = new PlaceAdditionalStructuresInSpanEquipment(
+                spanEquipmentId: sutSpanEquipmentId,
+                structureSpecificationIds: new Guid[] { TestSpecifications.Ø10_Red, TestSpecifications.Ø10_Violet }
+            );
+
+            var addStructureResult = await _commandDispatcher.HandleAsync<PlaceAdditionalStructuresInSpanEquipment, Result>(addStructure);
+
+            // Add two more inner conduits
+            var addStructure2 = new PlaceAdditionalStructuresInSpanEquipment(
+                spanEquipmentId: sutSpanEquipmentId,
+                structureSpecificationIds: new Guid[] { TestSpecifications.Ø10_Brown, TestSpecifications.Ø10_Brown }
+            );
+
+            var addStructureResult2 = await _commandDispatcher.HandleAsync<PlaceAdditionalStructuresInSpanEquipment, Result>(addStructure2);
+
+
+            var equipmentQueryResult = await _queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(
+               new GetEquipmentDetails(new EquipmentIdList() { sutSpanEquipmentId })
+            );
+
+            var equipmentAfterAddingStructure = equipmentQueryResult.Value.SpanEquipment[sutSpanEquipmentId];
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.CC_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            addStructureResult.IsSuccess.Should().BeTrue();
+            addStructureResult2.IsSuccess.Should().BeTrue();
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == Guid.Empty).Should().BeFalse();
+
+        }
+
     }
 }

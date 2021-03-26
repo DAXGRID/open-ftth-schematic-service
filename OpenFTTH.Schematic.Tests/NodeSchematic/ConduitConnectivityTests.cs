@@ -52,8 +52,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var cutCmd = new CutSpanSegmentsAtRouteNode(
                 routeNodeId: TestRouteNetwork.CC_1,
                 spanSegmentsToCut: new Guid[] {
-                    spanEquipment.SpanStructures[0].SpanSegments[0].Id,
-                    spanEquipment.SpanStructures[2].SpanSegments[0].Id
+                    spanEquipment.SpanStructures[3].SpanSegments[0].Id
                 }
             );
 
