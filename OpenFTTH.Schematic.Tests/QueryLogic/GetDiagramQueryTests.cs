@@ -31,7 +31,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         {
             _queryDispatcher = queryDispatcher;
 
-            _specs = new TestSpecifications(commandDispatcher, queryDispatcher).Run();
+            new TestSpecifications(commandDispatcher, queryDispatcher).Run();
             _conduits = new TestUtilityNetwork(commandDispatcher, queryDispatcher).Run();
         }
 
@@ -135,7 +135,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         [Fact, Order(30)]
         public async void TestGetDiagramQueryOnNodeWithNoConduits_ShouldReturnEmptyDiagram()
         {
-            var sutRouteNetworkElement = TestRouteNetwork.SDU_1;
+            var sutRouteNetworkElement = TestRouteNetwork.SDU_3;
 
             // Act
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));

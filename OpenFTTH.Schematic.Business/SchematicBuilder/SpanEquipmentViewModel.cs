@@ -62,16 +62,16 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         public List<SpanDiagramInfo> GetInnerSpanDiagramInfos(string stylePrefix)
         {
-            var innerStructures = _spanEquipment.SpanStructures.Where(s => s.Level == 2);
+            var innerStructures = _spanEquipment.SpanStructures.Where(s => s.Level == 2 && s.Deleted == false);
 
-            List<SpanDiagramInfo> styles = new List<SpanDiagramInfo>();
+            List<SpanDiagramInfo> spanInfos = new List<SpanDiagramInfo>();
 
             foreach (var structure in innerStructures)
             {
-                styles.Add(GetSpanDiagramInfoForStructure(stylePrefix, structure));
+                spanInfos.Add(GetSpanDiagramInfoForStructure(stylePrefix, structure));
             }
 
-            return styles;
+            return spanInfos;
         }
 
         private SpanDiagramInfo GetSpanDiagramInfoForStructure(string stylePrefix, SpanStructure structure)

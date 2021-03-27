@@ -25,6 +25,8 @@ namespace OpenFTTH.TestData
         public static Guid FlexConduit_40_Red_CC_1_to_SP_1;
         public static Guid MultiConduit_3x10_CC_1_to_SP_1;
         public static Guid MultiConduit_3x10_CC_1_to_HH_11;
+        public static Guid FlexConduit_40_Red_SDU_1_to_SDU_2;
+        public static Guid MultiConduit_5x10_SDU_1_to_SDU_2;
 
         public static Guid NodeContainer_HH_1;
         public static Guid NodeContainer_CC_1;
@@ -49,12 +51,15 @@ namespace OpenFTTH.TestData
                     return this;
 
                 // Place some conduits in the route network we can play with
-                MultiConduit_5x10_HH_1_to_HH_10 = PlaceConduit(TestSpecifications.Multi_Ø40_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S4, TestRouteNetwork.S13 }, "Rød tape");
-                MultiConduit_10x10_HH_1_to_HH_10 = PlaceConduit(TestSpecifications.Multi_Ø50_10x10, new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S4, TestRouteNetwork.S13 }, "Blå tape");
+                MultiConduit_5x10_HH_1_to_HH_10 = PlaceConduit(TestSpecifications.Multi_Ø40_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S4, TestRouteNetwork.S13 });
+                MultiConduit_10x10_HH_1_to_HH_10 = PlaceConduit(TestSpecifications.Multi_Ø50_10x10, new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S4, TestRouteNetwork.S13 });
                 FlexConduit_40_Red_HH_2_to_FP_2 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S3 });
                 FlexConduit_40_Red_CC_1_to_SP_1 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S5 });
                 MultiConduit_3x10_CC_1_to_SP_1 = PlaceConduit(TestSpecifications.Multi_Ø32_3x10, new RouteNetworkElementIdList() { TestRouteNetwork.S5 });
                 MultiConduit_3x10_CC_1_to_HH_11 = PlaceConduit(TestSpecifications.Multi_Ø32_3x10, new RouteNetworkElementIdList() { TestRouteNetwork.S5, TestRouteNetwork.S6, TestRouteNetwork.S9, TestRouteNetwork.S11 });
+                FlexConduit_40_Red_SDU_1_to_SDU_2 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S7, TestRouteNetwork.S8 });
+                MultiConduit_5x10_SDU_1_to_SDU_2 = PlaceConduit(TestSpecifications.Multi_Ø40_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S7, TestRouteNetwork.S8 });
+
 
                 // Place node containers
                 NodeContainer_HH_1 = PlaceNodeContainer(TestSpecifications.Well_Fiberpowertech_37_EK_378_400x800, TestSpecifications.Manu_Fiberpowertech, TestRouteNetwork.HH_1);
@@ -68,6 +73,9 @@ namespace OpenFTTH.TestData
                 // Affix 3x10 in J_1
                 AffixSpanEquipmentToContainer(MultiConduit_3x10_CC_1_to_HH_11, NodeContainer_J_1, NodeContainerSideEnum.West);
 
+                // Affix flex conduit in J_1
+                AffixSpanEquipmentToContainer(FlexConduit_40_Red_SDU_1_to_SDU_2, NodeContainer_J_1, NodeContainerSideEnum.West);
+
                 Thread.Sleep(100);
 
                 _conduitsCreated = true;
@@ -76,7 +84,7 @@ namespace OpenFTTH.TestData
             return this;
         }
 
-        private Guid PlaceConduit(Guid specificationId, RouteNetworkElementIdList walkIds, string markingText = null)
+        private Guid PlaceConduit(Guid specificationId, RouteNetworkElementIdList walkIds)
         {
             // Register walk of interest
             var walkOfInterestId = Guid.NewGuid();
@@ -84,11 +92,7 @@ namespace OpenFTTH.TestData
             var registerWalkOfInterestCommandResult = _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(registerWalkOfInterestCommand).Result;
 
             // Place conduit
-            var placeSpanEquipmentCommand = new PlaceSpanEquipmentInRouteNetwork(Guid.NewGuid(), specificationId, registerWalkOfInterestCommandResult.Value)
-            {
-                MarkingInfo = markingText != null ? new MarkingInfo() { MarkingText = markingText } : null
-            };
-
+            var placeSpanEquipmentCommand = new PlaceSpanEquipmentInRouteNetwork(Guid.NewGuid(), specificationId, registerWalkOfInterestCommandResult.Value);
             var placeSpanEquipmentResult =  _commandDispatcher.HandleAsync<PlaceSpanEquipmentInRouteNetwork, Result>(placeSpanEquipmentCommand).Result;
 
             if (placeSpanEquipmentResult.IsFailed)

@@ -24,7 +24,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IQueryDispatcher _queryDispatcher;
 
-        private static TestSpecifications _specs;
         private static TestUtilityNetwork _utilityNetwork;
 
         public ConduitConnectivityTests(IEventStore eventStore, ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
@@ -33,7 +32,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
 
-            _specs = new TestSpecifications(commandDispatcher, queryDispatcher).Run();
+            new TestSpecifications(commandDispatcher, queryDispatcher).Run();
             _utilityNetwork = new TestUtilityNetwork(commandDispatcher, queryDispatcher).Run();
         }
 

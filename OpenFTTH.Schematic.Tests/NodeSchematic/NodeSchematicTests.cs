@@ -25,7 +25,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IQueryDispatcher _queryDispatcher;
 
-        private static TestSpecifications _specs;
         private static TestUtilityNetwork _utilityNetwork;
 
         public NodeSchematicTests(IEventStore eventStore, ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
@@ -34,7 +33,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
 
-            _specs = new TestSpecifications(commandDispatcher, queryDispatcher).Run();
+            new TestSpecifications(commandDispatcher, queryDispatcher).Run();
             _utilityNetwork = new TestUtilityNetwork(commandDispatcher, queryDispatcher).Run();
         }
 
@@ -166,7 +165,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
 
-            var sutSpanEquipmentId = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutSpanEquipmentId = TestUtilityNetwork.FlexConduit_40_Red_SDU_1_to_SDU_2;
 
             utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentId, out var sutSpanEquipment);
 
