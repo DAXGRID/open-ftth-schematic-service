@@ -263,10 +263,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var removeStructureCmd = new RemoveSpanStructureFromSpanEquipment(sutSpanEquipment.SpanStructures[0].SpanSegments[0].Id);
             var removeStructureCmdResult = await _commandDispatcher.HandleAsync<RemoveSpanStructureFromSpanEquipment, Result>(removeStructureCmd);
 
-            // Remember to remove the walk of interest as well
-            var unregisterInterestCmd = new UnregisterInterest(sutSpanEquipment.WalkOfInterestId);
-            var unregisterInterestCmdResult = await _commandDispatcher.HandleAsync<UnregisterInterest, Result>(unregisterInterestCmd);
-
             // Act
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.J_1));
 
@@ -275,7 +271,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Assert
             removeStructureCmdResult.IsSuccess.Should().BeTrue();
-            unregisterInterestCmdResult.IsSuccess.Should().BeTrue();
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
             var diagram = getDiagramQueryResult.Value.Diagram;
 
