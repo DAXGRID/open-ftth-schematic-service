@@ -2,6 +2,7 @@
 using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
+using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.API.Queries;
 using OpenFTTH.Schematic.Business.IO;
@@ -161,7 +162,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
 
         [Fact, Order(3)]
-        public async void TestAddAdditionalInnerConduitsToPassThroughConduitInCC_1()
+        public async void TestAddAdditionalInnerConduitsToPassThroughConduitInJ_1()
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
 
@@ -193,7 +194,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var equipmentAfterAddingStructure = equipmentQueryResult.Value.SpanEquipment[sutSpanEquipmentId];
 
             // Act
-            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.CC_1));
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.J_1));
 
             if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
                 new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
@@ -206,9 +207,89 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             addStructureResult2.IsSuccess.Should().BeTrue();
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
 
+            // Assert that no empty guids
             diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == Guid.Empty).Should().BeFalse();
 
+            // Check that all added inner conduits are there
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == equipmentAfterAddingStructure.SpanStructures[1].SpanSegments[0].Id).Should().BeTrue();
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == equipmentAfterAddingStructure.SpanStructures[2].SpanSegments[0].Id).Should().BeTrue();
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == equipmentAfterAddingStructure.SpanStructures[3].SpanSegments[0].Id).Should().BeTrue();
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == equipmentAfterAddingStructure.SpanStructures[4].SpanSegments[0].Id).Should().BeTrue();
+
         }
+
+
+        [Fact, Order(4)]
+        public async void TestThatRemovedStructuresAreNotShownInDiagram()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutSpanEquipmentId = TestUtilityNetwork.FlexConduit_40_Red_SDU_1_to_SDU_2;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentId, out var sutSpanEquipment);
+
+            // Remove inner conduit 1 from flexconduit
+            var removeStructureCmd = new RemoveSpanStructureFromSpanEquipment(sutSpanEquipment.SpanStructures[1].SpanSegments[0].Id);
+
+            var removeStructureCmdResult = await _commandDispatcher.HandleAsync<RemoveSpanStructureFromSpanEquipment, Result>(removeStructureCmd);
+
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.J_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            removeStructureCmdResult.IsSuccess.Should().BeTrue();
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            // Make sure the fist inner conduit is gone
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutSpanEquipment.SpanStructures[1].SpanSegments[0].Id).Should().BeFalse();
+
+        }
+
+        [Fact, Order(5)]
+        public async void TestThatRemovedSpanEquipmentAreNotShownInDiagram()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutSpanEquipmentId = TestUtilityNetwork.MultiConduit_5x10_SDU_1_to_SDU_2;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentId, out var sutSpanEquipment);
+
+            // Remove outer conduit (which means remove the whole thing)
+            var removeStructureCmd = new RemoveSpanStructureFromSpanEquipment(sutSpanEquipment.SpanStructures[0].SpanSegments[0].Id);
+            var removeStructureCmdResult = await _commandDispatcher.HandleAsync<RemoveSpanStructureFromSpanEquipment, Result>(removeStructureCmd);
+
+            // Remember to remove the walk of interest as well
+            var unregisterInterestCmd = new UnregisterInterest(sutSpanEquipment.WalkOfInterestId);
+            var unregisterInterestCmdResult = await _commandDispatcher.HandleAsync<UnregisterInterest, Result>(unregisterInterestCmd);
+
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.J_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            removeStructureCmdResult.IsSuccess.Should().BeTrue();
+            unregisterInterestCmdResult.IsSuccess.Should().BeTrue();
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            // Make sure the no inner conduit is gone
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutSpanEquipment.SpanStructures[0].SpanSegments[0].Id).Should().BeFalse();
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutSpanEquipment.SpanStructures[1].SpanSegments[0].Id).Should().BeFalse();
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutSpanEquipment.SpanStructures[2].SpanSegments[0].Id).Should().BeFalse();
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutSpanEquipment.SpanStructures[3].SpanSegments[0].Id).Should().BeFalse();
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutSpanEquipment.SpanStructures[4].SpanSegments[0].Id).Should().BeFalse();
+            diagram.DiagramObjects.Any(d => d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutSpanEquipment.SpanStructures[5].SpanSegments[0].Id).Should().BeFalse();
+
+        }
+
+
 
     }
 }
