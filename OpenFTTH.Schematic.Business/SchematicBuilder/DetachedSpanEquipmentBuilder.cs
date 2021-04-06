@@ -89,6 +89,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             var orderedinnerSpanData = innerSpanData.OrderBy(i => (1000 - i.Position));
 
+            bool innerSpansFound = false;
+
             foreach (var spanInfo in orderedinnerSpanData)
             {
                 var fromTerminal = new BlockPortTerminal(fromPort)
@@ -116,6 +118,35 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, spanInfo.StyleName, LineShapeTypeEnum.Polygon);
                 terminalConnection.DrawingOrder = 510;
                 terminalConnection.SetReference(spanInfo.IngoingSegmentId, "SpanSegment");
+                terminalNo++;
+
+                innerSpansFound = true;
+            }
+
+            if (!innerSpansFound)
+            {
+                var fromTerminal = new BlockPortTerminal(fromPort)
+                {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    PointStyle = "WestTerminalLabel",
+                    PointLabel = rootSpanInfo.IngoingRouteNodeName,
+                    DrawingOrder = 520
+                };
+
+                fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+                var toTerminal = new BlockPortTerminal(toPort)
+                {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    PointStyle = "EastTerminalLabel",
+                    PointLabel = rootSpanInfo.OutgoingRouteNodeName,
+                    DrawingOrder = 520
+                };
+
+                toTerminal.SetReference(rootSpanInfo.OutgoingSegmentId, "SpanSegment");
+
                 terminalNo++;
             }
 
@@ -151,6 +182,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             var orderedinnerSpanData = innerSpanData.OrderBy(i => (1000 - i.Position));
 
+            bool innerSpansFound = false;
+
             foreach (var data in orderedinnerSpanData)
             {
                 var fromTerminal = new BlockPortTerminal(fromPort)
@@ -174,6 +207,24 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
                 terminalConnection.DrawingOrder = 510;
                 terminalConnection.SetReference(data.SegmentId, "SpanSegment");
+                terminalNo++;
+
+                innerSpansFound = true;
+            }
+
+            if (!innerSpansFound)
+            {
+                var fromTerminal = new BlockPortTerminal(fromPort)
+                {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    PointStyle = "WestTerminalLabel",
+                    PointLabel = rootSpanInfo.OppositeRouteNodeName,
+                    DrawingOrder = 520
+                };
+
+                fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+               
                 terminalNo++;
             }
 

@@ -250,7 +250,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             else
                 innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit");
 
+            bool innerSpansFound = false;
+
             int terminalNo = 1;
+
             foreach (var data in innerSpanData)
             {
                 TerminalShapeTypeEnum terminalShapeType = TerminalShapeTypeEnum.Point;
@@ -308,11 +311,43 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 }
 
                 terminalNo++;
+                innerSpansFound = true;
             }
+
+            // Create fake inner terminals used to display where the empty multi conduit is heading
+            if (!innerSpansFound)
+            {
+                var fromTerminal = new BlockPortTerminal(fromPort)
+                {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    PointStyle = fromSide.ToString() + "TerminalLabel",
+                    PointLabel = spanDiagramInfo.IngoingRouteNodeName,
+                    DrawingOrder = 520
+                };
+
+                fromTerminal.SetReference(spanDiagramInfo.IngoingSegmentId, "SpanSegment");
+
+                var toTerminal = new BlockPortTerminal(toPort)
+                {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    PointStyle = toSide.ToString() + "TerminalLabel",
+                    PointLabel = spanDiagramInfo.OutgoingRouteNodeName,
+                    DrawingOrder = 520
+                };
+
+                toTerminal.SetReference(spanDiagramInfo.OutgoingSegmentId, "SpanSegment");
+
+                terminalNo++;
+            }
+
         }
 
         private void AffixConduitEnd(LineBlock nodeContainerBlock, SpanEquipmentViewModel viewModel)
         {
+            var spanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
+
             BlockSideEnum side = MapFromContainerSide(viewModel.Affix.NodeContainerIngoingSide);
 
             // Port
@@ -339,6 +374,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             else
                 innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit");
 
+            bool innerSpansFound = false;
 
             // Create inner conduits as terminals
             foreach (var data in innerSpanData)
@@ -361,6 +397,23 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                 if (data.SpanSegment.ToTerminalId != Guid.Empty)
                     AddToTerminalEnds(data.SpanSegment.ToTerminalId, data.SpanSegment, terminal, data.StyleName);
+
+                innerSpansFound = true;
+            }
+
+            // Create fake inner terminal used to display where the empty multi conduit is heading
+            if (!innerSpansFound)
+            {
+                var terminal = new BlockPortTerminal(port)
+                {
+                    IsVisible = true,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    PointStyle = side.ToString() + "TerminalLabel",
+                    PointLabel = spanDiagramInfo.OppositeRouteNodeName,
+                    DrawingOrder = 520
+                };
+
+                terminal.SetReference(spanDiagramInfo.IngoingSegmentId, "SpanSegment");
             }
         }
 
