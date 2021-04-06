@@ -19,6 +19,8 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         public string Style { get; set; }
         public string Label { get; set; }
+        public string PointStyle { get; init; }
+        public string PointLabel { get; init; }
         public int DrawingOrder { get; set; }
 
         private List<BlockPortTerminal> _terminals = new List<BlockPortTerminal>();
@@ -141,6 +143,29 @@ namespace OpenFTTH.Schematic.Business.Lines
 
                 result.Add(portPolygon);
             }
+
+            if (PointLabel != null && PointStyle != null)
+            {
+                var labelX = offsetX;
+                var labelY = offsetY;
+
+                if (IsVertical)
+                    labelY += Length;
+
+
+                // Create point diagram object
+                result.Add(
+                    new DiagramObject(diagram)
+                    {
+                        Style = PointStyle,
+                        Label = PointLabel,
+                        Geometry = GeometryBuilder.Point(labelX, labelY),
+                        IdentifiedObject = _refClass != null ? new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass } : null,
+                        DrawingOrder = DrawingOrder
+                    }
+                );
+            }
+
 
             // Create terminal diagram objects
             double terminalX = offsetX;

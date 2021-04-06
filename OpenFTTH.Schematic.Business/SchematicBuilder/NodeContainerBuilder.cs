@@ -211,7 +211,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 IsVisible = portsVisible,
                 Margin = _portMargin,
-                Style = spanDiagramInfo.StyleName
+                Style = spanDiagramInfo.StyleName,
+                PointStyle = fromSide.ToString() + "TerminalLabel",
+                PointLabel = viewModel.GetSpanEquipmentLabel()
             };
 
             fromPort.DrawingOrder = 420;
@@ -222,7 +224,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 IsVisible = portsVisible,
                 Margin = _portMargin,
-                Style = spanDiagramInfo.StyleName
+                Style = spanDiagramInfo.StyleName,
+                PointStyle = toSide.ToString() + "TerminalLabel",
+                PointLabel = viewModel.GetSpanEquipmentLabel()
             };
 
             toPort.DrawingOrder = 420;
@@ -316,7 +320,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 IsVisible = true,
                 Margin = _portMargin,
-                Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName
+                Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName,
+                PointStyle = side.ToString() + "TerminalLabel",
+                PointLabel = viewModel.GetSpanEquipmentLabel()
             };
 
             port.DrawingOrder = 420;
