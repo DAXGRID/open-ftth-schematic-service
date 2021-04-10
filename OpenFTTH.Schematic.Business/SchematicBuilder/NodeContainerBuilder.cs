@@ -296,17 +296,17 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 else
                 {
                     // Add from terminal / ingoing segment to ends
-                    if (data.IngoingSpanSegment.FromTerminalId != Guid.Empty)
+                    if (data.IngoingSpanSegment != null && data.IngoingSpanSegment.FromTerminalId != Guid.Empty)
                         AddToTerminalEnds(data.IngoingSpanSegment.FromTerminalId, data.IngoingSpanSegment, fromTerminal, data.StyleName);
 
-                    if (data.IngoingSpanSegment.ToTerminalId != Guid.Empty)
+                    if (data.IngoingSpanSegment != null && data.IngoingSpanSegment.ToTerminalId != Guid.Empty)
                         AddToTerminalEnds(data.IngoingSpanSegment.ToTerminalId, data.IngoingSpanSegment, fromTerminal, data.StyleName);
 
                     // Add to terminal / outgoing segment to ends
-                    if (data.OutgoingSpanSegment.FromTerminalId != Guid.Empty)
+                    if (data.OutgoingSpanSegment != null && data.OutgoingSpanSegment.FromTerminalId != Guid.Empty)
                         AddToTerminalEnds(data.OutgoingSpanSegment.FromTerminalId, data.OutgoingSpanSegment, toTerminal, data.StyleName);
 
-                    if (data.OutgoingSpanSegment.ToTerminalId != Guid.Empty)
+                    if (data.OutgoingSpanSegment != null && data.OutgoingSpanSegment.ToTerminalId != Guid.Empty)
                         AddToTerminalEnds(data.OutgoingSpanSegment.ToTerminalId, data.OutgoingSpanSegment, toTerminal, data.StyleName);
                 }
 
@@ -392,10 +392,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                 terminal.SetReference(data.SegmentId, "SpanSegment");
 
-                if (data.SpanSegment.FromTerminalId != Guid.Empty)
+                if (data.SpanSegment != null && data.SpanSegment.FromTerminalId != Guid.Empty)
                     AddToTerminalEnds(data.SpanSegment.FromTerminalId, data.SpanSegment, terminal, data.StyleName);
 
-                if (data.SpanSegment.ToTerminalId != Guid.Empty)
+                if (data.SpanSegment != null && data.SpanSegment.ToTerminalId != Guid.Empty)
                     AddToTerminalEnds(data.SpanSegment.ToTerminalId, data.SpanSegment, terminal, data.StyleName);
 
                 innerSpansFound = true;
