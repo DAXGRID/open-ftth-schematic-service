@@ -138,14 +138,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             List<SpanEquipmentViewModel> toBeDrawedFirstList = new List<SpanEquipmentViewModel>();
             List<SpanEquipmentViewModel> toBeDrawedSecondList = new List<SpanEquipmentViewModel>();
 
-            // Make sure that span equipments that have a matching pair on oppside side with same specification is drawed first
+            // Make sure that span equipments that is pass through is drawed first
             foreach (var spanEquipmentViewModel in spanEquipmentViewModels)
             {
-                if (spanEquipmentViewModels.Any(
-                      s => s.SpanEquipment.Id != spanEquipmentViewModel.SpanEquipment.Id && 
-                      s.SpanEquipment.SpecificationId == spanEquipmentViewModel.SpanEquipment.SpecificationId && 
-                      SidesAreOppsite(s.Affix.NodeContainerIngoingSide, spanEquipmentViewModel.Affix.NodeContainerIngoingSide)
-                ))
+                if (spanEquipmentViewModel.IsPassThrough)
                     toBeDrawedFirstList.Add(spanEquipmentViewModel);
                 else
                     toBeDrawedSecondList.Add(spanEquipmentViewModel);

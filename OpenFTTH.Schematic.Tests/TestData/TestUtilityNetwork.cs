@@ -27,6 +27,8 @@ namespace OpenFTTH.TestData
         public static Guid MultiConduit_3x10_CC_1_to_HH_11;
         public static Guid FlexConduit_40_Red_SDU_1_to_SDU_2;
         public static Guid MultiConduit_5x10_SDU_1_to_SDU_2;
+        public static Guid MultiConduit_5x10_SDU_1_to_J_1;
+        public static Guid MultiConduit_5x10_SDU_2_to_J_1;
 
         public static Guid NodeContainer_HH_1;
         public static Guid NodeContainer_CC_1;
@@ -59,6 +61,8 @@ namespace OpenFTTH.TestData
                 MultiConduit_3x10_CC_1_to_HH_11 = PlaceConduit(TestSpecifications.Multi_Ø32_3x10, new RouteNetworkElementIdList() { TestRouteNetwork.S5, TestRouteNetwork.S6, TestRouteNetwork.S9, TestRouteNetwork.S11 });
                 FlexConduit_40_Red_SDU_1_to_SDU_2 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S7, TestRouteNetwork.S8 });
                 MultiConduit_5x10_SDU_1_to_SDU_2 = PlaceConduit(TestSpecifications.Multi_Ø40_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S7, TestRouteNetwork.S8 });
+                MultiConduit_5x10_SDU_1_to_J_1 = PlaceConduit(TestSpecifications.Multi_Ø40_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S7 });
+                MultiConduit_5x10_SDU_2_to_J_1 = PlaceConduit(TestSpecifications.Multi_Ø40_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S8 });
 
 
                 // Place node containers
@@ -69,11 +73,11 @@ namespace OpenFTTH.TestData
                 // Affix 5x10 and 3x10 in CC 1
                 AffixSpanEquipmentToContainer(MultiConduit_5x10_HH_1_to_HH_10, NodeContainer_CC_1, NodeContainerSideEnum.West);
                 AffixSpanEquipmentToContainer(MultiConduit_3x10_CC_1_to_SP_1, NodeContainer_CC_1, NodeContainerSideEnum.North);
+                AffixSpanEquipmentToContainer(MultiConduit_3x10_CC_1_to_HH_11, NodeContainer_CC_1, NodeContainerSideEnum.West);
 
-                // Affix 3x10 in J_1
+                // Affix conduits in J_1
                 AffixSpanEquipmentToContainer(MultiConduit_3x10_CC_1_to_HH_11, NodeContainer_J_1, NodeContainerSideEnum.West);
-
-                // Affix flex conduit in J_1
+                AffixSpanEquipmentToContainer(MultiConduit_5x10_SDU_2_to_J_1, NodeContainer_J_1, NodeContainerSideEnum.West);
                 AffixSpanEquipmentToContainer(FlexConduit_40_Red_SDU_1_to_SDU_2, NodeContainer_J_1, NodeContainerSideEnum.West);
 
                 Thread.Sleep(100);
