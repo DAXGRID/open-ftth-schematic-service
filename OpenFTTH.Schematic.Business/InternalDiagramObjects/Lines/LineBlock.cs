@@ -1,5 +1,6 @@
 ﻿using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.Drawing;
+using OpenFTTH.Schematic.Business.InternalDiagramObjects.Lines;
 using OpenFTTH.Schematic.Business.Layout;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ namespace OpenFTTH.Schematic.Business.Lines
     {
         public bool IsVisible { get; set; }
         public bool IsSidesVisible { get; set; }
+
+        public VerticalAlignmentEnum VerticalContentAlignment = VerticalAlignmentEnum.Bottom;
         
         private string _style = "LineBlock";
         public string Style
@@ -131,6 +134,32 @@ namespace OpenFTTH.Schematic.Business.Lines
             return height;
         }
 
+        private double HeightOfWestChildren()
+        {
+            double height = 0;
+
+            foreach (var side in _sides.Where(s => s.Key == BlockSideEnum.West))
+            {
+                if (side.Value.Length > height)
+                    height = side.Value.Length;
+            }
+
+            return height;
+        }
+
+        private double HeightOfEastChildren()
+        {
+            double height = 0;
+
+            foreach (var side in _sides.Where(s => s.Key == BlockSideEnum.East))
+            {
+                if (side.Value.Length > height)
+                    height = side.Value.Length;
+            }
+
+            return height;
+        }
+
 
         public override Size Measure()
         {
@@ -235,11 +264,29 @@ namespace OpenFTTH.Schematic.Business.Lines
         private double CalculateSideYOffset(BlockSide blockSide, double offsetY)
         {
             if (blockSide.Side == BlockSideEnum.West)
-                return offsetY + Margin;
+            {
+                if (VerticalContentAlignment == VerticalAlignmentEnum.Bottom)
+                    return offsetY + Margin;
+                else
+                {
+                    double height = HeightOfWestChildren();
+                    double spaceLeft = ActualSize.Height - (height + (Margin * 2));
+                    return offsetY + spaceLeft + Margin;
+                }
+            }
+            else if (blockSide.Side == BlockSideEnum.East)
+            {
+                if (VerticalContentAlignment == VerticalAlignmentEnum.Bottom)
+                    return offsetY + Margin;
+                else
+                {
+                    double height = HeightOfEastChildren();
+                    double spaceLeft = ActualSize.Height - (height + (Margin * 2));
+                    return offsetY + spaceLeft + Margin;
+                }
+            }
             else if (blockSide.Side == BlockSideEnum.North)
                 return offsetY + ActualSize.Height;
-            else if (blockSide.Side == BlockSideEnum.East)
-                return offsetY + Margin;
             else if (blockSide.Side == BlockSideEnum.South)
                 return offsetY;
             else

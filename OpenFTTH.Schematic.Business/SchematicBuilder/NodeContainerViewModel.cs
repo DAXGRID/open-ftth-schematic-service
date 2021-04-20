@@ -19,6 +19,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public RouteNetworkElementRelatedData Data => _data;
         public NodeContainer NodeContainer { get; }
 
+        public bool Flipped = true;
+
         public NodeContainerViewModel(RouteNetworkElementRelatedData data)
         {
             _data = data;

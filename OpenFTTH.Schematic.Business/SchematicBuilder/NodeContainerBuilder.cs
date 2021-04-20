@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.Drawing;
+using OpenFTTH.Schematic.Business.InternalDiagramObjects.Lines;
 using OpenFTTH.Schematic.Business.Layout;
 using OpenFTTH.Schematic.Business.Lines;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
@@ -106,7 +107,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 IsVisible = true,
                 Style = "NodeContainer",
                 Margin = _nodeContainerBlockMargin,
-                DrawingOrder = 100
+                DrawingOrder = 100,
+                VerticalContentAlignment = _nodeContainerViewModel.Flipped ? VerticalAlignmentEnum.Top : VerticalAlignmentEnum.Bottom
             };
 
             nodeEquipmentBlock.SetReference(_nodeContainerViewModel.NodeContainer.Id, "NodeContainer");
@@ -150,9 +152,16 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // Sort by marking color
             toBeDrawedFirstList = toBeDrawedFirstList.OrderBy(s => (GetOrderByKey(s.SpanEquipment))).ToList();
 
-            toBeDrawedFirstList.AddRange(toBeDrawedSecondList);
-
-            return toBeDrawedFirstList;
+            if (!_nodeContainerViewModel.Flipped)
+            {
+                toBeDrawedFirstList.AddRange(toBeDrawedSecondList);
+                return toBeDrawedFirstList;
+            }
+            else
+            {
+                toBeDrawedSecondList.AddRange(toBeDrawedFirstList);
+                return toBeDrawedSecondList;
+            }
         }
 
         private bool SidesAreOppsite(NodeContainerSideEnum nodeContainerIngoingSide1, NodeContainerSideEnum nodeContainerIngoingSide2)
