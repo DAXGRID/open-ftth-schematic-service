@@ -284,7 +284,41 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
         }
 
+        [Fact, Order(5)]
+        public async void TestVerticalAlignmentDiagram()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
 
+            var sutSpanEquipmentId = TestUtilityNetwork.MultiConduit_5x10_SDU_1_to_SDU_2;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentId, out var sutSpanEquipment);
+
+            // Act
+            var getDiagramQueryBeforeReverseResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.J_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryBeforeReverseResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+
+            var reverseAlignmentCmd = new ReverseNodeContainerVerticalContentAlignment(TestUtilityNetwork.NodeContainer_J_1);
+            var reverseAlignmentCmdResult = await _commandDispatcher.HandleAsync<ReverseNodeContainerVerticalContentAlignment, Result>(reverseAlignmentCmd);
+
+            var getDiagramQueryAfterReverseResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.J_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryAfterReverseResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+
+            // Assert
+            var conduit40BeforeMaxY = getDiagramQueryBeforeReverseResult.Value.Diagram.DiagramObjects.Find(d => d.Style == "WestTerminalLabel" && d.Label == "Ø40 5x10").Geometry.EnvelopeInternal.MaxY;
+            var conduit32BeforeMaxY = getDiagramQueryBeforeReverseResult.Value.Diagram.DiagramObjects.Find(d => d.Style == "WestTerminalLabel" && d.Label == "Ø32 3x10").Geometry.EnvelopeInternal.MaxY;
+            conduit40BeforeMaxY.Should().BeGreaterThan(conduit32BeforeMaxY);
+
+            var conduit40AfterMaxY = getDiagramQueryAfterReverseResult.Value.Diagram.DiagramObjects.Find(d => d.Style == "WestTerminalLabel" && d.Label == "Ø40 5x10").Geometry.EnvelopeInternal.MaxY;
+            var conduit32AfterMaxY = getDiagramQueryAfterReverseResult.Value.Diagram.DiagramObjects.Find(d => d.Style == "WestTerminalLabel" && d.Label == "Ø32 3x10").Geometry.EnvelopeInternal.MaxY;
+            conduit40AfterMaxY.Should().BeLessThan(conduit32AfterMaxY);
+
+        }
 
     }
 }

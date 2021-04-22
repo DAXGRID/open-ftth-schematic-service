@@ -108,7 +108,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Style = "NodeContainer",
                 Margin = _nodeContainerBlockMargin,
                 DrawingOrder = 100,
-                VerticalContentAlignment = _nodeContainerViewModel.Flipped ? VerticalAlignmentEnum.Top : VerticalAlignmentEnum.Bottom
+                VerticalContentAlignment = GetContainerVerticalAlignment()
             };
 
             nodeEquipmentBlock.SetReference(_nodeContainerViewModel.NodeContainer.Id, "NodeContainer");
@@ -122,6 +122,16 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             return nodeEquipmentBlock;
         }
+
+        private VerticalAlignmentEnum GetContainerVerticalAlignment()
+        {
+            if (_nodeContainerViewModel.NodeContainer.VertialContentAlignmemt == NodeContainerVerticalContentAlignmentEnum.Top)
+                return VerticalAlignmentEnum.Top;
+            else
+                return VerticalAlignmentEnum.Bottom;
+        }
+
+
         private void AffixConduits(LineBlock nodeContainerBlock)
         {
             var spanEquipmentViewModels = new List<SpanEquipmentViewModel>();
@@ -152,7 +162,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // Sort by marking color
             toBeDrawedFirstList = toBeDrawedFirstList.OrderBy(s => (GetOrderByKey(s.SpanEquipment))).ToList();
 
-            if (!_nodeContainerViewModel.Flipped)
+            if (_nodeContainerViewModel.NodeContainer.VertialContentAlignmemt == NodeContainerVerticalContentAlignmentEnum.Bottom)
             {
                 toBeDrawedFirstList.AddRange(toBeDrawedSecondList);
                 return toBeDrawedFirstList;
