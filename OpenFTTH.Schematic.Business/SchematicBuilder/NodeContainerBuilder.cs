@@ -417,7 +417,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.PointAndPolygon,
                     PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = viewModel.GetOutgoingRouteNodeName(data.SegmentId),
+                    PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(data.SegmentId) : viewModel.GetOutgoingRouteNodeName(data.SegmentId),
                     PolygonStyle = data.StyleName
                 };
 
@@ -442,7 +442,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = viewModel.GetOutgoingRouteNodeName(spanDiagramInfo.SegmentId),
+                    PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(spanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(spanDiagramInfo.SegmentId),
                     DrawingOrder = 520
                 };
 

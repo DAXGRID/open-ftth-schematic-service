@@ -284,7 +284,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
         }
 
-        [Fact, Order(5)]
+        [Fact, Order(6)]
         public async void TestVerticalAlignmentDiagram()
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
@@ -316,6 +316,40 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var conduit40AfterMaxY = getDiagramQueryAfterReverseResult.Value.Diagram.DiagramObjects.Find(d => d.Style == "WestTerminalLabel" && d.Label == "Ø40 5x10").Geometry.EnvelopeInternal.MaxY;
             var conduit32AfterMaxY = getDiagramQueryAfterReverseResult.Value.Diagram.DiagramObjects.Find(d => d.Style == "WestTerminalLabel" && d.Label == "Ø32 3x10").Geometry.EnvelopeInternal.MaxY;
             conduit40AfterMaxY.Should().BeLessThan(conduit32AfterMaxY);
+        }
+
+
+        [Fact, Order(7)]
+        public async void TestAffixConduitInHH_10()
+        {
+            // Affix 5x10 to west side
+            var conduit1Id = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+
+            var conduit1 = _eventStore.Projections.Get<UtilityNetworkProjection>().SpanEquipments[conduit1Id];
+
+            var conduit1AffixCommand = new AffixSpanEquipmentToNodeContainer(
+                spanEquipmentOrSegmentId: conduit1.SpanStructures[0].SpanSegments[0].Id,
+                nodeContainerId: TestUtilityNetwork.NodeContainer_HH_10,
+                nodeContainerIngoingSide: NodeContainerSideEnum.West
+            );
+
+            var conduit1AffixResult = await _commandDispatcher.HandleAsync<AffixSpanEquipmentToNodeContainer, Result>(conduit1AffixCommand);
+         
+            // Act
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.HH_10));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+
+            // Check that no conduit are drawed and labelled to end in the CC-1 node (because this means they are shown as pass-throughs, instead of conduit just ending in the node, which is wrong)
+            diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(15);
+            diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(0);
+
         }
 
     }

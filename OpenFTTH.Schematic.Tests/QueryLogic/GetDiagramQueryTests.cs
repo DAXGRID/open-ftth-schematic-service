@@ -169,5 +169,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
             getDiagramQueryResult.Value.Diagram.DiagramObjects.Any(d => d.Style == "NodeContainer").Should().BeTrue();
         }
+
+
+       
     }
 }
