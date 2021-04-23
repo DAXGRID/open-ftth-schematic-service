@@ -1,6 +1,7 @@
 ﻿using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.Util;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
+using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork.Tracing;
 using OpenFTTH.UtilityGraphService.Business.SpanEquipments;
 using System;
 using System.Collections.Generic;
@@ -17,8 +18,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly Guid _spanEquipmentId;
         private readonly RouteNetworkElementRelatedData _data;
 
-        private readonly SpanEquipment _spanEquipment;
+        private readonly SpanEquipmentWithRelatedInfo _spanEquipment;
         private readonly RouteNetworkInterestRelationKindEnum _relationKind;
+
+        private readonly Dictionary<Guid, RouteNetworkTrace> _traceByBySpanId = new();
 
         public SpanEquipment SpanEquipment => _spanEquipment;
 
@@ -31,8 +34,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             _spanEquipment = data.SpanEquipments[_spanEquipmentId];
             _relationKind = data.InterestRelations[_spanEquipment.WalkOfInterestId].RelationKind;
 
-            //if (spanEquipment.Traces == null)
-            // throw new ApplicationException("SpanEquipment passed to DetachedSpanEquipmentViewModel must contain trace information.");
+            if (_spanEquipment.RouteNetworkTraceRefs == null)
+                throw new ApplicationException("SpanEquipment passed to DetachedSpanEquipmentViewModel must contain trace information.");
+
+            foreach (var traceRef in _spanEquipment.RouteNetworkTraceRefs)
+            {
+                var trace = _data.RouteNetworkTraces[traceRef.TraceId];
+                _traceByBySpanId.Add(traceRef.SpanEquipmentOrSegmentId, trace);
+            }
         }
 
         public SpanDiagramInfo RootSpanDiagramInfo(string stylePrefix)
@@ -89,9 +98,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 var spanSegmentFromRouteNodeId = _spanEquipment.NodesOfInterestIds[spanSegment.FromNodeOfInterestIndex];
                 var spanSegmentToRouteNodeId = _spanEquipment.NodesOfInterestIds[spanSegment.ToNodeOfInterestIndex];
 
-                spanDiagramInfo.IngoingRouteNodeName = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.First()].Name;
-                spanDiagramInfo.OutgoingRouteNodeName = _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.Last()].Name;
-
                 if (spanSegmentToRouteNodeId == _data.RouteNetworkElementId)
                 {
                     spanDiagramInfo.IsIngoing = true;
@@ -127,6 +133,36 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             }
 
             return spanDiagramInfo;
+        }
+
+        public string GetIngoingRouteNodeName(Guid spanSegmentId)
+        {
+            if (_traceByBySpanId.TryGetValue(spanSegmentId, out var routeNetworkTraceBySegment))
+            {
+                return routeNetworkTraceBySegment.FromRouteNodeName;
+            }
+            else if (_traceByBySpanId.TryGetValue(_spanEquipment.Id, out var routeNetworkTraceByEquipment))
+            {
+                return routeNetworkTraceByEquipment.FromRouteNodeName;
+            }
+            else
+                throw new ApplicationException("Can't find incoming route node name in route network traces.");
+                
+            //return _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.First()].Name;
+        }
+
+        public string GetOutgoingRouteNodeName(Guid spanSegmentId)
+        {
+            if (_traceByBySpanId.TryGetValue(spanSegmentId, out var routeNetworkTraceBySegment))
+            {
+                return routeNetworkTraceBySegment.ToRouteNodeName;
+            }
+            else if (_traceByBySpanId.TryGetValue(_spanEquipment.Id, out var routeNetworkTraceByEquipment))
+            {
+                return routeNetworkTraceByEquipment.ToRouteNodeName;
+            }
+            else
+                throw new ApplicationException("Can't find incoming route node name in route network traces.");
         }
 
         public bool IsAttachedToNodeContainer()
@@ -189,22 +225,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public string StyleName { get; set; }
         public Guid IngoingSegmentId { get; set; }
         public Guid OutgoingSegmentId { get; set; }
-        public string IngoingRouteNodeName { get; set; }
-        public string OutgoingRouteNodeName { get; set; }
         public SpanSegment IngoingSpanSegment { get; set; }
         public SpanSegment OutgoingSpanSegment { get; set; }
-
-        public string OppositeRouteNodeName
-        {
-            get
-            {
-                if (IsIngoing)
-                    return IngoingRouteNodeName;
-                else
-                    return OutgoingRouteNodeName;
-            }
-        }
-
         public SpanSegment SpanSegment
         {
             get

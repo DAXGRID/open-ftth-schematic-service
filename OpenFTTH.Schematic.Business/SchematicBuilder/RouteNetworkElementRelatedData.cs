@@ -4,6 +4,7 @@ using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.Util;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
+using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork.Tracing;
 using OpenFTTH.UtilityGraphService.API.Queries;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public LookupCollection<RouteNetworkElement> RouteNetworkElements { get; set; }
         public LookupCollection<RouteNetworkInterest> RouteNetworkInterests { get; set; }
         public LookupCollection<SpanEquipmentWithRelatedInfo> SpanEquipments { get; set; }
+        public LookupCollection<RouteNetworkTrace> RouteNetworkTraces { get; set; }
         public Dictionary<Guid, RouteNetworkElementInterestRelation> InterestRelations { get; set; }
         public NodeContainer NodeContainer { get; set; }
         public Guid NodeContainerRouteNetworkElementId { get; set; }
@@ -63,12 +65,18 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             if (interestIdList.Count > 0)
             {
                 // Query all the equipments related to the route network element
-                var equipmentQueryResult = queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(new GetEquipmentDetails(interestIdList)).Result;
+                var equipmentQueryResult = queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(
+                    new GetEquipmentDetails(interestIdList)
+                    {
+                        EquipmentDetailsFilter = new EquipmentDetailsFilterOptions() { IncludeRouteNetworkTrace = true }
+                    }
+                ).Result;
 
                 if (equipmentQueryResult.IsFailed)
                     return Result.Fail(equipmentQueryResult.Errors.First());
 
                 result.SpanEquipments = equipmentQueryResult.Value.SpanEquipment;
+                result.RouteNetworkTraces = equipmentQueryResult.Value.RouteNetworkTraces;
 
                 if (equipmentQueryResult.Value.NodeContainers != null && equipmentQueryResult.Value.NodeContainers.Count > 0)
                 {

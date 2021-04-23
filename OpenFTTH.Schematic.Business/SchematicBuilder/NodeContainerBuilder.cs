@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.Drawing;
 using OpenFTTH.Schematic.Business.InternalDiagramObjects.Lines;
@@ -269,24 +270,41 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             int terminalNo = 1;
 
-            foreach (var data in innerSpanData)
+            foreach (var innerSpan in innerSpanData)
             {
                 TerminalShapeTypeEnum terminalShapeType = TerminalShapeTypeEnum.Point;
 
                 // If cut we want to draw the terminal polygon, because otherwise the conduit cannot be seen on the diagram (due to missing connection between the two sides)
-                if (!data.IsPassThrough)
+                if (!innerSpan.IsPassThrough)
                     terminalShapeType = TerminalShapeTypeEnum.PointAndPolygon;
+
+
+                string fromNodeName = "NA";
+                string toNodeName = "NA";
+
+                if (innerSpan.IsPassThrough)
+                {
+                    fromNodeName = viewModel.GetIngoingRouteNodeName(innerSpan.SegmentId);
+                    toNodeName = viewModel.GetOutgoingRouteNodeName(innerSpan.SegmentId);
+                }
+                else
+                {
+                    //if (viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.Start)
+                    
+                    fromNodeName = viewModel.GetIngoingRouteNodeName(innerSpan.IngoingSpanSegment.Id);
+                    toNodeName = viewModel.GetOutgoingRouteNodeName(innerSpan.OutgoingSpanSegment.Id);
+                }
 
                 var fromTerminal = new BlockPortTerminal(fromPort)
                 {
                     IsVisible = true,
                     ShapeType = terminalShapeType,
                     PointStyle = fromSide.ToString() + "TerminalLabel",
-                    PointLabel = data.IngoingRouteNodeName,
-                    PolygonStyle = data.StyleName
+                    PointLabel = fromNodeName,
+                    PolygonStyle = innerSpan.StyleName
                 };
 
-                fromTerminal.SetReference(data.IngoingSegmentId, "SpanSegment");
+                fromTerminal.SetReference(innerSpan.IngoingSegmentId, "SpanSegment");
                 fromTerminal.DrawingOrder = 620;
 
                 var toTerminal = new BlockPortTerminal(toPort)
@@ -294,35 +312,35 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = terminalShapeType,
                     PointStyle = toSide.ToString() + "TerminalLabel",
-                    PointLabel = data.OutgoingRouteNodeName,
-                    PolygonStyle = data.StyleName
+                    PointLabel = toNodeName,
+                    PolygonStyle = innerSpan.StyleName
                 };
 
-                toTerminal.SetReference(data.OutgoingSegmentId, "SpanSegment");
+                toTerminal.SetReference(innerSpan.OutgoingSegmentId, "SpanSegment");
                 toTerminal.DrawingOrder = 620;
 
                 // Connect the two sides, if the inner conduit is not cut / passing through
-                if (data.IsPassThrough)
+                if (innerSpan.IsPassThrough)
                 {
-                    var terminalConnection = nodeContainerBlock.AddTerminalConnection(fromSide, fromPort.Index, terminalNo, toSide, toPort.Index, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
-                    terminalConnection.SetReference(data.IngoingSegmentId, "SpanSegment");
+                    var terminalConnection = nodeContainerBlock.AddTerminalConnection(fromSide, fromPort.Index, terminalNo, toSide, toPort.Index, terminalNo, null, innerSpan.StyleName, LineShapeTypeEnum.Polygon);
+                    terminalConnection.SetReference(innerSpan.IngoingSegmentId, "SpanSegment");
                     terminalConnection.DrawingOrder = 510;
                 }
                 else
                 {
                     // Add from terminal / ingoing segment to ends
-                    if (data.IngoingSpanSegment != null && data.IngoingSpanSegment.FromTerminalId != Guid.Empty)
-                        AddToTerminalEnds(data.IngoingSpanSegment.FromTerminalId, data.IngoingSpanSegment, fromTerminal, data.StyleName);
+                    if (innerSpan.IngoingSpanSegment != null && innerSpan.IngoingSpanSegment.FromTerminalId != Guid.Empty)
+                        AddToTerminalEnds(innerSpan.IngoingSpanSegment.FromTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
 
-                    if (data.IngoingSpanSegment != null && data.IngoingSpanSegment.ToTerminalId != Guid.Empty)
-                        AddToTerminalEnds(data.IngoingSpanSegment.ToTerminalId, data.IngoingSpanSegment, fromTerminal, data.StyleName);
+                    if (innerSpan.IngoingSpanSegment != null && innerSpan.IngoingSpanSegment.ToTerminalId != Guid.Empty)
+                        AddToTerminalEnds(innerSpan.IngoingSpanSegment.ToTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
 
                     // Add to terminal / outgoing segment to ends
-                    if (data.OutgoingSpanSegment != null && data.OutgoingSpanSegment.FromTerminalId != Guid.Empty)
-                        AddToTerminalEnds(data.OutgoingSpanSegment.FromTerminalId, data.OutgoingSpanSegment, toTerminal, data.StyleName);
+                    if (innerSpan.OutgoingSpanSegment != null && innerSpan.OutgoingSpanSegment.FromTerminalId != Guid.Empty)
+                        AddToTerminalEnds(innerSpan.OutgoingSpanSegment.FromTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
 
-                    if (data.OutgoingSpanSegment != null && data.OutgoingSpanSegment.ToTerminalId != Guid.Empty)
-                        AddToTerminalEnds(data.OutgoingSpanSegment.ToTerminalId, data.OutgoingSpanSegment, toTerminal, data.StyleName);
+                    if (innerSpan.OutgoingSpanSegment != null && innerSpan.OutgoingSpanSegment.ToTerminalId != Guid.Empty)
+                        AddToTerminalEnds(innerSpan.OutgoingSpanSegment.ToTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
                 }
 
                 terminalNo++;
@@ -337,7 +355,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = fromSide.ToString() + "TerminalLabel",
-                    PointLabel = spanDiagramInfo.IngoingRouteNodeName,
+                    PointLabel = viewModel.GetIngoingRouteNodeName(spanDiagramInfo.IngoingSegmentId),
                     DrawingOrder = 520
                 };
 
@@ -348,7 +366,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = toSide.ToString() + "TerminalLabel",
-                    PointLabel = spanDiagramInfo.OutgoingRouteNodeName,
+                    PointLabel = viewModel.GetOutgoingRouteNodeName(spanDiagramInfo.IngoingSegmentId),
                     DrawingOrder = 520
                 };
 
@@ -399,7 +417,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.PointAndPolygon,
                     PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = data.OppositeRouteNodeName,
+                    PointLabel = viewModel.GetOutgoingRouteNodeName(data.SegmentId),
                     PolygonStyle = data.StyleName
                 };
 
@@ -424,7 +442,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = spanDiagramInfo.OppositeRouteNodeName,
+                    PointLabel = viewModel.GetOutgoingRouteNodeName(spanDiagramInfo.SegmentId),
                     DrawingOrder = 520
                 };
 

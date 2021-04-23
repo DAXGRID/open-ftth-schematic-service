@@ -221,6 +221,22 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
         }
 
+        [Fact, Order(50)]
+        public async void TestHH_2()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElement = TestRouteNetwork.HH_2;
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            // Assert
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+        }
+
 
     }
 }
