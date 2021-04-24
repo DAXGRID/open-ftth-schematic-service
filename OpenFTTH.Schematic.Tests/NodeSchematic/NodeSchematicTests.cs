@@ -345,9 +345,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
             var diagram = getDiagramQueryResult.Value.Diagram;
 
-
-            // Check that no conduit are drawed and labelled to end in the CC-1 node (because this means they are shown as pass-throughs, instead of conduit just ending in the node, which is wrong)
-            diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(15);
+            diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(14);
+            diagram.DiagramObjects.Count(o => o.Label == "CC-1").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(0);
 
         }

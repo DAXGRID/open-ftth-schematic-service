@@ -114,16 +114,18 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 }
                 else
                 {
-                    spanDiagramInfo.IsPassThrough = true;
-                    
                     var spanEquipmentInterest = _data.RouteNetworkInterests[_spanEquipment.WalkOfInterestId];
 
                     var routeNodeElementIndex = spanEquipmentInterest.RouteNetworkElementRefs.IndexOf(_data.RouteNetworkElementId);
+
                     var spanSegmentFromIndex = spanEquipmentInterest.RouteNetworkElementRefs.IndexOf(spanSegmentFromRouteNodeId);
                     var spanSegmentToIndex = spanEquipmentInterest.RouteNetworkElementRefs.IndexOf(spanSegmentToRouteNodeId);
 
+                    // Check if segment is passing the route node we are looking at (build a diagram for)
                     if (spanSegmentFromIndex < routeNodeElementIndex && spanSegmentToIndex > routeNodeElementIndex)
                     {
+                        spanDiagramInfo.IsPassThrough = true;
+
                         spanDiagramInfo.IngoingSegmentId = spanSegment.Id;
                         spanDiagramInfo.OutgoingSegmentId = spanSegment.Id;
                         spanDiagramInfo.IngoingSpanSegment = spanSegment;
