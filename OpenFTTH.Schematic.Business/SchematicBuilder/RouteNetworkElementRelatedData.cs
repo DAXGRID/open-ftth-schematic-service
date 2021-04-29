@@ -35,13 +35,13 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // TODO: All specifications should be cached and only re-queried if some spec is missing.
 
             // Query all span equipment specifications
-            result.SpanEquipmentSpecifications = queryDispatcher.HandleAsync<GetSpanEquipmentSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanEquipmentSpecification>>>(new GetSpanEquipmentSpecifications()).Result.Value;
+            result.SpanEquipmentSpecifications = queryDispatcher.HandleAsync<GetSpanEquipmentSpecifications, Result<LookupCollection<SpanEquipmentSpecification>>>(new GetSpanEquipmentSpecifications()).Result.Value;
 
             // Query all span structure specifications
-            result.SpanStructureSpecifications = queryDispatcher.HandleAsync<GetSpanStructureSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<SpanStructureSpecification>>>(new GetSpanStructureSpecifications()).Result.Value;
+            result.SpanStructureSpecifications = queryDispatcher.HandleAsync<GetSpanStructureSpecifications, Result<LookupCollection<SpanStructureSpecification>>>(new GetSpanStructureSpecifications()).Result.Value;
 
             // Query all node container specifications
-            result.NodeContainerSpecifications = queryDispatcher.HandleAsync<GetNodeContainerSpecifications, CSharpFunctionalExtensions.Result<LookupCollection<NodeContainerSpecification>>>(new GetNodeContainerSpecifications()).Result.Value;
+            result.NodeContainerSpecifications = queryDispatcher.HandleAsync<GetNodeContainerSpecifications, Result<LookupCollection<NodeContainerSpecification>>>(new GetNodeContainerSpecifications()).Result.Value;
 
             // Query all route node interests
             var routeNetworkInterestQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { routeNetworkElementId })

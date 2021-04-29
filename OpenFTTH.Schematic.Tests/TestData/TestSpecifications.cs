@@ -1,10 +1,11 @@
-﻿using CSharpFunctionalExtensions;
+﻿using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.Util;
 using OpenFTTH.UtilityGraphService.API.Commands;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using OpenFTTH.UtilityGraphService.API.Queries;
 using System;
+using System.Linq;
 using System.Threading;
 
 namespace OpenFTTH.TestData
@@ -778,8 +779,8 @@ namespace OpenFTTH.TestData
             var cmd = new AddSpanEquipmentSpecification(spec);
             var cmdResult = _commandDispatcher.HandleAsync<AddSpanEquipmentSpecification, Result>(cmd).Result;
 
-            if (cmdResult.IsFailure)
-                throw new ApplicationException(cmdResult.Error);
+            if (cmdResult.IsFailed)
+                throw new ApplicationException(cmdResult.Errors.First().Message);
         }
 
         private void AddSpecification(SpanStructureSpecification spec)
@@ -787,8 +788,8 @@ namespace OpenFTTH.TestData
             var cmd = new AddSpanStructureSpecification(spec);
             var cmdResult = _commandDispatcher.HandleAsync<AddSpanStructureSpecification, Result>(cmd).Result;
 
-            if (cmdResult.IsFailure)
-                throw new ApplicationException(cmdResult.Error);
+            if (cmdResult.IsFailed)
+                throw new ApplicationException(cmdResult.Errors.First().Message);
         }
 
         private void AddSpecification(NodeContainerSpecification spec)
@@ -796,8 +797,8 @@ namespace OpenFTTH.TestData
             var cmd = new AddNodeContainerSpecification(spec);
             var cmdResult = _commandDispatcher.HandleAsync<AddNodeContainerSpecification, Result>(cmd).Result;
 
-            if (cmdResult.IsFailure)
-                throw new ApplicationException(cmdResult.Error);
+            if (cmdResult.IsFailed)
+                throw new ApplicationException(cmdResult.Errors.First().Message);
         }
 
         private void AddManufacturer(Manufacturer manufacturer)
@@ -805,8 +806,8 @@ namespace OpenFTTH.TestData
             var cmd = new AddManufacturer(manufacturer);
             var cmdResult = _commandDispatcher.HandleAsync<AddManufacturer, Result>(cmd).Result;
 
-            if (cmdResult.IsFailure)
-                throw new ApplicationException(cmdResult.Error);
+            if (cmdResult.IsFailed)
+                throw new ApplicationException(cmdResult.Errors.First().Message);
         }
     }
 }

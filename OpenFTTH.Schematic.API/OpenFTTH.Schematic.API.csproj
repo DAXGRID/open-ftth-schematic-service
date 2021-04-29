@@ -6,12 +6,15 @@
 
   <ItemGroup>
     <PackageReference Include="NetTopologySuite" Version="2.1.0" />
-    <PackageReference Include="OpenFTTH.CQRS" Version="1.0.3" />
+    <PackageReference Include="OpenFTTH.CQRS" Version="1.2.0" />
     <PackageReference Include="OpenFTTH.EventSourcing" Version="1.2.0" />
-    <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="1.2.2" />
-    <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="1.2.2" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="1.2.5" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="1.2.5" />
+    <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="1.3.0" />
+    <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="1.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\open-ftth-utility-graph-service\OpenFTTH.UtilityGraphService.API\OpenFTTH.UtilityGraphService.API.csproj" />
+    <ProjectReference Include="..\..\open-ftth-utility-graph-service\OpenFTTH.UtilityGraphService.Business\OpenFTTH.UtilityGraphService.Business.csproj" />
   </ItemGroup>
 
 </Project>
