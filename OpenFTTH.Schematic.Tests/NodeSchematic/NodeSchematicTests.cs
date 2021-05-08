@@ -127,7 +127,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.IdentifiedObject.RefId == conduit1.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
 
-            diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.IdentifiedObject.RefId == conduit2.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "SouthTerminalLabel" && o.IdentifiedObject.RefId == conduit2.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
 
             // Only one terminal connection should be shown in conduit 1 that is affixed to the node container
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefId == conduit1.SpanStructures[0].SpanSegments[0].Id).Should().Be(1);
@@ -135,7 +135,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Any(d => d.DrawingOrder == 0).Should().BeFalse();
         }
 
-        [Fact, Order(2)]
+        [Fact, Order(3)]
         public async void CutPassThroughConduitInCC1()
         {
             var sutRouteNetworkElement = TestRouteNetwork.CC_1;
@@ -158,10 +158,54 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var cutResult = await _commandDispatcher.HandleAsync<CutSpanSegmentsAtRouteNode, Result>(cutCmd);
 
             cutResult.IsSuccess.Should().BeTrue();
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.CC_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+
+        }
+
+        [Fact, Order(4)]
+        public async void CutSouthAndEastSideConduitInCC1()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.CC_1;
+            var sutSpanEquipmentFrom = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutSpanEquipmentTo = TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1;
+
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            // Act
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentFrom, out var fromSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentTo, out var toSpanEquipment);
+
+            // Connect segments
+            var connectCmd = new ConnectSpanSegmentsAtRouteNode(
+                routeNodeId: TestRouteNetwork.CC_1,
+                spanSegmentsToConnect: new Guid[] {
+                    toSpanEquipment.SpanStructures[1].SpanSegments[0].Id,
+                    fromSpanEquipment.SpanStructures[2].SpanSegments[1].Id,
+                }
+            );
+
+            var connectResult = await _commandDispatcher.HandleAsync<ConnectSpanSegmentsAtRouteNode, Result>(connectCmd);
+
+            connectResult.IsSuccess.Should().BeTrue();
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.CC_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+
         }
 
 
-        [Fact, Order(3)]
+
+
+
+        [Fact, Order(10)]
         public async void TestAddAdditionalInnerConduitsToPassThroughConduitInJ_1()
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
@@ -219,7 +263,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         }
 
 
-        [Fact, Order(4)]
+        [Fact, Order(11)]
         public async void TestThatRemovedStructuresAreNotShownInDiagram()
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
@@ -250,7 +294,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
         }
 
-        [Fact, Order(5)]
+        [Fact, Order(12)]
         public async void TestThatRemovedSpanEquipmentAreNotShownInDiagram()
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
@@ -284,7 +328,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
         }
 
-        [Fact, Order(6)]
+        [Fact, Order(13)]
         public async void TestVerticalAlignmentDiagram()
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
@@ -319,7 +363,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         }
 
 
-        [Fact, Order(7)]
+        [Fact, Order(20)]
         public async void TestAffixConduitInHH_10()
         {
             // Affix 5x10 to west side
@@ -346,7 +390,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var diagram = getDiagramQueryResult.Value.Diagram;
 
             diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(14);
-            diagram.DiagramObjects.Count(o => o.Label == "CC-1").Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Label == "SP-1").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(0);
 
         }

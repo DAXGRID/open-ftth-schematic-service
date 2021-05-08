@@ -155,32 +155,6 @@ namespace OpenFTTH.Schematic.Business.Lines
                 midY = fromCurveStartPointY;
             }
 
-            // V-S
-            if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.South)
-            {
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointX += shiftX;
-
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointX += shiftX;
-
-                midX = toCurveEndPointX;
-                midY = fromCurveStartPointY;
-            }
-
-            // V-E
-            if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.East)
-            {
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointY += shiftY;
-
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointY += shiftY;
-
-                midX = toCurveEndPointX - ((toCurveEndPointX - fromCurveStartPointX) / 2);
-                midY = fromCurveStartPointY;
-            }
-
             // N-V
             if (FromTerminal.Port.Side == BlockSideEnum.North && ToTerminal.Port.Side == BlockSideEnum.West)
             {
@@ -194,6 +168,34 @@ namespace OpenFTTH.Schematic.Business.Lines
                 midY = toCurveEndPointY;
             }
 
+            // V-S
+            if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.South)
+            {
+                fromCurveStartPointY += shiftY;
+                toCurveEndPointX += shiftX;
+
+                fromTerminalStartPointY += shiftY;
+                toTerminalEndPointX += shiftX;
+
+                midX = toCurveEndPointX;
+                midY = fromCurveStartPointY;
+            }
+
+            // S-V
+            if (FromTerminal.Port.Side == BlockSideEnum.South && ToTerminal.Port.Side == BlockSideEnum.West)
+            {
+                //TODO
+                fromCurveStartPointY += shiftY;
+                toCurveEndPointX += shiftX;
+
+                fromTerminalStartPointY += shiftY;
+                toTerminalEndPointX += shiftX;
+
+                midX = toCurveEndPointX;
+                midY = fromCurveStartPointY;
+            }
+
+
             // N-E
             if (FromTerminal.Port.Side == BlockSideEnum.North && ToTerminal.Port.Side == BlockSideEnum.East)
             {
@@ -205,19 +207,6 @@ namespace OpenFTTH.Schematic.Business.Lines
 
                 midX = fromCurveStartPointX;
                 midY = toCurveEndPointY;
-            }
-
-            // N-S
-            if (FromTerminal.Port.Side == BlockSideEnum.North && ToTerminal.Port.Side == BlockSideEnum.South)
-            {
-                fromCurveStartPointX += shiftX;
-                toCurveEndPointX += shiftX;
-
-                fromTerminalStartPointX += shiftX;
-                toTerminalEndPointX += shiftX;
-
-                midX = fromCurveStartPointX;
-                midY = fromCurveStartPointY - ((fromCurveStartPointY - toCurveEndPointY) / 2);
             }
 
             // E-N
@@ -233,6 +222,34 @@ namespace OpenFTTH.Schematic.Business.Lines
                 midY = fromCurveStartPointY;
             }
 
+            // N-S
+            if (FromTerminal.Port.Side == BlockSideEnum.North && ToTerminal.Port.Side == BlockSideEnum.South)
+            {
+                fromCurveStartPointX += shiftX;
+                toCurveEndPointX += shiftX;
+
+                fromTerminalStartPointX += shiftX;
+                toTerminalEndPointX += shiftX;
+
+                midX = fromCurveStartPointX;
+                midY = fromCurveStartPointY - ((fromCurveStartPointY - toCurveEndPointY) / 2);
+            }
+
+            // S-N
+            if (FromTerminal.Port.Side == BlockSideEnum.South && ToTerminal.Port.Side == BlockSideEnum.North)
+            {
+                fromCurveStartPointX += shiftX;
+                toCurveEndPointX += shiftX;
+
+                fromTerminalStartPointX += shiftX;
+                toTerminalEndPointX += shiftX;
+
+                midX = fromCurveStartPointX;
+                midY = toCurveEndPointY - ((toCurveEndPointY - fromCurveStartPointY) / 2);
+            }
+
+
+
             // E-S
             if (FromTerminal.Port.Side == BlockSideEnum.East && ToTerminal.Port.Side == BlockSideEnum.South)
             {
@@ -244,6 +261,19 @@ namespace OpenFTTH.Schematic.Business.Lines
 
                 midX = toCurveEndPointX;
                 midY = fromCurveStartPointY;
+            }
+
+            // S-E
+            if (FromTerminal.Port.Side == BlockSideEnum.South && ToTerminal.Port.Side == BlockSideEnum.East)
+            {
+                fromCurveStartPointX += shiftX;
+                toCurveEndPointY -= shiftY;
+
+                fromTerminalStartPointX += shiftX;
+                toTerminalEndPointY -= shiftY;
+
+                midX = fromTerminalStartPointX;
+                midY = toCurveEndPointY;
             }
 
             // E-V
@@ -259,17 +289,17 @@ namespace OpenFTTH.Schematic.Business.Lines
                 midY = fromCurveStartPointY;
             }
 
-            // S-N
-            if (FromTerminal.Port.Side == BlockSideEnum.South && ToTerminal.Port.Side == BlockSideEnum.North)
+            // V-E
+            if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.East)
             {
-                fromCurveStartPointX += shiftX;
-                toCurveEndPointX += shiftX;
+                fromCurveStartPointY += shiftY;
+                toCurveEndPointY += shiftY;
 
-                fromTerminalStartPointX += shiftX;
-                toTerminalEndPointX += shiftX;
+                fromTerminalStartPointY += shiftY;
+                toTerminalEndPointY += shiftY;
 
-                midX = fromCurveStartPointX;
-                midY = toCurveEndPointY - ((toCurveEndPointY - fromCurveStartPointY) / 2);
+                midX = toCurveEndPointX - ((toCurveEndPointX - fromCurveStartPointX) / 2);
+                midY = fromCurveStartPointY;
             }
 
             LineString curve = null;
