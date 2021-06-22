@@ -1,10 +1,5 @@
-﻿using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.Util;
-using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
-using OpenFTTH.UtilityGraphService.Business.SpanEquipments;
+﻿using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {

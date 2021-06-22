@@ -48,7 +48,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipment, out var spanEquipment);
 
             // Cut segments in structure 1 (the outer conduit and second inner conduit)
-            var cutCmd = new CutSpanSegmentsAtRouteNode(
+            var cutCmd = new CutSpanSegmentsAtRouteNode(Guid.NewGuid(), new UserContext("test", Guid.Empty),
                 routeNodeId: TestRouteNetwork.CC_1,
                 spanSegmentsToCut: new Guid[] {
                     spanEquipment.SpanStructures[3].SpanSegments[0].Id
@@ -118,7 +118,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             utilityNetwork.TryGetEquipment<SpanEquipment>(sutConnectToSpanEquipment, out var sutToSpanEquipment);
 
             // Connect inner conduit 2 in 5x10 with inner conduit 3 in 3x10
-            var connectCmd = new ConnectSpanSegmentsAtRouteNode(
+            var connectCmd = new ConnectSpanSegmentsAtRouteNode(Guid.NewGuid(), new UserContext("test", Guid.Empty),
                 routeNodeId: TestRouteNetwork.CC_1,
                 spanSegmentsToConnect: new Guid[] {
                     sutFromSpanEquipment.SpanStructures[2].SpanSegments[0].Id,

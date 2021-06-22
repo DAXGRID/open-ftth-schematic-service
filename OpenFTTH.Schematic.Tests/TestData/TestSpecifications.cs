@@ -776,7 +776,7 @@ namespace OpenFTTH.TestData
 
         private void AddSpecification(SpanEquipmentSpecification spec)
         {
-            var cmd = new AddSpanEquipmentSpecification(spec);
+            var cmd = new AddSpanEquipmentSpecification(Guid.NewGuid(), new UserContext("test", Guid.Empty), spec);
             var cmdResult = _commandDispatcher.HandleAsync<AddSpanEquipmentSpecification, Result>(cmd).Result;
 
             if (cmdResult.IsFailed)
@@ -785,7 +785,7 @@ namespace OpenFTTH.TestData
 
         private void AddSpecification(SpanStructureSpecification spec)
         {
-            var cmd = new AddSpanStructureSpecification(spec);
+            var cmd = new AddSpanStructureSpecification(Guid.NewGuid(), new UserContext("test", Guid.Empty), spec);
             var cmdResult = _commandDispatcher.HandleAsync<AddSpanStructureSpecification, Result>(cmd).Result;
 
             if (cmdResult.IsFailed)
@@ -794,7 +794,7 @@ namespace OpenFTTH.TestData
 
         private void AddSpecification(NodeContainerSpecification spec)
         {
-            var cmd = new AddNodeContainerSpecification(spec);
+            var cmd = new AddNodeContainerSpecification(Guid.NewGuid(), new UserContext("test", Guid.Empty), spec);
             var cmdResult = _commandDispatcher.HandleAsync<AddNodeContainerSpecification, Result>(cmd).Result;
 
             if (cmdResult.IsFailed)
@@ -803,7 +803,7 @@ namespace OpenFTTH.TestData
 
         private void AddManufacturer(Manufacturer manufacturer)
         {
-            var cmd = new AddManufacturer(manufacturer);
+            var cmd = new AddManufacturer(Guid.NewGuid(), new UserContext("test", Guid.Empty), manufacturer);
             var cmdResult = _commandDispatcher.HandleAsync<AddManufacturer, Result>(cmd).Result;
 
             if (cmdResult.IsFailed)

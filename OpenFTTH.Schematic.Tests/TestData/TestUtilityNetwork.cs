@@ -94,11 +94,11 @@ namespace OpenFTTH.TestData
         {
             // Register walk of interest
             var walkOfInterestId = Guid.NewGuid();
-            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(walkOfInterestId, walkIds);
+            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walkOfInterestId, walkIds);
             var registerWalkOfInterestCommandResult = _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(registerWalkOfInterestCommand).Result;
 
             // Place conduit
-            var placeSpanEquipmentCommand = new PlaceSpanEquipmentInRouteNetwork(Guid.NewGuid(), specificationId, registerWalkOfInterestCommandResult.Value);
+            var placeSpanEquipmentCommand = new PlaceSpanEquipmentInRouteNetwork(Guid.NewGuid(), new UserContext("test", Guid.Empty), Guid.NewGuid(), specificationId, registerWalkOfInterestCommandResult.Value);
             var placeSpanEquipmentResult =  _commandDispatcher.HandleAsync<PlaceSpanEquipmentInRouteNetwork, Result>(placeSpanEquipmentCommand).Result;
 
             if (placeSpanEquipmentResult.IsFailed)
@@ -110,10 +110,10 @@ namespace OpenFTTH.TestData
         private Guid PlaceNodeContainer(Guid specificationId, Guid manufacturerId, Guid routeNodeId)
         {
             var nodeOfInterestId = Guid.NewGuid();
-            var registerNodeOfInterestCommand = new RegisterNodeOfInterest(nodeOfInterestId, routeNodeId);
+            var registerNodeOfInterestCommand = new RegisterNodeOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), nodeOfInterestId, routeNodeId);
             var registerNodeOfInterestCommandResult = _commandDispatcher.HandleAsync<RegisterNodeOfInterest, Result<RouteNetworkInterest>>(registerNodeOfInterestCommand).Result;
 
-            var placeNodeContainerCommand = new PlaceNodeContainerInRouteNetwork(Guid.NewGuid(), specificationId, registerNodeOfInterestCommandResult.Value)
+            var placeNodeContainerCommand = new PlaceNodeContainerInRouteNetwork(Guid.NewGuid(), new UserContext("test", Guid.Empty), Guid.NewGuid(), specificationId, registerNodeOfInterestCommandResult.Value)
             {
                 ManufacturerId = manufacturerId
             };
@@ -128,7 +128,7 @@ namespace OpenFTTH.TestData
 
         private void AffixSpanEquipmentToContainer(Guid spanEquipmentId, Guid nodeContainerId, NodeContainerSideEnum side)
         {
-            var affixConduitToContainerCommand = new AffixSpanEquipmentToNodeContainer(
+            var affixConduitToContainerCommand = new AffixSpanEquipmentToNodeContainer(Guid.NewGuid(), new UserContext("test", Guid.Empty),
                spanEquipmentOrSegmentId: spanEquipmentId,
                nodeContainerId: nodeContainerId,
                nodeContainerIngoingSide: side
