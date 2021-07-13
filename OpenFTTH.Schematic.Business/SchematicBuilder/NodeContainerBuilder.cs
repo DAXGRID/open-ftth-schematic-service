@@ -386,8 +386,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // Port
             var port = new BlockPort(side)
             {
-                IsVisible = true,
-                Margin = _portMargin,
+                IsVisible = viewModel.IsSingleSpan ? false: true,
+                Margin = viewModel.IsSingleSpan ? _portMargin / 2 : _portMargin,
                 Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName,
                 PointStyle = side.ToString() + "TerminalLabel",
                 PointLabel = viewModel.GetSpanEquipmentLabel()
@@ -440,13 +440,23 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 var terminal = new BlockPortTerminal(port)
                 {
                     IsVisible = true,
-                    ShapeType = TerminalShapeTypeEnum.Point,
+                    ShapeType = viewModel.IsSingleSpan ? TerminalShapeTypeEnum.PointAndPolygon : TerminalShapeTypeEnum.Point,
                     PointStyle = side.ToString() + "TerminalLabel",
                     PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(spanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(spanDiagramInfo.SegmentId),
-                    DrawingOrder = 520
+                    PolygonStyle = spanDiagramInfo.StyleName,
+                    DrawingOrder = 620
                 };
 
-                terminal.SetReference(spanDiagramInfo.IngoingSegmentId, "SpanSegment");
+                terminal.SetReference(spanDiagramInfo.SegmentId, "SpanSegment");
+
+                if (viewModel.IsSingleSpan)
+                {
+                    if (spanDiagramInfo.SpanSegment != null && spanDiagramInfo.SpanSegment.FromTerminalId != Guid.Empty)
+                        AddToTerminalEnds(spanDiagramInfo.SpanSegment.FromTerminalId, spanDiagramInfo.SpanSegment, terminal, spanDiagramInfo.StyleName);
+
+                    if (spanDiagramInfo.SpanSegment != null && spanDiagramInfo.SpanSegment.ToTerminalId != Guid.Empty)
+                        AddToTerminalEnds(spanDiagramInfo.SpanSegment.ToTerminalId, spanDiagramInfo.SpanSegment, terminal, spanDiagramInfo.StyleName);
+                }
             }
         }
 

@@ -151,7 +151,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
                 routeNodeId: TestRouteNetwork.CC_1,
                 spanSegmentsToCut: new Guid[] {
                     spanEquipment.SpanStructures[0].SpanSegments[0].Id,
-                    spanEquipment.SpanStructures[2].SpanSegments[0].Id
+                    spanEquipment.SpanStructures[2].SpanSegments[0].Id,
+                    spanEquipment.SpanStructures[4].SpanSegments[0].Id
                 }
             );
 
@@ -389,9 +390,43 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
             var diagram = getDiagramQueryResult.Value.Diagram;
 
-            diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(14);
+            diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(13);
             diagram.DiagramObjects.Count(o => o.Label == "SP-1").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(0);
+
+        }
+
+        [Fact, Order(30)]
+        public async void TestConnectSingleConduitInCC1()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.CC_1;
+            var sutSpanEquipmentFrom = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutSpanEquipmentTo = TestUtilityNetwork.CustomerConduit_CC_1_to_SDU_1;
+
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            // Act
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentFrom, out var fromSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentTo, out var toSpanEquipment);
+
+            // Connect segments
+            var connectCmd = new ConnectSpanSegmentsAtRouteNode(Guid.NewGuid(), new UserContext("test", Guid.Empty),
+                routeNodeId: TestRouteNetwork.CC_1,
+                spanSegmentsToConnect: new Guid[] {
+                    fromSpanEquipment.SpanStructures[4].SpanSegments[0].Id,
+                    toSpanEquipment.SpanStructures[0].SpanSegments[0].Id
+                }
+            );
+
+            var connectResult = await _commandDispatcher.HandleAsync<ConnectSpanSegmentsAtRouteNode, Result>(connectCmd);
+
+            connectResult.IsSuccess.Should().BeTrue();
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.CC_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
 
         }
 

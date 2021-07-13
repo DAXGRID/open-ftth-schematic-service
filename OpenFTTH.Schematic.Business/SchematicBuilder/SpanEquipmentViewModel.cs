@@ -212,6 +212,15 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             }
         }
 
+        public bool IsSingleSpan { 
+            get
+            {
+                var spec = _data.SpanEquipmentSpecifications[_spanEquipment.SpecificationId];
+
+                return (!spec.IsMultiLevel);
+            }
+        }
+
         public RouteNetworkInterestRelationKindEnum InterestRelationKind()
         {
             return _data.InterestRelations[_spanEquipment.WalkOfInterestId].RelationKind;
