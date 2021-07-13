@@ -80,7 +80,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             var detachedSpanEquipments = _data.SpanEquipments.Where(s => !s.IsAttachedToNodeContainer(_data));
 
-            var orderedDetachedSpanEquipments = detachedSpanEquipments.OrderBy(s => s.IsPassThrough(_data)).Reverse();
+            var orderedDetachedSpanEquipments = detachedSpanEquipments.OrderBy(s => s.IsPassThrough(_data)).ThenBy(s => s.IsMultiLevel(_data)).Reverse();
 
             foreach (var spanEquipment in orderedDetachedSpanEquipments)
             {

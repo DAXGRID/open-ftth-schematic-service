@@ -66,34 +66,30 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // Create outer conduits
             var rootSpanInfo = _spanEquipmentViewModel.RootSpanDiagramInfo("OuterConduit");
 
-            var spanEquipmentBlock = _spanEquipmentViewModel.IsSingleSpan ?
-               new LineBlock()
-               {
-                    MinWidth = _spanEquipmentAreaWidth,
-                    IsVisible = false,
-                    Style = rootSpanInfo.StyleName,
-                    Margin = 0,
-                    DrawingOrder = 400
-               }
-               :
-               new LineBlock()
-               {
-                    MinWidth = _spanEquipmentAreaWidth,
-                    IsVisible = true,
-                    Style = rootSpanInfo.StyleName,
-                    Margin = _spanEquipmentBlockMargin,
-                    DrawingOrder = 400
-               };
+            var spanEquipmentBlock = new LineBlock()
+            {
+                MinWidth = _spanEquipmentAreaWidth,
+                IsVisible = _spanEquipmentViewModel.IsSingleSpan ? false : true,
+                Style = rootSpanInfo.StyleName,
+                Margin = _spanEquipmentViewModel.IsSingleSpan ? 0 : _spanEquipmentBlockMargin,
+                DrawingOrder = 400
+            };
 
             spanEquipmentBlock.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
 
             // Create inner conduits
             var innerSpanData = _spanEquipmentViewModel.GetInnerSpanDiagramInfos("InnerConduit");
 
-            var fromPort = new BlockPort(BlockSideEnum.West) { IsVisible = false, DrawingOrder = 420 };
+            var fromPort = _spanEquipmentViewModel.IsSingleSpan ?
+               new BlockPort(BlockSideEnum.West, null, null, 0, -1, 0) { IsVisible = false, DrawingOrder = 420 } :
+               new BlockPort(BlockSideEnum.West) { IsVisible = false, DrawingOrder = 420 };
+
             spanEquipmentBlock.AddPort(fromPort);
 
-            var toPort = new BlockPort(BlockSideEnum.East) { IsVisible = false, DrawingOrder = 420 };
+            var toPort = _spanEquipmentViewModel.IsSingleSpan ?
+                new BlockPort(BlockSideEnum.East, null, null, 0, -1, 0) { IsVisible = false, DrawingOrder = 420 } :
+                new BlockPort(BlockSideEnum.East) { IsVisible = false, DrawingOrder = 420 };
+
             spanEquipmentBlock.AddPort(toPort);
 
             int terminalNo = 1;
@@ -178,24 +174,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // Create outer conduits
             var rootSpanInfo = _spanEquipmentViewModel.RootSpanDiagramInfo("OuterConduit");
 
-            var spanEquipmentBlock = _spanEquipmentViewModel.IsSingleSpan ? 
-                new LineBlock()
-                {
-                    MinWidth = _spanEquipmentAreaWidth / 2,
-                    IsVisible = false,
-                    Style = rootSpanInfo.StyleName,
-                    Margin = _spanEquipmentBlockMargin,
-                    DrawingOrder = 400
-                } 
-                : 
-                new LineBlock()
-                {
-                    MinWidth = _spanEquipmentAreaWidth / 2,
-                    IsVisible = true,
-                    Style = rootSpanInfo.StyleName,
-                    Margin = 0,
-                    DrawingOrder = 400
-                };
+            var spanEquipmentBlock = new LineBlock()
+            {
+                MinWidth = _spanEquipmentAreaWidth / 2,
+                IsVisible = _spanEquipmentViewModel.IsSingleSpan ? false : true,
+                Style = rootSpanInfo.StyleName,
+                Margin = _spanEquipmentViewModel.IsSingleSpan ? 0 : _spanEquipmentBlockMargin,
+                DrawingOrder = 400
+            };
 
             spanEquipmentBlock.SetReference(rootSpanInfo.SegmentId, "SpanSegment");
 

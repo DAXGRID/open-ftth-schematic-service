@@ -31,5 +31,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             return false;
         }
 
+        public static bool IsMultiLevel(this SpanEquipment spanEquipment, RouteNetworkElementRelatedData data)
+        {
+            return data.SpanEquipmentSpecifications[spanEquipment.SpecificationId].IsMultiLevel;
+        }
+
+        
+
     }
 }
