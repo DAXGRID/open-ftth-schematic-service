@@ -1,4 +1,6 @@
-﻿using OpenFTTH.RouteNetwork.API.Model;
+﻿using Microsoft.Extensions.Logging;
+using OpenFTTH.RouteNetwork.API.Model;
+using OpenFTTH.Schematic.Business.QueryHandler;
 using OpenFTTH.Util;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork.Tracing;
@@ -14,6 +16,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     /// </summary>
     public class SpanEquipmentViewModel
     {
+        private readonly ILogger<GetDiagramQueryHandler> _logger;
         private readonly Guid _elementNodeId;
         private readonly Guid _spanEquipmentId;
         private readonly RouteNetworkElementRelatedData _data;
@@ -25,8 +28,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         public SpanEquipment SpanEquipment => _spanEquipment;
 
-        public SpanEquipmentViewModel(Guid routeElementId, Guid spanEquipmentId, RouteNetworkElementRelatedData data)
+        public SpanEquipmentViewModel(ILogger<GetDiagramQueryHandler> logger, Guid routeElementId, Guid spanEquipmentId, RouteNetworkElementRelatedData data)
         {
+            _logger = logger;
             _elementNodeId = routeElementId;
             _spanEquipmentId = spanEquipmentId;
             _data = data;
@@ -133,6 +137,21 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     }
                 }
             }
+
+            // Log detailed error information if no segments are parsing by or ending in the route node element we're looking at
+            if (spanDiagramInfo.IngoingSegmentId == Guid.Empty && spanDiagramInfo.OutgoingSegmentId == Guid.Empty)
+            {
+                _logger.LogError($"Error relating any span segments in structure level: {structure.Level} position: {structure.Position} in span equipment with id: {this._spanEquipment.Id} to route node with id: {_data.RouteNetworkElementId}");
+
+                foreach (var spanSegment in structure.SpanSegments)
+                {
+                    var spanSegmentFromRouteNodeId = _spanEquipment.NodesOfInterestIds[spanSegment.FromNodeOfInterestIndex];
+                    var spanSegmentToRouteNodeId = _spanEquipment.NodesOfInterestIds[spanSegment.ToNodeOfInterestIndex];
+
+                    _logger.LogError($"Potential wrong from or to node id in span segment: {spanSegment.Id} FromRouteNodeId: {spanSegmentFromRouteNodeId} ToRouteNodeId: {spanSegmentToRouteNodeId}");
+                }
+            }
+
 
             return spanDiagramInfo;
         }

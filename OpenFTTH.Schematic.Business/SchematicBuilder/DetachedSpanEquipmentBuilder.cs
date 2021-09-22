@@ -1,8 +1,10 @@
-﻿using OpenFTTH.RouteNetwork.API.Model;
+﻿using Microsoft.Extensions.Logging;
+using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.Drawing;
 using OpenFTTH.Schematic.Business.Layout;
 using OpenFTTH.Schematic.Business.Lines;
+using OpenFTTH.Schematic.Business.QueryHandler;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,6 +15,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     /// </summary>
     public class DetachedSpanEquipmentBuilder
     {
+        private readonly ILogger<GetDiagramQueryHandler> _logger;
         private readonly SpanEquipmentViewModel _spanEquipmentViewModel;
 
         private readonly double _spanEquipmentAreaWidth = 300;
@@ -20,8 +23,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly double _spanEquipmentLabelOffset = 5;
 
 
-        public DetachedSpanEquipmentBuilder(SpanEquipmentViewModel spanEquipmentViewModel)
+        public DetachedSpanEquipmentBuilder(ILogger<GetDiagramQueryHandler> logger, SpanEquipmentViewModel spanEquipmentViewModel)
         {
+            _logger = logger;
             _spanEquipmentViewModel = spanEquipmentViewModel;
         }
 

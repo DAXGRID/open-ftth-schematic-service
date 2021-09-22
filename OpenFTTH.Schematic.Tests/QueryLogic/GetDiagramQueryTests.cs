@@ -131,20 +131,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(0);
         }
 
-
-        [Fact, Order(30)]
-        public async void TestGetDiagramQueryOnNodeWithNoConduits_ShouldReturnEmptyDiagram()
-        {
-            var sutRouteNetworkElement = TestRouteNetwork.SDU_3;
-
-            // Act
-            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
-
-            // Assert
-            getDiagramQueryResult.IsSuccess.Should().BeTrue();
-            getDiagramQueryResult.Value.Diagram.DiagramObjects.Count().Should().Be(0);
-        }
-
         [Fact, Order(31)]
         public async void TestGetDiagramForRouteNodeThatDontExist_ShouldFail()
         {

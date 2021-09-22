@@ -1,6 +1,8 @@
 ﻿using FluentResults;
+using Microsoft.Extensions.Logging;
 using OpenFTTH.CQRS;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
+using OpenFTTH.Schematic.Business.QueryHandler;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {
     public class RouteNetworkElementDiagramBuilder
     {
+        private readonly ILogger<GetDiagramQueryHandler> _logger;
         private readonly IQueryDispatcher _queryDispatcher;
 
         private readonly Diagram _diagram = new Diagram()
@@ -22,8 +25,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private Guid _routeNetworkElementId;
         private RouteNetworkElementRelatedData _data;
 
-        public RouteNetworkElementDiagramBuilder(IQueryDispatcher queryDispatcher)
+        public RouteNetworkElementDiagramBuilder(ILogger<GetDiagramQueryHandler> logger, IQueryDispatcher queryDispatcher)
         {
+            _logger = logger;
             _queryDispatcher = queryDispatcher;
         }
 
@@ -64,7 +68,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 var readModel = new NodeContainerViewModel(_data);
 
-                var builder = new NodeContainerBuilder(readModel);
+                var builder = new NodeContainerBuilder(_logger, readModel);
 
                 var size = builder.CreateDiagramObjects(_diagram, 0, yOffset);
 
@@ -84,9 +88,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             foreach (var spanEquipment in orderedDetachedSpanEquipments)
             {
-                var readModel = new SpanEquipmentViewModel(_routeNetworkElementId, spanEquipment.Id, _data);
+                var readModel = new SpanEquipmentViewModel(_logger, _routeNetworkElementId, spanEquipment.Id, _data);
 
-                var builder = new DetachedSpanEquipmentBuilder(readModel);
+                var builder = new DetachedSpanEquipmentBuilder(_logger, readModel);
 
                 var size = builder.CreateDiagramObjects(_diagram, 0, yOffset);
 

@@ -1,11 +1,14 @@
 ﻿using FluentAssertions;
 using FluentResults;
+using Microsoft.Extensions.Logging;
+using Moq;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.API.Queries;
 using OpenFTTH.Schematic.Business.IO;
+using OpenFTTH.Schematic.Business.QueryHandler;
 using OpenFTTH.Schematic.Business.SchematicBuilder;
 using OpenFTTH.TestData;
 using OpenFTTH.UtilityGraphService.API.Commands;
@@ -41,6 +44,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         [Fact, Order(1)]
         public void TestDrawingSingleDetachedMultiConduit_5x10_HH_1_to_HH_10()
         {
+            var logger = Mock.Of<ILogger<GetDiagramQueryHandler>>();
+
             var sutRouteNode = TestRouteNetwork.CC_1;
 
             var data = RouteNetworkElementRelatedData.FetchData(_queryDispatcher, sutRouteNode).Value;
@@ -48,9 +53,9 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var spanEquipment = data.SpanEquipments[TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10];
 
             // Create read model
-            var readModel = new SpanEquipmentViewModel(sutRouteNode, spanEquipment.Id, data);
+            var readModel = new SpanEquipmentViewModel(logger, sutRouteNode, spanEquipment.Id, data);
 
-            var builder = new DetachedSpanEquipmentBuilder(readModel);
+            var builder = new DetachedSpanEquipmentBuilder(logger, readModel);
 
             // Create the diagram
             Diagram diagram = new Diagram();

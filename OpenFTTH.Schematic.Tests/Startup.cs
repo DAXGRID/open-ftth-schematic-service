@@ -1,5 +1,7 @@
 ﻿using DAX.EventProcessing;
 using Microsoft.Extensions.DependencyInjection;
+using OpenFTTH.Address.Business;
+using OpenFTTH.Address.Business.Repository;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.EventSourcing.InMem;
@@ -49,6 +51,11 @@ namespace OpenFTTH.Schematic.Tests
             services.AddCQRS(businessAssemblies);
 
             services.AddProjections(businessAssemblies);
+
+            // In-mem address service for testing
+            services.AddSingleton<IAddressRepository>(x =>
+                new InMemAddressRepository(TestAddressData.AccessAddresses)
+            );
 
             // Test Route Network Data
             services.AddSingleton<ITestRouteNetworkData, TestRouteNetwork>();

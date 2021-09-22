@@ -1,10 +1,12 @@
-﻿using NetTopologySuite.Geometries;
+﻿using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.Drawing;
 using OpenFTTH.Schematic.Business.InternalDiagramObjects.Lines;
 using OpenFTTH.Schematic.Business.Layout;
 using OpenFTTH.Schematic.Business.Lines;
+using OpenFTTH.Schematic.Business.QueryHandler;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
     /// </summary>
     public class NodeContainerBuilder
     {
+        private readonly ILogger<GetDiagramQueryHandler> _logger;
         private readonly NodeContainerViewModel _nodeContainerViewModel;
 
         private readonly double _areaWidth = 300;
@@ -26,9 +29,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private Dictionary<Guid, List<TerminalEndHolder>> _terminalEndsByTerminalId = new Dictionary<Guid, List<TerminalEndHolder>>();
 
-        public NodeContainerBuilder(NodeContainerViewModel viewModel)
+        public NodeContainerBuilder(ILogger<GetDiagramQueryHandler> logger, NodeContainerViewModel viewModel)
         {
-            _nodeContainerViewModel = viewModel;
+            _logger = logger;
+           _nodeContainerViewModel = viewModel;
         }
 
         public Size CreateDiagramObjects(Diagram diagram, double offsetX, double offsetY)
@@ -138,7 +142,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var spanEquipmentViewModels = new List<SpanEquipmentViewModel>();
                 
             foreach (var spanEquipment in _nodeContainerViewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_nodeContainerViewModel.Data)))
-                spanEquipmentViewModels.Add(new SpanEquipmentViewModel(_nodeContainerViewModel.Data.RouteNetworkElementId, spanEquipment.Id, _nodeContainerViewModel.Data));
+                spanEquipmentViewModels.Add(new SpanEquipmentViewModel(_logger, _nodeContainerViewModel.Data.RouteNetworkElementId, spanEquipment.Id, _nodeContainerViewModel.Data));
 
             foreach (var viewModel in GetOrderedSpanEquipmentViewModels(spanEquipmentViewModels))
             {
