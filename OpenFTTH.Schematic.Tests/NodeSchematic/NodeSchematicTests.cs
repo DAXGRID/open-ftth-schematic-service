@@ -132,7 +132,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             diagram.DiagramObjects.Count(o => o.Style == "WestTerminalLabel" && o.IdentifiedObject.RefId == conduit1.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
 
-            diagram.DiagramObjects.Count(o => o.Style == "SouthTerminalLabel" && o.IdentifiedObject.RefId == conduit2.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "SouthTerminalLabel" && o.IdentifiedObject.RefId == conduit3.SpanStructures[0].SpanSegments[0].Id).Should().Be(2);
 
             // Only one terminal connection should be shown in conduit 1 that is affixed to the node container
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefId == conduit1.SpanStructures[0].SpanSegments[0].Id).Should().Be(1);

@@ -74,9 +74,9 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Style == "InnerConduitBlue" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "InnerConduitYellow" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "InnerConduitWhite" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
-            diagram.DiagramObjects.Count(o => o.Style == "SouthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
-            diagram.DiagramObjects.Count(o => o.Style == "SouthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
-            diagram.DiagramObjects.Count(o => o.Style == "SouthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[1].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[2].SpanSegments[0].Id).Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
 
             // Assert that 5x10 passing through node container has as correct labels and id's
             utilityNetwork.TryGetEquipment<SpanEquipment>(TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10, out var hh11tohh10conduit);
@@ -171,8 +171,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             westSegment1MaxY.Should().BeGreaterThan(westSegment2MaxY);
 
             // In south side, span equipment must be drawed from left to right 1,2,3,4..
-            var northSegment1MaxX = diagram.DiagramObjects.Find(d => d.Style == "SouthTerminalLabel" && d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[2].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
-            var northsegment2MaxX = diagram.DiagramObjects.Find(d => d.Style == "SouthTerminalLabel" && d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[3].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
+            var northSegment1MaxX = diagram.DiagramObjects.Find(d => d.Style == "NorthTerminalLabel" && d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[2].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
+            var northsegment2MaxX = diagram.DiagramObjects.Find(d => d.Style == "NorthTerminalLabel" && d.IdentifiedObject != null && d.IdentifiedObject.RefId == sutNorthAttachedSpanEquipment.SpanStructures[3].SpanSegments[0].Id).Geometry.EnvelopeInternal.MaxX;
             northsegment2MaxX.Should().BeGreaterThan(northSegment1MaxX);
 
             // In stand alone span equipment must be drawed from top and down 1,2,3,4..

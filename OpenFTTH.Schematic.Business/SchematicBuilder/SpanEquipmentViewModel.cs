@@ -8,6 +8,7 @@ using OpenFTTH.UtilityGraphService.Business.SpanEquipments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RouteNetworkTrace = OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork.Tracing.RouteNetworkTrace;
 
 namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {

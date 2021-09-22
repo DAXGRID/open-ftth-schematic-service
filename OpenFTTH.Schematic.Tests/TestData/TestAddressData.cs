@@ -21,7 +21,7 @@ namespace OpenFTTH.TestData
                         unitAddressIds: new Guid[] { Guid.Parse("d81c1428-1fe2-44bf-be71-57a5cfe8ac6c") }
                     )
                     {
-                        HouseHumber = "3",
+                        HouseNumber = "3",
                         PostDistrictCode = "7120",
                         PostDistrict = "Vejle Øst",
                         ExternalId = Guid.Parse("0a3f5090-b718-32b8-e044-0003ba298018"),
@@ -47,7 +47,7 @@ namespace OpenFTTH.TestData
                         unitAddressIds: new Guid[] { Guid.Parse("5d639c7c-64e7-42c7-828e-5f615a13424b") }
                     )
                     {
-                        HouseHumber = "7A",
+                        HouseNumber = "7A",
                         PostDistrictCode = "8722",
                         PostDistrict = "Hedensted",
                         ExternalId = Guid.Parse("0a3f508f-8504-32b8-e044-0003ba298018"),
@@ -77,7 +77,7 @@ namespace OpenFTTH.TestData
                         }
                     )
                     {
-                        HouseHumber = "3",
+                        HouseNumber = "3",
                         PostDistrictCode = "8700",
                         PostDistrict = "Horsens",
                         ExternalId = Guid.Parse("6d66b677-5eea-43f2-afd1-354217159a81"),
