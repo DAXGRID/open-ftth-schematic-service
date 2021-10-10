@@ -172,9 +172,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             conduitsPassingThroughList = conduitsPassingThroughList.OrderBy(s => (GetOrderByKey(s.SpanEquipment))).ToList();
 
             // Sort non pass throughs
-            var spanEquipmentEndOrganizer = new NodeContainerSpanEquipmentOrganizer(conduitsEndingInNodeList);
+            var spanEquipmentEndOrganizer = new NodeContainerSpanEquipmentOrganizer(spanEquipmentViewModels);
 
-            conduitsEndingInNodeList = spanEquipmentEndOrganizer.SortByConnectivity();
+            conduitsEndingInNodeList = spanEquipmentEndOrganizer.SortByConnectivity(conduitsEndingInNodeList);
 
             if (_nodeContainerViewModel.NodeContainer.VertialContentAlignmemt == NodeContainerVerticalContentAlignmentEnum.Bottom)
             {

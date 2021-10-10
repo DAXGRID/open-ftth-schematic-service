@@ -435,5 +435,40 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
         }
 
+
+        [Fact, Order(31)]
+        public async void TestConnectOneMoreSingleConduitInCC1()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.CC_1;
+            var sutSpanEquipmentFrom = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutSpanEquipmentTo = TestUtilityNetwork.CustomerConduit_CC_1_to_SDU_2;
+
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            // Act
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentFrom, out var fromSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(sutSpanEquipmentTo, out var toSpanEquipment);
+
+            // Connect segments
+            var connectCmd = new ConnectSpanSegmentsAtRouteNode(Guid.NewGuid(), new UserContext("test", Guid.Empty),
+                routeNodeId: TestRouteNetwork.CC_1,
+                spanSegmentsToConnect: new Guid[] {
+                    fromSpanEquipment.SpanStructures[2].SpanSegments[0].Id,
+                    toSpanEquipment.SpanStructures[0].SpanSegments[0].Id
+                }
+            );
+
+            var connectResult = await _commandDispatcher.HandleAsync<ConnectSpanSegmentsAtRouteNode, Result>(connectCmd);
+
+            connectResult.IsSuccess.Should().BeTrue();
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.CC_1));
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(getDiagramQueryResult.Value.Diagram).Export("c:/temp/diagram/test.geojson");
+
+
+        }
+
     }
 }

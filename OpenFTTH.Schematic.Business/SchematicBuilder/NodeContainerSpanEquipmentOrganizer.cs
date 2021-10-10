@@ -20,7 +20,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             _matrix = CreateConnectionMatrix();
         }
 
-        public List<SpanEquipmentViewModel> SortByConnectivity()
+        public List<SpanEquipmentViewModel> SortByConnectivity(List<SpanEquipmentViewModel> spanEquipmentViewModelsToSort)
         {
             Dictionary<Guid, string> sortKey = new();
 
@@ -47,7 +47,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 }
             }
 
-            return _affixedSpanEquipmentViewModels.OrderBy(s => sortKey[s.SpanEquipment.Id]).ToList();
+            return spanEquipmentViewModelsToSort.OrderBy(s => sortKey[s.SpanEquipment.Id]).ToList();
         }
 
         private string GetSortSuffix(NodeContainerSideEnum side, NodeContainerSideEnum connectedToSide, ushort connectedToStructureIndex)
@@ -55,18 +55,25 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             ushort reverseIndexPos = 5000;
 
             if (side == NodeContainerSideEnum.North && connectedToSide == NodeContainerSideEnum.East)
-                return $"{reverseIndexPos - connectedToStructureIndex}";
+                return (reverseIndexPos - connectedToStructureIndex).ToString("D7");
 
             if (side == NodeContainerSideEnum.East && connectedToSide == NodeContainerSideEnum.North)
-                return $"{reverseIndexPos - connectedToStructureIndex}";
+                return (reverseIndexPos - connectedToStructureIndex).ToString("D7");
 
             if (side == NodeContainerSideEnum.South && connectedToSide == NodeContainerSideEnum.West)
-                return $"{reverseIndexPos - connectedToStructureIndex}";
+                return (reverseIndexPos - connectedToStructureIndex).ToString("D7");
 
             if (side == NodeContainerSideEnum.West && connectedToSide == NodeContainerSideEnum.South)
-                return $"{reverseIndexPos - connectedToStructureIndex}";
+                return (reverseIndexPos - connectedToStructureIndex).ToString("D7");
 
-            return $"{connectedToStructureIndex}";
+            if (side == NodeContainerSideEnum.West && connectedToSide == NodeContainerSideEnum.East)
+                return (reverseIndexPos - connectedToStructureIndex).ToString("D7");
+
+            if (side == NodeContainerSideEnum.East && connectedToSide == NodeContainerSideEnum.West)
+                return (reverseIndexPos - connectedToStructureIndex).ToString("D7");
+
+
+            return connectedToStructureIndex.ToString("D7");
         }
 
         private SpanSegmentEndConnectionMatrix CreateConnectionMatrix()
