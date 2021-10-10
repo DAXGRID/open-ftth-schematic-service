@@ -40,7 +40,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         public async void TestDrawingSpanEquipmentWithSegmentsCut()
         {
             var sutRouteNetworkElement = TestRouteNetwork.CC_1;
-            var sutSpanEquipment = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutSpanEquipment = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
 
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
 
@@ -79,7 +79,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Style == "NorthTerminalLabel" && o.Label == "SP-1" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == cc1tosp1conduit.SpanStructures[3].SpanSegments[0].Id).Should().Be(1);
 
             // Assert that 5x10 passing through node container has as correct labels and id's
-            utilityNetwork.TryGetEquipment<SpanEquipment>(TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10, out var hh11tohh10conduit);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10, out var hh11tohh10conduit);
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[0].SpanSegments[0].Id).Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.IdentifiedObject.RefClass == "SpanSegment" && o.IdentifiedObject.RefId == hh11tohh10conduit.SpanStructures[0].SpanSegments[1].Id).Should().Be(1);
 
@@ -109,9 +109,9 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
 
             var sutRouteNetworkElement = TestRouteNetwork.CC_1;
-            var sutSpanEquipment = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutSpanEquipment = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
 
-            var sutConnectFromSpanEquipment = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutConnectFromSpanEquipment = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
             var sutConnectToSpanEquipment = TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1;
 
             utilityNetwork.TryGetEquipment<SpanEquipment>(sutConnectFromSpanEquipment, out var sutFromSpanEquipment);
@@ -147,7 +147,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
 
             var sutRouteNetworkElementId = TestRouteNetwork.CC_1;
-            var sutSpanEquipmentId1 = TestUtilityNetwork.MultiConduit_5x10_HH_1_to_HH_10;
+            var sutSpanEquipmentId1 = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
             var sutSpanEquipmentId2 = TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1;
             var sutSpanEquipmentId3 = TestUtilityNetwork.MultiConduit_10x10_HH_1_to_HH_10;
 
