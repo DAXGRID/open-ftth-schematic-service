@@ -29,6 +29,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         public SpanEquipment SpanEquipment => _spanEquipment;
 
+        public Guid RouteNetworkElementIdOfInterest => _data.RouteNetworkElementId;
+
         public SpanEquipmentViewModel(ILogger<GetDiagramQueryHandler> logger, Guid routeElementId, Guid spanEquipmentId, RouteNetworkElementRelatedData data)
         {
             _logger = logger;

@@ -139,12 +139,15 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private void AffixConduits(LineBlock nodeContainerBlock)
         {
-            var spanEquipmentViewModels = new List<SpanEquipmentViewModel>();
+            var affixedSpanEquipmentViewModels = new List<SpanEquipmentViewModel>();
                 
             foreach (var spanEquipment in _nodeContainerViewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_nodeContainerViewModel.Data)))
-                spanEquipmentViewModels.Add(new SpanEquipmentViewModel(_logger, _nodeContainerViewModel.Data.RouteNetworkElementId, spanEquipment.Id, _nodeContainerViewModel.Data));
+                affixedSpanEquipmentViewModels.Add(new SpanEquipmentViewModel(_logger, _nodeContainerViewModel.Data.RouteNetworkElementId, spanEquipment.Id, _nodeContainerViewModel.Data));
 
-            foreach (var viewModel in GetOrderedSpanEquipmentViewModels(spanEquipmentViewModels))
+            var organizer = new NodeContainerSpanEquipmentOrganizer(affixedSpanEquipmentViewModels);
+
+
+            foreach (var viewModel in GetOrderedSpanEquipmentViewModels(affixedSpanEquipmentViewModels))
             {
                 AffixConduit(nodeContainerBlock, viewModel);
             }
@@ -152,30 +155,36 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private List<SpanEquipmentViewModel> GetOrderedSpanEquipmentViewModels(List<SpanEquipmentViewModel> spanEquipmentViewModels)
         {
-            List<SpanEquipmentViewModel> toBeDrawedFirstList = new List<SpanEquipmentViewModel>();
-            List<SpanEquipmentViewModel> toBeDrawedSecondList = new List<SpanEquipmentViewModel>();
+            List<SpanEquipmentViewModel> conduitsPassingThroughList = new List<SpanEquipmentViewModel>();
+            List<SpanEquipmentViewModel> conduitsEndingInNodeList = new List<SpanEquipmentViewModel>();
 
             // Make sure that span equipments that is pass through is drawed first
             foreach (var spanEquipmentViewModel in spanEquipmentViewModels)
             {
                 if (spanEquipmentViewModel.IsPassThrough)
-                    toBeDrawedFirstList.Add(spanEquipmentViewModel);
+                    conduitsPassingThroughList.Add(spanEquipmentViewModel);
                 else
-                    toBeDrawedSecondList.Add(spanEquipmentViewModel);
+                    conduitsEndingInNodeList.Add(spanEquipmentViewModel);
             }
 
-            // Sort by marking color
-            toBeDrawedFirstList = toBeDrawedFirstList.OrderBy(s => (GetOrderByKey(s.SpanEquipment))).ToList();
+
+            // Sort pass throughs by marking color
+            conduitsPassingThroughList = conduitsPassingThroughList.OrderBy(s => (GetOrderByKey(s.SpanEquipment))).ToList();
+
+            // Sort non pass throughs
+            var spanEquipmentEndOrganizer = new NodeContainerSpanEquipmentOrganizer(conduitsEndingInNodeList);
+
+            conduitsEndingInNodeList = spanEquipmentEndOrganizer.SortByConnectivity();
 
             if (_nodeContainerViewModel.NodeContainer.VertialContentAlignmemt == NodeContainerVerticalContentAlignmentEnum.Bottom)
             {
-                toBeDrawedFirstList.AddRange(toBeDrawedSecondList);
-                return toBeDrawedFirstList;
+                conduitsPassingThroughList.AddRange(conduitsEndingInNodeList);
+                return conduitsPassingThroughList;
             }
             else
             {
-                toBeDrawedSecondList.AddRange(toBeDrawedFirstList);
-                return toBeDrawedSecondList;
+                conduitsEndingInNodeList.AddRange(conduitsPassingThroughList);
+                return conduitsEndingInNodeList;
             }
         }
 
