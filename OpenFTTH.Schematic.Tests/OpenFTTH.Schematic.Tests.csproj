@@ -14,10 +14,10 @@
     <PackageReference Include="OpenFTTH.Address.API" Version="1.1.0" />
     <PackageReference Include="OpenFTTH.Address.Business" Version="1.1.0" />
     <PackageReference Include="OpenFTTH.EventSourcing" Version="1.4.0" />
-    <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="1.6.3" />
-    <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="1.6.3" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="1.16.2" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="1.16.2" />
+    <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="1.6.6" />
+    <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="1.6.6" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="1.17.3" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="1.17.3" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="Xunit.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="Xunit.Extensions.Ordering" Version="1.4.5" />

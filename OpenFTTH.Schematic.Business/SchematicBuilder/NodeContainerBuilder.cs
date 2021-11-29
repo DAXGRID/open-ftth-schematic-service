@@ -2,6 +2,7 @@
 using NetTopologySuite.Geometries;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
+using OpenFTTH.Schematic.Business.Canvas;
 using OpenFTTH.Schematic.Business.Drawing;
 using OpenFTTH.Schematic.Business.InternalDiagramObjects.Lines;
 using OpenFTTH.Schematic.Business.Layout;
@@ -22,7 +23,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly ILogger<GetDiagramQueryHandler> _logger;
         private readonly NodeContainerViewModel _nodeContainerViewModel;
 
-        private readonly double _areaWidth = 300;
+        private double _initialMinWidth = 300;
         private readonly double _nodeContainerBlockMargin = 60;
         private readonly double _portMargin = 10;
         private readonly double _typeLabelOffset = 8;
@@ -39,22 +40,47 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         {
             List<DiagramObject> result = new List<DiagramObject>();
 
-            // Build node equipment block
-            var nodeEquipmentBlock = CreateNodeEquipmentBlock();
+            // Measure terminal equipment block if node container has any racks or terminal equipments
+            TerminalEquipmentBlockBuilder terminalEquipmentBlockBuilder = null;
+            double nodeContainerExtraHeightForTerminalEquipments = 0;
 
-            result.AddRange(nodeEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
+            if (_nodeContainerViewModel.HasRacksOrTerminalEquipments)
+            {
+                // Build / measue terminal equipment block
+                terminalEquipmentBlockBuilder = new TerminalEquipmentBlockBuilder(_nodeContainerViewModel);
+                var terminalEquipmentBlockMinSize = terminalEquipmentBlockBuilder.Measure();
+
+               nodeContainerExtraHeightForTerminalEquipments = terminalEquipmentBlockMinSize.Height;
+
+                if (terminalEquipmentBlockMinSize.Width > _initialMinWidth)
+                    _initialMinWidth = terminalEquipmentBlockMinSize.Width;
+            }
+
+            // Build node container block
+            var spanEquipmentBlock = CreateSpanEquipmentBlock(nodeContainerExtraHeightForTerminalEquipments);
+
+            result.AddRange(spanEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
 
             // Create label on top of span equipment block
-            var nodeEquipmentTypeLabel = CreateTypeLabel(diagram, offsetX, offsetY + nodeEquipmentBlock.ActualSize.Height + _typeLabelOffset);
+            var nodeEquipmentTypeLabel = CreateTypeLabel(diagram, offsetX, offsetY + spanEquipmentBlock.ActualSize.Height + _typeLabelOffset + nodeContainerExtraHeightForTerminalEquipments);
             result.Add(nodeEquipmentTypeLabel);
 
             // Create the 4 sides
-            result.Add(CreateSide(diagram, BlockSideEnum.West, offsetX, offsetY, nodeEquipmentBlock.ActualSize.Width, nodeEquipmentBlock.ActualSize.Height));
-            result.Add(CreateSide(diagram, BlockSideEnum.North, offsetX, offsetY, nodeEquipmentBlock.ActualSize.Width, nodeEquipmentBlock.ActualSize.Height));
-            result.Add(CreateSide(diagram, BlockSideEnum.East, offsetX, offsetY, nodeEquipmentBlock.ActualSize.Width, nodeEquipmentBlock.ActualSize.Height));
-            result.Add(CreateSide(diagram, BlockSideEnum.South, offsetX, offsetY, nodeEquipmentBlock.ActualSize.Width, nodeEquipmentBlock.ActualSize.Height));
+            result.Add(CreateSide(diagram, BlockSideEnum.West, offsetX, offsetY, spanEquipmentBlock.ActualSize.Width, spanEquipmentBlock.ActualSize.Height));
+            result.Add(CreateSide(diagram, BlockSideEnum.North, offsetX, offsetY, spanEquipmentBlock.ActualSize.Width, spanEquipmentBlock.ActualSize.Height));
+            result.Add(CreateSide(diagram, BlockSideEnum.East, offsetX, offsetY, spanEquipmentBlock.ActualSize.Width, spanEquipmentBlock.ActualSize.Height));
+            result.Add(CreateSide(diagram, BlockSideEnum.South, offsetX, offsetY, spanEquipmentBlock.ActualSize.Width, spanEquipmentBlock.ActualSize.Height));
 
-            return new Size(nodeEquipmentBlock.ActualSize.Height + _typeLabelOffset, nodeEquipmentBlock.ActualSize.Width);
+            var nodeContainerBlockSize = spanEquipmentBlock.ActualSize;
+
+            // Add terminal equipment block
+            if (terminalEquipmentBlockBuilder != null)
+            {
+                var equipmentBlock = terminalEquipmentBlockBuilder.CreateEquipmentBlock(spanEquipmentBlock.Measure().Width);
+                result.AddRange(equipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY + nodeContainerBlockSize.Height));
+            }
+
+            return new Size(nodeContainerBlockSize.Height + _typeLabelOffset, nodeContainerBlockSize.Width);
         }
 
         private DiagramObject CreateTypeLabel(Diagram diagram, double x, double y)
@@ -104,11 +130,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         }
 
 
-        private LineBlock CreateNodeEquipmentBlock()
+        private LineBlock CreateSpanEquipmentBlock(double extraHeightTop = 0)
         {
             var nodeEquipmentBlock = new LineBlock()
             {
-                MinWidth = _areaWidth,
+                MinWidth = _initialMinWidth,
+                ExtraHeightTop = extraHeightTop,
                 IsVisible = true,
                 Style = "NodeContainer",
                 Margin = _nodeContainerBlockMargin,
@@ -127,6 +154,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             return nodeEquipmentBlock;
         }
+
+      
 
         private VerticalAlignmentEnum GetContainerVerticalAlignment()
         {

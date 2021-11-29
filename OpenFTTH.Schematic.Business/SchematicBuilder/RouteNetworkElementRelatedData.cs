@@ -19,6 +19,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public LookupCollection<SpanEquipmentSpecification> SpanEquipmentSpecifications { get; set; }
         public LookupCollection<SpanStructureSpecification> SpanStructureSpecifications { get; set; }
         public LookupCollection<NodeContainerSpecification> NodeContainerSpecifications { get; set; }
+        public LookupCollection<RackSpecification> RackSpecifications { get; set; }
         public LookupCollection<RouteNetworkElement> RouteNetworkElements { get; set; }
         public LookupCollection<RouteNetworkInterest> RouteNetworkInterests { get; set; }
         public LookupCollection<SpanEquipmentWithRelatedInfo> SpanEquipments { get; set; }
@@ -43,6 +44,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             // Query all node container specifications
             result.NodeContainerSpecifications = queryDispatcher.HandleAsync<GetNodeContainerSpecifications, Result<LookupCollection<NodeContainerSpecification>>>(new GetNodeContainerSpecifications()).Result.Value;
+
+            // Query all rack specifications
+            result.RackSpecifications = queryDispatcher.HandleAsync<GetRackSpecifications, Result<LookupCollection<RackSpecification>>>(new GetRackSpecifications()).Result.Value;
+
 
             // Query all route node interests
             var routeNetworkInterestQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { routeNetworkElementId })

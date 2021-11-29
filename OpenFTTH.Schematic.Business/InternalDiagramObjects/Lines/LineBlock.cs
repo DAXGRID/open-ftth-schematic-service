@@ -210,7 +210,7 @@ namespace OpenFTTH.Schematic.Business.Lines
                 result.Add(new DiagramObject(diagram)
                 {
                     Style = this.Style,
-                    Geometry = GeometryBuilder.Rectangle(_offsetX, _offsetY, ActualSize.Height, ActualSize.Width),
+                    Geometry = GeometryBuilder.Rectangle(_offsetX, _offsetY, ActualSize.Height + ExtraHeightTop, ActualSize.Width),
                     IdentifiedObject = _refClass == null ? null : new IdentifiedObjectReference() { RefId = _refId, RefClass = _refClass },
                     DrawingOrder = this.DrawingOrder
                 });

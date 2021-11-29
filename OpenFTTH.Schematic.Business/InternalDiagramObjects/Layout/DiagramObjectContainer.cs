@@ -10,5 +10,6 @@ namespace OpenFTTH.Schematic.Business.Layout
         public abstract Size ActualSize { get; }
         public double MinHeight { get; init;  }
         public double MinWidth { get; init; }
+        public double ExtraHeightTop { get; init; }
     }
 }

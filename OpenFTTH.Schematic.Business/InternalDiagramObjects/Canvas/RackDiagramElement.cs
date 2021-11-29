@@ -1,0 +1,107 @@
+﻿using OpenFTTH.Schematic.API.Model.DiagramLayout;
+using OpenFTTH.Schematic.Business.Drawing;
+using OpenFTTH.Schematic.Business.Layout;
+using OpenFTTH.Schematic.Business.SchematicBuilder;
+using System.Collections.Generic;
+
+
+namespace OpenFTTH.Schematic.Business.Canvas
+{
+    public class RackDiagramElement : TerminalEquipmentDiagramBlockElement
+    {
+        RackViewModel _rackViewModel;
+
+        static double _rackUnitHeight = 10;
+        static double _innerFrameMargin = 40;
+
+        private string _style = "Rack";
+        public string Style
+        {
+            get
+            {
+                return _style;
+            }
+
+            init
+            {
+                _style = value;
+            }
+        }
+
+        private TerminalEquipmentDiagramBlock _terminalEquipmentBlock = null;
+
+        private double Width { get; }
+        private double Height { get; }
+
+        public RackDiagramElement(TerminalEquipmentDiagramBlock canvasBlock, RackViewModel rackViewModel)
+        {
+            _rackViewModel = rackViewModel;
+            _terminalEquipmentBlock = canvasBlock;
+            Width = 400;
+            Height = (_rackUnitHeight * rackViewModel.MinHeightInUnits) + (_innerFrameMargin * 2);
+        }
+   
+        public override List<DiagramObject> CreateDiagramObjects(Diagram diagram, double offsetX, double offsetY)
+        {
+            List<DiagramObject> result = new List<DiagramObject>();
+
+            // Create rack block rectangle
+            var rackPoly = new DiagramObject(diagram)
+            {
+                Geometry = GeometryBuilder.Rectangle(offsetX, offsetY, Height, Width),
+                Style = "Rack",
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)100
+            };
+
+            result.Add(rackPoly);
+
+            // Create rack block rectangle
+            var subRackSpacePoly = new DiagramObject(diagram)
+            {
+                Geometry = GeometryBuilder.Rectangle(offsetX + _innerFrameMargin, offsetY + _innerFrameMargin, Height - (_innerFrameMargin * 2), Width - (_innerFrameMargin * 2)),
+                Style = "SubrackSpace",
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)200
+            };
+
+            result.Add(subRackSpacePoly);
+
+
+            // Create Unit texts
+            for (int rackUnit = 0; rackUnit <= _rackViewModel.MinHeightInUnits; rackUnit++)
+            {
+                result.Add(
+                    new DiagramObject(diagram)
+                    {
+                        Style = "RackUnitLabel",
+                        Label = $"U {rackUnit}",
+                        Geometry = GeometryBuilder.Point(offsetX + 40, offsetY + (rackUnit * _rackUnitHeight) + 40),
+                        DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)300
+                    }
+                );
+            }
+
+            // Create rack label
+            result.Add(CreateRackLabel(diagram, offsetX + _innerFrameMargin, offsetY + 15 + Height - _innerFrameMargin, _rackViewModel.Name + "(" + _rackViewModel.SpecName + ")"));
+
+            return result;
+        }
+
+        private DiagramObject CreateRackLabel(Diagram diagram, double x, double y, string label)
+        {
+            var labelDiagramObject = new DiagramObject(diagram)
+            {
+                Style = "RackLabel",
+                Label = label,
+                Geometry = GeometryBuilder.Point(x, y),
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)400
+            };
+
+            return labelDiagramObject;
+        }
+
+        public override Size Measure()
+        {
+            return new Size(Height, Width);
+        }
+    }
+}

@@ -40,6 +40,7 @@ namespace OpenFTTH.TestData
         public static Guid NodeContainer_HH_10;
         public static Guid NodeContainer_CC_1;
         public static Guid NodeContainer_J_1;
+        public static Guid NodeContainer_FP_2;
 
         public TestUtilityNetwork(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
@@ -101,6 +102,7 @@ namespace OpenFTTH.TestData
                 NodeContainer_HH_10 = PlaceNodeContainer(TestSpecifications.Well_Fiberpowertech_37_EK_378_400x800, TestSpecifications.Manu_Fiberpowertech, TestRouteNetwork.HH_10);
                 NodeContainer_CC_1 = PlaceNodeContainer(TestSpecifications.Conduit_Closure_Emtelle_Branch_Box, TestSpecifications.Manu_Emtelle, TestRouteNetwork.CC_1);
                 NodeContainer_J_1 = PlaceNodeContainer(TestSpecifications.Conduit_Closure_Emtelle_Branch_Box, TestSpecifications.Manu_Emtelle, TestRouteNetwork.J_1);
+                NodeContainer_FP_2 = PlaceNodeContainer(TestSpecifications.Well_Cubis_STAKKAbox_MODULA_600x450, TestSpecifications.Manu_Emtelle, TestRouteNetwork.FP_2);
 
                 // Affix 5x10 and 3x10 in CC 1
                 AffixSpanEquipmentToContainer(MultiConduit_12x7_HH_1_to_HH_10, NodeContainer_CC_1, NodeContainerSideEnum.West);
