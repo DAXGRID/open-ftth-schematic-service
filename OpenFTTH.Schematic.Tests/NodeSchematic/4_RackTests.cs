@@ -101,6 +101,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Style == "SubrackSpace").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "RackLabel").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "RackUnitLabel").Should().Be(81);
+
+            diagram.DiagramObjects.Count(o => o.Style == "Rack" && o.IdentifiedObject.RefId != Guid.Empty).Should().Be(1);
         }
 
         [Fact, Order(11)]

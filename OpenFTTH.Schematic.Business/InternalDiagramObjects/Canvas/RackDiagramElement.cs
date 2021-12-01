@@ -50,7 +50,8 @@ namespace OpenFTTH.Schematic.Business.Canvas
             {
                 Geometry = GeometryBuilder.Rectangle(offsetX, offsetY, Height, Width),
                 Style = "Rack",
-                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)100
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)100,
+                IdentifiedObject = new IdentifiedObjectReference() { RefClass = "Rack", RefId = _rackViewModel.RackId }
             };
 
             result.Add(rackPoly);

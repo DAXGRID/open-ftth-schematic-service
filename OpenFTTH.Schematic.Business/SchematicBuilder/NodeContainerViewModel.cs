@@ -52,7 +52,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                     rackViewModels.Add(new RackViewModel()
                     {
-                        Id = rack.Id,
+                        RackId = rack.Id,
                         Name = rack.Name,
                         SpecName = rackSpec.ShortName,
                         MinHeightInUnits = rack.HeightInUnits
