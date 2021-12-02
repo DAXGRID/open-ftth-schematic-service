@@ -19,10 +19,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public LookupCollection<SpanEquipmentSpecification> SpanEquipmentSpecifications { get; set; }
         public LookupCollection<SpanStructureSpecification> SpanStructureSpecifications { get; set; }
         public LookupCollection<NodeContainerSpecification> NodeContainerSpecifications { get; set; }
+        public LookupCollection<TerminalEquipmentSpecification> TerminalEquipmentSpecifications { get; set; }
         public LookupCollection<RackSpecification> RackSpecifications { get; set; }
         public LookupCollection<RouteNetworkElement> RouteNetworkElements { get; set; }
         public LookupCollection<RouteNetworkInterest> RouteNetworkInterests { get; set; }
         public LookupCollection<SpanEquipmentWithRelatedInfo> SpanEquipments { get; set; }
+        public LookupCollection<TerminalEquipment> TerminalEquipments { get; set; }
         public LookupCollection<RouteNetworkTrace> RouteNetworkTraces { get; set; }
         public Dictionary<Guid, RouteNetworkElementInterestRelation> InterestRelations { get; set; }
         public NodeContainer NodeContainer { get; set; }
@@ -47,6 +49,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             // Query all rack specifications
             result.RackSpecifications = queryDispatcher.HandleAsync<GetRackSpecifications, Result<LookupCollection<RackSpecification>>>(new GetRackSpecifications()).Result.Value;
+
+            // Query all terminal equipment specifications
+            result.TerminalEquipmentSpecifications = queryDispatcher.HandleAsync<GetTerminalEquipmentSpecifications, Result<LookupCollection<TerminalEquipmentSpecification>>>(new GetTerminalEquipmentSpecifications()).Result.Value;
 
 
             // Query all route node interests
@@ -100,6 +105,41 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 result.RouteNetworkElements = new LookupCollection<RouteNetworkElement>();
                 result.SpanEquipments = new LookupCollection<SpanEquipmentWithRelatedInfo>();
+            }
+
+            // Query terminal equipments
+            List<Guid> terminalEquipmentIds = new();
+
+            if (result.NodeContainer != null)
+            {
+                if (result.NodeContainer.Racks != null)
+                {
+                    foreach (var rack in result.NodeContainer.Racks)
+                    {
+                        foreach (var mount in rack.SubrackMounts)
+                            terminalEquipmentIds.Add(mount.TerminalEquipmentId);
+                    }
+                }
+
+                if (result.NodeContainer.TerminalEquipmentReferences != null)
+                {
+                    foreach (var terminalEquipmentReference in result.NodeContainer.TerminalEquipmentReferences)
+                    {
+                        terminalEquipmentIds.Add(terminalEquipmentReference);
+                    }
+                }
+            }
+
+            if (terminalEquipmentIds.Count > 0)
+            {
+                var terminalEquipmentQueryResult = queryDispatcher.HandleAsync<GetEquipmentDetails, Result<GetEquipmentDetailsResult>>(
+                    new GetEquipmentDetails(new EquipmentIdList(terminalEquipmentIds))
+                ).Result;
+
+                if (terminalEquipmentQueryResult.IsFailed)
+                    return Result.Fail(terminalEquipmentQueryResult.Errors.First());
+
+                result.TerminalEquipments = terminalEquipmentQueryResult.Value.TerminalEquipment;
             }
 
             return Result.Ok(result);

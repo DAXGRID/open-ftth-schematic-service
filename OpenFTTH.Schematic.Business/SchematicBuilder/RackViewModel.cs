@@ -12,5 +12,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public string Name { get; set; }
         public int MinHeightInUnits { get; set; }
         public string SpecName { get; set; }
+        public List<TerminalEquipmentViewModel> TerminalEquipments { get; set; }    
     }
 }

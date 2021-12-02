@@ -27,6 +27,8 @@ namespace OpenFTTH.TestData
         public static Guid Manu_Emtelle = Guid.Parse("fd457db0-ad32-444c-9946-a9e5e8a14d17");
         public static Guid Manu_Fiberpowertech = Guid.Parse("e845dc91-f3b9-407b-a622-2c300d43aaad");
         public static Guid Manu_Cubis = Guid.Parse("6b02e4aa-19f1-46a5-85e8-c1faab236ef0");
+        public static Guid Manu_CommScope = Guid.Parse("6f729864-ea2a-4ddf-b370-3271ef81879c");
+        public static Guid Manu_HuberSuhner = Guid.Parse("52d8191b-8cad-4584-a133-99dc252e5193");
 
         public static Guid Well_Cubis_STAKKAbox_MODULA_600x450 = Guid.Parse("0fb389b5-4bbd-4ebf-b506-bfc636001171");
         public static Guid Well_Cubis_STAKKAbox_MODULA_900x450 = Guid.Parse("8251e1d3-c586-4632-952a-41332aa61a47");
@@ -137,8 +139,36 @@ namespace OpenFTTH.TestData
 
         // Racks
         public static Guid Rack_ESTI = Guid.Parse("b72523d7-4a55-489e-8901-a9fdf9a7d471");
-        public static Guid Rack_19Inch = Guid.Parse("a34f58a1-d214-49a1-85b9-b3a6c1a03ba5");
-        public static Guid Rack_HuberSuber = Guid.Parse("f4889d4a-0224-49e1-a1fe-61158f3bd764");
+
+
+        // Termianl Equipment Structure
+        public static Guid SpliceTray_Uknown12Pin = Guid.Parse("42e126cf-9654-4f0e-b3c2-15bce380fd4e");
+        public static Guid SpliceTray_Uknown24Pin = Guid.Parse("629e7a6c-7326-4cfb-bf8b-df1f78b7473e");
+        public static Guid SpliceTray_SE12Pin = Guid.Parse("fdd67d8c-de49-46d6-ac88-af392f539019");
+        public static Guid SpliceTray_SC12Pin = Guid.Parse("4a15dcc1-4477-4c9d-bf5e-e530480ce822");
+
+        public static Guid SplicePatchTray_LX12UPC12APC = Guid.Parse("adabaab0-24bd-4ecf-b703-932c407cfba8");
+        public static Guid SplicePatchTray_GPS2_12SC = Guid.Parse("8e36b878-5f14-40f3-b088-f04f2ffb03d7");
+        public static Guid SplicePatchTray_GPS2_24LC = Guid.Parse("e24b4f50-24f6-4a33-8b56-cf9a52dce522");
+
+
+        // Terminal Equipments
+        public static Guid SpliceClosure_VMC_12Tray = Guid.Parse("c27377df-f5d0-483c-bc35-2ce8ab56c31b");
+        public static Guid SpliceClosure_VMC_24Tray = Guid.Parse("420cdc14-5eaf-4d28-ade2-1cb5a940d818");
+        public static Guid SpliceClosure_VMC_LZ = Guid.Parse("6ed9bc08-51b7-4c0c-a286-16f27f2f3ffb");
+        public static Guid SpliceClosure_3M_72Fiber = Guid.Parse("c20fb96a-18c7-4730-aae2-e2e5882006d9");
+        public static Guid SpliceClosure_Uknown12Fiber = Guid.Parse("a3de806d-8e3b-4280-8e12-ff875bf87469");
+        public static Guid SpliceClosure_Uknown72Fiber = Guid.Parse("411b565b-2704-4416-bfaa-09e1faa62f8b");
+        public static Guid SpliceClosure_BUDI1S_16SCTrays = Guid.Parse("b982398f-d546-41ab-a5d1-10048d5b9db6");
+        public static Guid SpliceClosure_BUDI1S_6SETrays = Guid.Parse("a27fd2e9-9c5e-459d-b3e2-10dd8932cca0");
+        public static Guid SpliceClosure_BUDI2S_1SETrays = Guid.Parse("57a1d8ae-38c5-499e-b55a-5afc00687a20");
+        public static Guid SpliceClosure_FTUO = Guid.Parse("a469960e-f650-487e-b16b-ce094ef4d9e6");
+        public static Guid SpliceClosure_FIST = Guid.Parse("7a038a46-297d-490c-8796-42b44d1218e0");
+        public static Guid SpliceClosure_FOSC400 = Guid.Parse("5d95fe82-c563-47ff-8356-81d63bb512ee");
+
+        public static Guid Subrack_LISA_APC_UPC = Guid.Parse("778b9d6f-7add-40eb-ae9d-da9660dc1799");
+        public static Guid Subrack_GPS_72_SC = Guid.Parse("aa8027fc-25d6-498e-98e6-4eb7d634070c");
+        public static Guid Subrack_GPS_144_LC = Guid.Parse("d1748de5-de10-45d9-a2a9-1b5b344bf159");
 
 
         public FluentResults.Result<TestSpecifications> Run()
@@ -159,6 +189,10 @@ namespace OpenFTTH.TestData
                 AddSpanEquipmentSpecifications();
 
                 AddRackSpecifications();
+
+                AddTerminalStructureSpecifications();
+
+                AddTerminalEquipmentSpecifications();
 
                 Thread.Sleep(100);
 
@@ -788,14 +822,400 @@ namespace OpenFTTH.TestData
             AddManufacturer(new Manufacturer(Manu_Emtelle, "Emtelle"));
             AddManufacturer(new Manufacturer(Manu_Fiberpowertech, "Fiberpowertech"));
             AddManufacturer(new Manufacturer(Manu_Cubis, "Wavin"));
+            AddManufacturer(new Manufacturer(Manu_CommScope, "CommScope"));
+            AddManufacturer(new Manufacturer(Manu_HuberSuhner, "Huber+Suhner"));
+
         }
 
         private void AddRackSpecifications()
         {
+            // ESTI
             AddSpecification(new RackSpecification(Rack_ESTI, "CommScope ETSI Rack", "ETSI"));
-            AddSpecification(new RackSpecification(Rack_19Inch, "19\" Rack", "19\""));
-            AddSpecification(new RackSpecification(Rack_HuberSuber, "HUBER+SUHNER Rack", "HUBER+SUHNER"));
         }
+
+        private void AddTerminalStructureSpecifications()
+        {
+            // 12 Pin Tray Uknown Type
+            AddSpecification(new TerminalStructureSpecification(SpliceTray_Uknown12Pin, "SpliceTray", "Splidsebakke 12 Søm", "Bakke 12 Søm",
+                new TerminalTemplate[]
+                {
+                    new TerminalTemplate("1", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("2", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("3", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("4", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("5", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("6", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("7", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("8", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("9", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("10", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("11", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("12", TerminalDirectionEnum.BI, false, true)
+                }
+            ));
+
+            // 14 Pin Tray Uknown Type
+            AddSpecification(new TerminalStructureSpecification(SpliceTray_Uknown24Pin, "SpliceTray", "Splidsebakke 24 Søm", "Bakke 24 Søm",
+                new TerminalTemplate[]
+                {
+                    new TerminalTemplate("1", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("2", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("3", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("4", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("5", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("6", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("7", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("8", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("9", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("10", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("11", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("12", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("13", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("14", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("15", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("16", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("17", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("18", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("19", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("20", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("21", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("22", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("23", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("24", TerminalDirectionEnum.BI, false, true)
+                }
+            ));
+
+            // 12 Pin Tray SC (thin tray)
+            AddSpecification(new TerminalStructureSpecification(SpliceTray_SC12Pin, "SpliceTray", "Small SC splidsebakke 12 Søm", "SC Bakke",
+                new TerminalTemplate[]
+                {
+                    new TerminalTemplate("1", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("2", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("3", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("4", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("5", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("6", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("7", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("8", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("9", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("10", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("11", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("12", TerminalDirectionEnum.BI, false, true)
+                }
+            ));
+
+            // 12 Pin Tray SE (thick tray)
+            AddSpecification(new TerminalStructureSpecification(SpliceTray_SE12Pin, "SpliceTray", "Bred SE splidsebakke 12 Søm", "SE Bakke",
+                new TerminalTemplate[]
+                {
+                    new TerminalTemplate("1", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("2", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("3", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("4", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("5", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("6", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("7", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("8", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("9", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("10", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("11", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("12", TerminalDirectionEnum.BI, false, true)
+                }
+            ));
+
+            // LISA 24 Søm UPC+APC
+            AddSpecification(new TerminalStructureSpecification(SplicePatchTray_LX12UPC12APC, "SplicePatchTray", "LISATray 12 x LX.5/UPC og 12 x LX.5/APC", "LISA UPC+APC",
+                new TerminalTemplate[]
+                {
+                    new TerminalTemplate("1", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("2", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("3", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("4", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("5", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("6", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("7", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("8", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("9", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("10", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("11", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("12", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("13", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("14", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("15", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("16", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("17", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("18", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/APC"},
+                    new TerminalTemplate("19", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("20", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("21", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("22", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("23", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"},
+                    new TerminalTemplate("24", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LX.5/UPC"}
+                }
+            ));
+
+
+            // CommScope GPS2 12 SC
+            AddSpecification(new TerminalStructureSpecification(SplicePatchTray_GPS2_12SC, "SplicePatchTray", "GPS2 12 x SC/APC", "GPS2 12xSC/APC",
+                new TerminalTemplate[]
+                {
+                    new TerminalTemplate("1", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("2", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("3", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("4", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("5", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("6", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("7", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("8", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("9", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("10", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("11", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                    new TerminalTemplate("12", TerminalDirectionEnum.BI, false, true) { ConnectorType = "SC/APC"},
+                }
+            ));
+
+            // CommScope GPS2 24 
+            AddSpecification(new TerminalStructureSpecification(SplicePatchTray_GPS2_24LC, "SplicePatchTray", "GPS2 24 x LC/APC", "GPS2 24xLC/APC",
+                new TerminalTemplate[]
+                {
+                    new TerminalTemplate("1", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("2", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("3", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("4", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("5", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("6", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("7", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("8", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("9", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("10", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("11", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("12", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("13", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("14", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("15", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("16", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("17", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("18", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("19", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("20", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("21", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("22", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("23", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"},
+                    new TerminalTemplate("24", TerminalDirectionEnum.BI, false, true) { ConnectorType = "LC/APC"}
+                }
+            ));
+
+        }
+
+        private void AddTerminalEquipmentSpecifications()
+        {
+            // 12 Fiber Tray Uknown Type
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_Uknown12Fiber, "SpliceClosure", "Ukendt Splidseboks 12 Fiber", "Splidseboks", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                }
+            ));
+
+            // 72 Fiber Tray Uknown Type
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_Uknown72Fiber, "SpliceClosure", "Ukendt Splidseboks 72 Fiber", "Splidseboks", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                }
+            ));
+
+
+            // VMC 12 bakker
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_VMC_12Tray, "SpliceClosure", "VMC Splidseboks 24 Fiber 12 stk. bakker med 12 søm", "VMC-12", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 1),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 2),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 3),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 4),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 5),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 6),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 7),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 8),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 9),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 10),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 11),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 12)
+                }
+            ));
+
+            // VMC 24 bakker
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_VMC_24Tray, "SpliceClosure", "VMC Splidseboks 48 Fiber 24 stk. bakker med 12 søm", "VMC-24", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 1),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 2),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 3),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 4),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 5),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 6),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 7),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 8),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 9),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 10),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 11),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 12),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 13),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 14),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 15),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 16),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 17),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 18),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 19),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 20),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 21),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 22),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 23),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 24)
+                }
+            ));
+
+            // 3M 72 Fiber
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_3M_72Fiber, "SpliceClosure", "3M Splidseboks 72 Fiber 6 stk. bakker med 12 søm", "3M", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 1),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 2),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 3),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 4),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 5),
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 6)
+                }
+            ));
+
+            // FIST Muffe
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_FIST, "SpliceClosure", "FIST Splidsemuffe IP55 flad 1x24 UM 12 stk. SE bakker med 12 søm", "FIST Muffe", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 1),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 2),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 3),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 4),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 5),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 6),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 7),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 8),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 9),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 10),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 12),
+                }
+            ));
+
+            // FOSC400
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_FOSC400, "SpliceClosure", "Splidsemuffe FOSC400 B4 3 stk bakker med 24 som", "FOSC400", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_Uknown24Pin, 1),
+                    new TerminalStructureTemplate(SpliceTray_Uknown24Pin, 2),
+                    new TerminalStructureTemplate(SpliceTray_Uknown24Pin, 3),
+                }
+            ));
+
+
+            // BUDI 1S 16 smal bakker
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_BUDI1S_16SCTrays, "SpliceClosure", "BUDI-1S splidseboks 48 Fiber 16 stk. SC bakker med 12 søm", "BUDI-1S", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 1),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 2),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 3),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 4),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 5),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 6),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 7),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 8),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 9),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 10),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 12),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 13),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 14),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 15),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 16)
+               }
+            )
+            { ManufacturerRefs = new Guid[] { Manu_CommScope } });
+
+            // BUDI 1S 6 brede bakker
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_BUDI1S_6SETrays, "SpliceClosure", "BUDI-1S splidseboks 72 Fiber 6 stk. SE bakker med 12 søm", "BUDI-1S", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 1),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 2),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 3),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 4),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 5),
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 6)
+               }
+            )
+            { ManufacturerRefs = new Guid[] { Manu_CommScope } });
+
+
+            // BUDI 2S 1 bakke
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_BUDI2S_1SETrays, "SpliceClosure", "BUDI-2S splidseboks 12 Fiber 1 stk. SE bakker med 12 søm", "BUDI-2S", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_SE12Pin, 1)
+               }
+            )
+            { ManufacturerRefs = new Guid[] { Manu_CommScope } });
+
+
+            // FTUO
+            AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_FTUO, "SpliceClosure", "FTUO udvendig splideboks med plads til 12 søm", "FTUO", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_Uknown12Pin, 1)
+               }
+            )
+            { ManufacturerRefs = new Guid[] { Manu_CommScope } });
+
+
+
+            // LISA 24 Søm APC+UDF Tray
+            AddSpecification(new TerminalEquipmentSpecification(Subrack_LISA_APC_UPC, "Subrack", "LISATray 12 x LX.5/UPC og 12 x LX.5/APC", "LISA APC+UPC", true, 1,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SplicePatchTray_LX12UPC12APC, 1)
+               }
+            )
+            { ManufacturerRefs = new Guid[] { Manu_HuberSuhner } });
+
+
+            // Patch/splidse GPS2 19" 72xSC/APC  
+            AddSpecification(new TerminalEquipmentSpecification(Subrack_GPS_72_SC, "Subrack", "Patch/splidse GPS2 19\" 72 x SC/APC", "GPS2-72", true, 4,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_12SC, 1),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_12SC, 2),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_12SC, 3),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_12SC, 4),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_12SC, 5),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_12SC, 6)
+               }
+            )
+            { ManufacturerRefs = new Guid[] { Manu_CommScope } });
+
+
+            // Patch/splidse GPS2 19" 144xLC/APC  
+            AddSpecification(new TerminalEquipmentSpecification(Subrack_GPS_144_LC, "Subrack", "Patch/splidse GPS2 19\" 144 x LC/APC", "GPS2-144", true, 4,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_24LC, 1),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_24LC, 2),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_24LC, 3),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_24LC, 4),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_24LC, 5),
+                    new TerminalStructureTemplate(SplicePatchTray_GPS2_24LC, 6)
+               }
+            )
+            { ManufacturerRefs = new Guid[] { Manu_CommScope } });
+
+        }
+
 
         private void AddSpecification(SpanEquipmentSpecification spec)
         {
@@ -837,6 +1257,24 @@ namespace OpenFTTH.TestData
         {
             var cmd = new AddManufacturer(Guid.NewGuid(), new UserContext("test", Guid.Empty), manufacturer);
             var cmdResult = _commandDispatcher.HandleAsync<AddManufacturer, Result>(cmd).Result;
+
+            if (cmdResult.IsFailed)
+                throw new ApplicationException(cmdResult.Errors.First().Message);
+        }
+
+        private void AddSpecification(TerminalEquipmentSpecification spec)
+        {
+            var cmd = new AddTerminalEquipmentSpecification(Guid.NewGuid(), new UserContext("test", Guid.Empty), spec);
+            var cmdResult = _commandDispatcher.HandleAsync<AddTerminalEquipmentSpecification, Result>(cmd).Result;
+
+            if (cmdResult.IsFailed)
+                throw new ApplicationException(cmdResult.Errors.First().Message);
+        }
+
+        private void AddSpecification(TerminalStructureSpecification spec)
+        {
+            var cmd = new AddTerminalStructureSpecification(Guid.NewGuid(), new UserContext("test", Guid.Empty), spec);
+            var cmdResult = _commandDispatcher.HandleAsync<AddTerminalStructureSpecification, Result>(cmd).Result;
 
             if (cmdResult.IsFailed)
                 throw new ApplicationException(cmdResult.Errors.First().Message);

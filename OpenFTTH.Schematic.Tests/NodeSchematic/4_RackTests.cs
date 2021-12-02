@@ -145,6 +145,144 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Style == "RackUnitLabel").Should().Be(162);
         }
 
+        [Fact, Order(20)]
+        public async void TestAddFirstTerminalEquipmentInFP2()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.FP_2;
+            var sutNodeContainer = TestUtilityNetwork.NodeContainer_FP_2;
+
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            utilityNetwork.TryGetEquipment<NodeContainer>(sutNodeContainer, out var nodeContainerBeforeCommand);
+
+            // Act
+            var placeEquipmentCmd = new PlaceTerminalEquipmentInNodeContainer(
+              correlationId: Guid.NewGuid(),
+                userContext: new UserContext("test", Guid.Empty),
+                nodeContainerId: sutNodeContainer,
+                terminalEquipmentSpecificationId: TestSpecifications.SpliceClosure_BUDI1S_16SCTrays,
+                numberOfEquipments: 1,
+                startSequenceNumber: 1,
+                namingMethod: TerminalEquipmentNamingMethodEnum.NameOnly,
+                namingInfo: new Events.Core.Infos.NamingInfo() { Name = "SC 1" }
+            );
+
+            var placeEquipmentResult = await _commandDispatcher.HandleAsync<PlaceTerminalEquipmentInNodeContainer, Result>(placeEquipmentCmd);
+
+            // Assert
+            placeEquipmentResult.IsSuccess.Should().BeTrue();
+
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipment").Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentNameLabel").Should().Be(1);
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentTypeLabel").Should().Be(1);
+
+        }
+
+
+        [Fact, Order(20)]
+        public async void TestAddFirstTerminalEquipmentInFP2Rack1()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.FP_2;
+            var sutNodeContainer = TestUtilityNetwork.NodeContainer_FP_2;
+
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            utilityNetwork.TryGetEquipment<NodeContainer>(sutNodeContainer, out var nodeContainerBeforeCommand);
+
+            // Act
+            var placeEquipmentCmd = new PlaceTerminalEquipmentInNodeContainer(
+              correlationId: Guid.NewGuid(),
+                userContext: new UserContext("test", Guid.Empty),
+                nodeContainerId: sutNodeContainer,
+                terminalEquipmentSpecificationId: TestSpecifications.Subrack_GPS_144_LC,
+                numberOfEquipments: 3,
+                startSequenceNumber: 1,
+                namingMethod: TerminalEquipmentNamingMethodEnum.NameAndNumber,
+                namingInfo: new Events.Core.Infos.NamingInfo() { Name = "GPS" }
+            )
+            {
+                SubrackPlacementInfo = new SubrackPlacementInfo(nodeContainerBeforeCommand.Racks[0].Id, 2, SubrackPlacmentMethod.TopDown)
+            };
+
+            var placeEquipmentResult = await _commandDispatcher.HandleAsync<PlaceTerminalEquipmentInNodeContainer, Result>(placeEquipmentCmd);
+
+            // Assert
+            placeEquipmentResult.IsSuccess.Should().BeTrue();
+
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipment").Should().Be(4);
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentNameLabel").Should().Be(4);
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentTypeLabel").Should().Be(4);
+
+        }
+
+
+        [Fact, Order(21)]
+        public async void TestAdd80EquipmentsInFP2Rack2()
+        {
+            var sutRouteNetworkElement = TestRouteNetwork.FP_2;
+            var sutNodeContainer = TestUtilityNetwork.NodeContainer_FP_2;
+
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            utilityNetwork.TryGetEquipment<NodeContainer>(sutNodeContainer, out var nodeContainerBeforeCommand);
+
+            // Act
+            var placeEquipmentCmd = new PlaceTerminalEquipmentInNodeContainer(
+              correlationId: Guid.NewGuid(),
+                userContext: new UserContext("test", Guid.Empty),
+                nodeContainerId: sutNodeContainer,
+                terminalEquipmentSpecificationId: TestSpecifications.Subrack_LISA_APC_UPC,
+                numberOfEquipments: 80,
+                startSequenceNumber: 1,
+                namingMethod: TerminalEquipmentNamingMethodEnum.NumberOnly,
+                namingInfo: new Events.Core.Infos.NamingInfo() { Name = "GPS" }
+            )
+            {
+                SubrackPlacementInfo = new SubrackPlacementInfo(nodeContainerBeforeCommand.Racks[1].Id, 0, SubrackPlacmentMethod.TopDown)
+            };
+
+            var placeEquipmentResult = await _commandDispatcher.HandleAsync<PlaceTerminalEquipmentInNodeContainer, Result>(placeEquipmentCmd);
+
+            // Assert
+            placeEquipmentResult.IsSuccess.Should().BeTrue();
+
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            getDiagramQueryResult.IsSuccess.Should().BeTrue();
+
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipment").Should().Be(84);
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentNameLabel").Should().Be(84);
+        }
+
 
 
 

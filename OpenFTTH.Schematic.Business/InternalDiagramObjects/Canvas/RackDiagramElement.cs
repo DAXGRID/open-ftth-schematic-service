@@ -2,6 +2,7 @@
 using OpenFTTH.Schematic.Business.Drawing;
 using OpenFTTH.Schematic.Business.Layout;
 using OpenFTTH.Schematic.Business.SchematicBuilder;
+using System;
 using System.Collections.Generic;
 
 
@@ -84,8 +85,54 @@ namespace OpenFTTH.Schematic.Business.Canvas
             // Create rack label
             result.Add(CreateRackLabel(diagram, offsetX + _innerFrameMargin, offsetY + 15 + Height - _innerFrameMargin, _rackViewModel.Name + "(" + _rackViewModel.SpecName + ")"));
 
+
+            // Create terminal equipments in rack
+            foreach (var rackMount in _rackViewModel.TerminalEquipments)
+            {
+                result.AddRange(CreateTerminalEquipment(diagram, offsetX + _innerFrameMargin, offsetY + _innerFrameMargin + (rackMount.SubrackPosition * _rackUnitHeight), rackMount.SubrackHeight * _rackUnitHeight, rackMount));
+            }
+
             return result;
         }
+
+        private List<DiagramObject> CreateTerminalEquipment(Diagram diagram, double offsetX, double offsetY, double height, TerminalEquipmentViewModel rackMount)
+        {
+            List<DiagramObject> result = new();
+
+            var terminalEquipmentBlockWidth = Width - (_innerFrameMargin * 2);
+
+            // Create terminal equipment rectangle
+            result.Add(
+                new DiagramObject(diagram)
+                {
+                    Geometry = GeometryBuilder.Rectangle(offsetX, offsetY, height, terminalEquipmentBlockWidth),
+                    Style = "TerminalEquipment",
+                    DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)400,
+                    IdentifiedObject = new IdentifiedObjectReference() { RefClass = "TerminalEquipment", RefId = rackMount.TerminalEquipmentId }
+                }
+            );
+
+            if (height >= 40)
+            {
+                double distanceBetwenNameAndType = 20;
+
+                double nameTextOffset = (height / 2) + (distanceBetwenNameAndType / 2);
+                double typeTextOffset = (height / 2) - (distanceBetwenNameAndType / 2);
+
+                result.Add(CreateTerminalEquipmentNameLabel(diagram, offsetX + (terminalEquipmentBlockWidth / 2), offsetY + nameTextOffset, rackMount.Name));
+                result.Add(CreateTerminalEquipmentTypeLabel(diagram, offsetX + (terminalEquipmentBlockWidth / 2), offsetY + typeTextOffset, "(" + rackMount.SpecName + ")"));
+            }
+            else
+            {
+                double textOffset = (height / 2);
+
+                result.Add(CreateTerminalEquipmentNameLabel(diagram, offsetX + (terminalEquipmentBlockWidth / 2), offsetY + textOffset, rackMount.Name + " (" + rackMount.SpecName + ")"));
+            }
+
+            return result;
+        }
+
+
 
         private DiagramObject CreateRackLabel(Diagram diagram, double x, double y, string label)
         {
@@ -95,6 +142,32 @@ namespace OpenFTTH.Schematic.Business.Canvas
                 Label = label,
                 Geometry = GeometryBuilder.Point(x, y),
                 DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)400
+            };
+
+            return labelDiagramObject;
+        }
+
+        private DiagramObject CreateTerminalEquipmentNameLabel(Diagram diagram, double x, double y, string label)
+        {
+            var labelDiagramObject = new DiagramObject(diagram)
+            {
+                Style = "TerminalEquipmentNameLabel",
+                Label = label,
+                Geometry = GeometryBuilder.Point(x, y),
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)500
+            };
+
+            return labelDiagramObject;
+        }
+
+        private DiagramObject CreateTerminalEquipmentTypeLabel(Diagram diagram, double x, double y, string label)
+        {
+            var labelDiagramObject = new DiagramObject(diagram)
+            {
+                Style = "TerminalEquipmentTypeLabel",
+                Label = label,
+                Geometry = GeometryBuilder.Point(x, y),
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)500
             };
 
             return labelDiagramObject;

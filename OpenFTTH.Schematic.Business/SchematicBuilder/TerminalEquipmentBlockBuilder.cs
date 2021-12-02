@@ -42,6 +42,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 equipmentBlock.Children.Add(new RackDiagramElement(equipmentBlock, rackViewModel));
             }
 
+            foreach (var terminalEquipmentViewModel in _nodeContainerViewModel.GetStandaloneTerminalEquipmentViewModels())
+            {
+                equipmentBlock.Children.Add(new TerminalEquipmentStandaloneDiagramElement(equipmentBlock, terminalEquipmentViewModel));
+            }
+
             return equipmentBlock;
         }
 

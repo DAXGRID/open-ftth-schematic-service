@@ -1,6 +1,7 @@
 ﻿using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {
@@ -55,12 +56,63 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                         RackId = rack.Id,
                         Name = rack.Name,
                         SpecName = rackSpec.ShortName,
-                        MinHeightInUnits = rack.HeightInUnits
+                        MinHeightInUnits = rack.HeightInUnits,
+                        TerminalEquipments = GetTerminalEquipmentViewModelsForRack(rack.Id)
                     });
                 }
             }
 
             return rackViewModels;
+        }
+
+        public List<TerminalEquipmentViewModel> GetStandaloneTerminalEquipmentViewModels()
+        {
+            List<TerminalEquipmentViewModel> viewModels = new();
+
+            if (Data.NodeContainer.TerminalEquipmentReferences != null)
+            {
+                foreach (var terminalEquipmentRef in Data.NodeContainer.TerminalEquipmentReferences)
+                {
+                    var terminalEquipment = Data.TerminalEquipments[terminalEquipmentRef];
+                    var terminalEquipmentSpecification =Data.TerminalEquipmentSpecifications[terminalEquipment.SpecificationId];
+
+                    viewModels.Add(new TerminalEquipmentViewModel()
+                    {
+                        TerminalEquipmentId = terminalEquipment.Id,
+                        Name = terminalEquipment.Name,
+                        SpecName = terminalEquipmentSpecification.Name
+                    });
+                }
+            }
+
+            return viewModels;
+        }
+
+        public List<TerminalEquipmentViewModel> GetTerminalEquipmentViewModelsForRack(Guid rackId)
+        {
+            List<TerminalEquipmentViewModel> viewModels = new();
+
+            if (Data.NodeContainer.Racks != null)
+            {
+                var rack = Data.NodeContainer.Racks.First(r => r.Id == rackId);
+
+                foreach (var subrack in rack.SubrackMounts)
+                {
+                    var terminalEquipment = Data.TerminalEquipments[subrack.TerminalEquipmentId];
+                    var terminalEquipmentSpecification = Data.TerminalEquipmentSpecifications[terminalEquipment.SpecificationId];
+
+                    viewModels.Add(new TerminalEquipmentViewModel()
+                    {
+                        TerminalEquipmentId = terminalEquipment.Id,
+                        SubrackPosition = subrack.Position,
+                        SubrackHeight = subrack.HeightInUnits,
+                        Name = terminalEquipment.Name,
+                        SpecName = terminalEquipmentSpecification.Name
+                    });
+                }
+            }
+          
+            return viewModels;
         }
     }
  }
