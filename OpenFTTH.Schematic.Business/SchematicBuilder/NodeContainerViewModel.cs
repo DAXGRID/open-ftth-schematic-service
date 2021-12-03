@@ -80,7 +80,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     {
                         TerminalEquipmentId = terminalEquipment.Id,
                         Name = terminalEquipment.Name,
-                        SpecName = terminalEquipmentSpecification.Name
+                        SpecName = terminalEquipmentSpecification.ShortName
                     });
                 }
             }
@@ -107,7 +107,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                         SubrackPosition = subrack.Position,
                         SubrackHeight = subrack.HeightInUnits,
                         Name = terminalEquipment.Name,
-                        SpecName = terminalEquipmentSpecification.Name
+                        SpecName = terminalEquipmentSpecification.ShortName
                     });
                 }
             }
