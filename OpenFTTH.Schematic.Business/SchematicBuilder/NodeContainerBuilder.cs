@@ -271,7 +271,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Margin = _portMargin,
                 Style = spanDiagramInfo.StyleName,
                 PointStyle = fromSide.ToString() + "TerminalLabel",
-                PointLabel = viewModel.GetSpanEquipmentLabel()
+                PointLabel = viewModel.GetConduitEquipmentLabel()
             };
 
             fromPort.DrawingOrder = 420;
@@ -284,7 +284,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Margin = _portMargin,
                 Style = spanDiagramInfo.StyleName,
                 PointStyle = toSide.ToString() + "TerminalLabel",
-                PointLabel = viewModel.GetSpanEquipmentLabel()
+                PointLabel = viewModel.GetConduitEquipmentLabel()
             };
 
             toPort.DrawingOrder = 420;
@@ -367,6 +367,18 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     var terminalConnection = nodeContainerBlock.AddTerminalConnection(fromSide, fromPort.Index, terminalNo, toSide, toPort.Index, terminalNo, null, innerSpan.StyleName, LineShapeTypeEnum.Polygon);
                     terminalConnection.SetReference(innerSpan.IngoingSegmentId, "SpanSegment");
                     terminalConnection.DrawingOrder = 510;
+
+                    // Add eventually cable running through inner conduit
+                    if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(innerSpan.IngoingSegmentId))
+                    {
+                        var cableId = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[innerSpan.IngoingSegmentId].First();
+                        var fiberCableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
+
+
+                        var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+                        cableTerminalConnection.DrawingOrder = 600;
+                        cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                    }
                 }
                 else
                 {
@@ -432,7 +444,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Margin = viewModel.IsSingleSpan ? _portMargin / 2 : _portMargin,
                 Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName,
                 PointStyle = side.ToString() + "TerminalLabel",
-                PointLabel = viewModel.GetSpanEquipmentLabel()
+                PointLabel = viewModel.GetConduitEquipmentLabel()
             };
 
             port.DrawingOrder = 420;
@@ -537,11 +549,37 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                 if (terminalEnd.DiagramTerminal.Port.Side != otherDiagramTerminal.DiagramTerminal.Port.Side)
                                     terminalConnection.DrawingOrder = 560;
 
-
                                 terminalConnection.SetReference(terminalEnd.SpanSegment.Id, "SpanSegment");
 
                                 alreadyConnected.Add(terminalEnd.DiagramTerminal);
                                 alreadyConnected.Add(otherDiagramTerminal.DiagramTerminal);
+
+
+                                // Add eventually cable running through inner conduit
+                                if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(terminalEnd.SpanSegment.Id))
+                                {
+                                    var cableId = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[terminalEnd.SpanSegment.Id].First();
+                                    var fiberCableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
+
+
+                                    var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
+                                       fromSide: terminalEnd.DiagramTerminal.Port.Side,
+                                       fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
+                                       fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
+                                       toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
+                                       toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
+                                       toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
+                                       label: fiberCableLineLabel,
+                                       style: "FiberCable",
+                                       lineShapeType: LineShapeTypeEnum.Line
+                                    );
+
+                                    cableTerminalConnection.SetReference(cableId, "SpanSegment");
+
+                                    cableTerminalConnection.DrawingOrder = 600;
+                                }
+
+
                             }
                         }
                     }

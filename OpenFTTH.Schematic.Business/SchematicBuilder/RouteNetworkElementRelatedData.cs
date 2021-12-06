@@ -30,6 +30,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public NodeContainer NodeContainer { get; set; }
         public Guid NodeContainerRouteNetworkElementId { get; set; }
 
+        public Dictionary<Guid, List<Guid>> CableToConduitSegmentParentRelations = new();
+        public Dictionary<Guid, List<Guid>> ConduitSegmentToCableChildRelations = new();
+
         public static Result<RouteNetworkElementRelatedData> FetchData(IQueryDispatcher queryDispatcher, Guid routeNetworkElementId)
         {
             RouteNetworkElementRelatedData result = new RouteNetworkElementRelatedData();
@@ -142,7 +145,79 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 result.TerminalEquipments = terminalEquipmentQueryResult.Value.TerminalEquipment;
             }
 
+            BuildCableToConduitIndex(result);
+
             return Result.Ok(result);
         }
+
+        private static void BuildCableToConduitIndex(RouteNetworkElementRelatedData data)
+        {
+            HashSet<Guid> accessibleConduitSpanSegmentIds = new();
+
+            foreach (var conduit in data.SpanEquipments.Where(s => !s.IsCable))
+            {
+                foreach (var structure in conduit.SpanStructures)
+                {
+                    var model = new SpanEquipmentViewModel(null, data.RouteNetworkElementId, conduit.Id, data);
+                    var spanStructureInfo = model.GetSpanDiagramInfoForStructure("", structure);
+
+                    if (spanStructureInfo.IngoingSegmentId != Guid.Empty)
+                    {
+                        if (!accessibleConduitSpanSegmentIds.Contains(spanStructureInfo.IngoingSegmentId))
+                            accessibleConduitSpanSegmentIds.Add(spanStructureInfo.IngoingSegmentId);
+                    }
+
+                    if (spanStructureInfo.OutgoingSegmentId != Guid.Empty)
+                    {
+                        if (!accessibleConduitSpanSegmentIds.Contains(spanStructureInfo.OutgoingSegmentId))
+                            accessibleConduitSpanSegmentIds.Add(spanStructureInfo.OutgoingSegmentId);
+                    }
+                }
+
+            }
+
+            foreach (var cable in data.SpanEquipments.Where(s => s.IsCable))
+            {
+                if (cable.ParentAffixes != null && cable.ParentAffixes.Length > 0)
+                {
+                    foreach (var parrentAffix in cable.ParentAffixes)
+                    {
+                        if (accessibleConduitSpanSegmentIds.Contains(parrentAffix.SpanSegmentId))
+                        {
+                            if (data.CableToConduitSegmentParentRelations.ContainsKey(cable.Id))
+                                data.CableToConduitSegmentParentRelations[cable.Id].Add(parrentAffix.SpanSegmentId);
+                            else
+                                data.CableToConduitSegmentParentRelations[cable.Id] = new List<Guid>() { parrentAffix.SpanSegmentId };
+
+
+                            if (data.ConduitSegmentToCableChildRelations.ContainsKey(parrentAffix.SpanSegmentId))
+                                data.ConduitSegmentToCableChildRelations[parrentAffix.SpanSegmentId].Add(cable.Id);
+                            else
+                                data.ConduitSegmentToCableChildRelations[parrentAffix.SpanSegmentId] = new List<Guid>() { cable.Id };
+                        }
+                    }
+                }
+
+            }
+        }
+
+        public string GetCableEquipmentLabel(Guid cableId)
+        {
+            var cable = SpanEquipments[cableId];
+
+            string label = SpanEquipmentSpecifications[cable.SpecificationId].Name;
+
+            return label;
+        }
+
+        public string GetCableEquipmentLineLabel(Guid cableId)
+        {
+            var cable = SpanEquipments[cableId];
+
+            string label = SpanEquipmentSpecifications[cable.SpecificationId].Name;
+
+            return cable.Name + " (" + (cable.SpanStructures.Length - 1).ToString() + ")";
+        }
+
     }
 }

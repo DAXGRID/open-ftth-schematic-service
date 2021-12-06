@@ -90,11 +90,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             {
                 var readModel = new SpanEquipmentViewModel(_logger, _routeNetworkElementId, spanEquipment.Id, _data);
 
-                var builder = new DetachedSpanEquipmentBuilder(_logger, readModel);
+                if (!readModel.IsCableWithinConduit)
+                {
+                    var builder = new DetachedSpanEquipmentBuilder(_logger, readModel);
 
-                var size = builder.CreateDiagramObjects(_diagram, 0, yOffset);
+                    var size = builder.CreateDiagramObjects(_diagram, 0, yOffset);
 
-                yOffset += size.Height + _spaceBetweenSections;
+                    yOffset += size.Height + _spaceBetweenSections;
+                }
             }
 
             return yOffset;

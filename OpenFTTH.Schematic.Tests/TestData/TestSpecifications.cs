@@ -5,6 +5,7 @@ using OpenFTTH.UtilityGraphService.API.Commands;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using OpenFTTH.UtilityGraphService.API.Queries;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -137,6 +138,24 @@ namespace OpenFTTH.TestData
         // Customer span equipments
         public static Guid CustomerConduit_Ø12_Orange = Guid.Parse("ddd86873-9d6c-4741-a406-084c628314db");
 
+
+        // Fiber cables
+        public static Guid FiberCable_Jacket = Guid.Parse("f95154f2-7df6-4149-bbb7-587c40fed385");
+        public static Guid FiberCable_Fiber = Guid.Parse("162faf17-dad7-4838-81a9-73b5ab8f61c2");
+
+        public static Guid FiberCable_2Fiber = Guid.Parse("8164e388-ca59-4ad1-8317-44b601c39e2a");
+        public static Guid FiberCable_4Fiber = Guid.Parse("39756e03-bc7e-4341-9a73-672f1c6849b4");
+        public static Guid FiberCable_12Fiber = Guid.Parse("2ed3de4f-178e-4f61-bf30-348f2c9781b2");
+        public static Guid FiberCable_24Fiber = Guid.Parse("cfd395b6-288c-4fe8-90d7-a523d7a862db");
+        public static Guid FiberCable_48Fiber = Guid.Parse("64b3ba07-dd2f-4880-a0e0-24b1d0faa771");
+        public static Guid FiberCable_72Fiber = Guid.Parse("703afeeb-a32e-4600-a9e1-0ed50fabfdbe");
+        public static Guid FiberCable_96Fiber = Guid.Parse("9ae8da66-4643-4fab-bce9-5a01545640a6");
+        public static Guid FiberCable_144Fiber = Guid.Parse("d50fb652-5092-44e3-b5f5-1ff585b0c18d");
+        public static Guid FiberCable_192Fiber = Guid.Parse("6df0a7c2-e10e-42eb-b0fb-8371caaa043e");
+        public static Guid FiberCable_216Fiber = Guid.Parse("e1cb1f5a-201a-4cf7-8420-a6f5bbafd7aa");
+        public static Guid FiberCable_288Fiber = Guid.Parse("0450545d-1698-4d68-a85f-532270a7059a");
+
+
         // Racks
         public static Guid Rack_ESTI = Guid.Parse("b72523d7-4a55-489e-8901-a9fdf9a7d471");
 
@@ -187,6 +206,8 @@ namespace OpenFTTH.TestData
                 AddSpanStructureSpecifications();
 
                 AddSpanEquipmentSpecifications();
+
+                AddFiberCableSpecifications();
 
                 AddRackSpecifications();
 
@@ -815,6 +836,125 @@ namespace OpenFTTH.TestData
             AddSpecification(new SpanStructureSpecification(Ø110_Red, "Conduit", "Ø110", "Red") { OuterDiameter = 110 });
         }
 
+        private void AddFiberCableSpecifications()
+        {
+            AddSpecification(new SpanStructureSpecification(FiberCable_Jacket, "FiberCable", "Jacket", "Black") { OuterDiameter = 0, InnerDiameter = 0 });
+            AddSpecification(new SpanStructureSpecification(FiberCable_Fiber, "FiberCable", "Fiber", "White") { OuterDiameter = 0, InnerDiameter = 0 });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_2Fiber, "FiberCable", "2 Fiber", CreateFibers(2))
+            {
+                Description = "2 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_4Fiber, "FiberCable", "4 Fiber", CreateFibers(4))
+            {
+                Description = "4 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_12Fiber, "FiberCable", "12 Fiber", CreateFibers(12))
+            {
+                Description = "12 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_24Fiber, "FiberCable", "24 Fiber", CreateFibers(24))
+            {
+                Description = "24 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_48Fiber, "FiberCable", "48 Fiber", CreateFibers(48))
+            {
+                Description = "48 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_72Fiber, "FiberCable", "72 Fiber", CreateFibers(72))
+            {
+                Description = "72 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_96Fiber, "FiberCable", "96 Fiber", CreateFibers(96))
+            {
+                Description = "96 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_144Fiber, "FiberCable", "144 Fiber", CreateFibers(144))
+            {
+                Description = "144 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_192Fiber, "FiberCable", "192 Fiber", CreateFibers(192))
+            {
+                Description = "192 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_216Fiber, "FiberCable", "216 Fiber", CreateFibers(216))
+            {
+                Description = "216 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+
+            AddSpecification(new SpanEquipmentSpecification(FiberCable_288Fiber, "FiberCable", "288 Fiber", CreateFibers(288))
+            {
+                Description = "288 Fiber Cable",
+                ManufacturerRefs = new Guid[] { Manu_Emtelle },
+                IsFixed = true,
+                IsMultiLevel = true,
+                IsCable = true
+            });
+        }
+
+        private SpanStructureTemplate CreateFibers(int numberOfFibers)
+        {
+            List<SpanStructureTemplate> fiberStructures = new();
+
+            for (ushort fiberNo = 1; fiberNo <= numberOfFibers; fiberNo++)
+            {
+                fiberStructures.Add(new SpanStructureTemplate(FiberCable_Fiber, 2, fiberNo, Array.Empty<SpanStructureTemplate>()));
+            }
+
+            return new SpanStructureTemplate(FiberCable_Jacket, 1, 1, fiberStructures.ToArray());
+        }
+
+
+
         private void AddManufactures()
         {
             // Manufacturer
@@ -854,7 +994,7 @@ namespace OpenFTTH.TestData
                 }
             ));
 
-            // 14 Pin Tray Uknown Type
+            // 24 Pin Tray Uknown Type
             AddSpecification(new TerminalStructureSpecification(SpliceTray_Uknown24Pin, "SpliceTray", "Splidsebakke 24 Søm", "Bakke 24 Søm",
                 new TerminalTemplate[]
                 {
@@ -1130,6 +1270,7 @@ namespace OpenFTTH.TestData
                     new TerminalStructureTemplate(SpliceTray_SC12Pin, 8),
                     new TerminalStructureTemplate(SpliceTray_SC12Pin, 9),
                     new TerminalStructureTemplate(SpliceTray_SC12Pin, 10),
+                    new TerminalStructureTemplate(SpliceTray_SC12Pin, 11),
                     new TerminalStructureTemplate(SpliceTray_SC12Pin, 12),
                     new TerminalStructureTemplate(SpliceTray_SC12Pin, 13),
                     new TerminalStructureTemplate(SpliceTray_SC12Pin, 14),

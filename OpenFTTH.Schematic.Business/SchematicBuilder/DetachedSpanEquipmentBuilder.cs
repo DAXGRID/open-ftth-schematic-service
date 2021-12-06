@@ -5,6 +5,7 @@ using OpenFTTH.Schematic.Business.Drawing;
 using OpenFTTH.Schematic.Business.Layout;
 using OpenFTTH.Schematic.Business.Lines;
 using OpenFTTH.Schematic.Business.QueryHandler;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -38,8 +39,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             result.AddRange(spanEquipmentBlock.CreateDiagramObjects(diagram, offsetX, offsetY));
 
             // Create label on top of span equipment block
-            var spanEquipmentLabel = CreateSpanEquipmentTypeLabel(diagram, offsetX, offsetY + spanEquipmentBlock.ActualSize.Height + _spanEquipmentLabelOffset);
-            result.Add(spanEquipmentLabel);
+            if (!_spanEquipmentViewModel.SpanEquipment.IsCable)
+            {
+                var spanEquipmentLabel = CreateSpanEquipmentTypeLabel(diagram, offsetX, offsetY + spanEquipmentBlock.ActualSize.Height + _spanEquipmentLabelOffset);
+                result.Add(spanEquipmentLabel);
+            }
 
             return new Size(spanEquipmentBlock.ActualSize.Height + _spanEquipmentLabelOffset, spanEquipmentBlock.ActualSize.Width);
         }
@@ -49,7 +53,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             var labelDiagramObject = new DiagramObject(diagram)
             {
                 Style = "SpanEquipmentLabel",
-                Label = _spanEquipmentViewModel.GetSpanEquipmentLabel(),
+                Label = _spanEquipmentViewModel.GetConduitEquipmentLabel(),
                 Geometry = GeometryBuilder.Point(x, y),
                 DrawingOrder = 1000
             };
@@ -59,10 +63,25 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private LineBlock CreateSpanEquipmentBlock()
         {
-            if (_spanEquipmentViewModel.IsPassThrough)
-                return CreateConduitPassThroughBlock();
+            if (_spanEquipmentViewModel.SpanEquipment.IsCable)
+            {
+                if (!_spanEquipmentViewModel.IsCableWithinConduit)
+                {
+                    if (_spanEquipmentViewModel.IsPassThrough)
+                        return CreateCableOutsideConduitPassThroughBlock();
+                    else
+                        return CreateCableOutsideConduitEndBlock();
+                }
+                else
+                    throw new ApplicationException($"DetachedSpanEquipmentBuild should not be called on span equipments that are not detached! Cable span equipment with id: {_spanEquipmentViewModel.SpanEquipment.Id} is places with a conduit!");
+            }
             else
-                return CreateConduitEndBlock();
+            {
+                if (_spanEquipmentViewModel.IsPassThrough)
+                    return CreateConduitPassThroughBlock();
+                else
+                    return CreateConduitEndBlock();
+            }
         }
 
         private LineBlock CreateConduitPassThroughBlock()
@@ -115,7 +134,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                 fromTerminal.SetReference(spanInfo.IngoingSegmentId, "SpanSegment");
 
-                var toTerminal= new BlockPortTerminal(toPort)
+                var toTerminal = new BlockPortTerminal(toPort)
                 {
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
@@ -129,6 +148,19 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, spanInfo.StyleName, LineShapeTypeEnum.Polygon);
                 terminalConnection.DrawingOrder = 510;
                 terminalConnection.SetReference(spanInfo.IngoingSegmentId, "SpanSegment");
+
+                // Add eventually cable running through inner conduit
+                if (_spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(spanInfo.SegmentId))
+                {
+                    var cableId = _spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations[spanInfo.SegmentId].First();
+                    var fiberCableLineLabel = _spanEquipmentViewModel.Data.GetCableEquipmentLineLabel(cableId);
+
+
+                    var cableTerminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+                    cableTerminalConnection.DrawingOrder = 600;
+                    cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                }
+
                 terminalNo++;
 
                 innerSpansFound = true;
@@ -157,7 +189,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 };
 
                 toTerminal.SetReference(rootSpanInfo.OutgoingSegmentId, "SpanSegment");
-               
+
 
                 // If a single conduit
                 if (_spanEquipmentViewModel.IsSingleSpan)
@@ -165,7 +197,22 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, rootSpanInfo.StyleName, LineShapeTypeEnum.Polygon);
                     terminalConnection.DrawingOrder = 510;
                     terminalConnection.SetReference(rootSpanInfo.SegmentId, "SpanSegment");
+
+
+                    // Add eventually cable running through inner conduit
+                    if (_spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(rootSpanInfo.SegmentId))
+                    {
+                        var cableId = _spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations[rootSpanInfo.SegmentId].First();
+                        var fiberCableLineLabel = _spanEquipmentViewModel.Data.GetCableEquipmentLineLabel(cableId);
+
+
+                        var cableTerminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+                        cableTerminalConnection.DrawingOrder = 600;
+                        cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                    }
+
                 }
+
 
                 terminalNo++;
             }
@@ -233,6 +280,20 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, data.StyleName, LineShapeTypeEnum.Polygon);
                 terminalConnection.DrawingOrder = 510;
                 terminalConnection.SetReference(data.SegmentId, "SpanSegment");
+
+                // Add eventually cable running through inner conduit
+                if (_spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(data.SegmentId))
+                {
+                    var cableId = _spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations[data.SegmentId].First();
+                    var fiberCableLineLabel = _spanEquipmentViewModel.Data.GetCableEquipmentLineLabel(cableId);
+
+
+                    var cableTerminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+                    cableTerminalConnection.DrawingOrder = 600;
+                    cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                }
+
+
                 terminalNo++;
 
                 innerSpansFound = true;
@@ -246,11 +307,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "WestTerminalLabel",
                     PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
-                    DrawingOrder = 520                    
+                    DrawingOrder = 520
                 };
 
                 fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
-               
+
 
                 // If a single conduit
                 if (_spanEquipmentViewModel.IsSingleSpan)
@@ -265,8 +326,135 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, rootSpanInfo.StyleName, LineShapeTypeEnum.Polygon);
                     terminalConnection.DrawingOrder = 510;
                     terminalConnection.SetReference(rootSpanInfo.SegmentId, "SpanSegment");
+
+                    // Add eventually cable running through inner conduit
+                    if (_spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(rootSpanInfo.SegmentId))
+                    {
+                        var cableId = _spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations[rootSpanInfo.SegmentId].First();
+                        var fiberCableLineLabel = _spanEquipmentViewModel.Data.GetCableEquipmentLineLabel(cableId);
+
+                        var cableTerminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+                        cableTerminalConnection.DrawingOrder = 600;
+                        cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                    }
+
                 }
             }
+
+            return spanEquipmentBlock;
+        }
+
+        private LineBlock CreateCableOutsideConduitEndBlock()
+        {
+            // Create outer conduits
+            var rootSpanInfo = _spanEquipmentViewModel.RootSpanDiagramInfo("FiberCable");
+
+            var spanEquipmentBlock = new LineBlock()
+            {
+                MinWidth = _spanEquipmentAreaWidth / 2,
+                IsVisible =  false,
+                Style = rootSpanInfo.StyleName,
+                Margin = _spanEquipmentViewModel.IsSingleSpan ? 0 : _spanEquipmentBlockMargin,
+                DrawingOrder = 400
+            };
+
+            spanEquipmentBlock.SetReference(rootSpanInfo.SegmentId, "SpanSegment");
+
+            // Create ports
+            var fromPort = new BlockPort(BlockSideEnum.West, null, null, 0, 4, 0) { IsVisible = false, DrawingOrder = 420 }; 
+
+            spanEquipmentBlock.AddPort(fromPort);
+
+            var toPort = new BlockPort(BlockSideEnum.East, null, null, 0, 4, 0) { IsVisible = false, DrawingOrder = 420 };
+
+            spanEquipmentBlock.AddPort(toPort);
+
+
+            // Create termnals
+            int terminalNo = 1;
+
+            var fromTerminal = new BlockPortTerminal(fromPort)
+            {
+                IsVisible = true,
+                ShapeType = TerminalShapeTypeEnum.Point,
+                PointStyle = "WestTerminalLabel",
+                PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                DrawingOrder = 520
+            };
+
+            fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+            new BlockPortTerminal(toPort)
+            {
+                IsVisible = false,
+                ShapeType = TerminalShapeTypeEnum.None,
+                DrawingOrder = 520
+            };
+
+            var fiberCableLineLabel = _spanEquipmentViewModel.Data.GetCableEquipmentLineLabel(_spanEquipmentViewModel.SpanEquipment.Id);
+
+            var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+            terminalConnection.DrawingOrder = 600;
+            terminalConnection.SetReference(rootSpanInfo.SegmentId, "SpanSegment");
+
+            return spanEquipmentBlock;
+        }
+
+        private LineBlock CreateCableOutsideConduitPassThroughBlock()
+        {
+            // Create outer conduits
+            var rootSpanInfo = _spanEquipmentViewModel.RootSpanDiagramInfo("OuterConduit");
+
+            var spanEquipmentBlock = new LineBlock()
+            {
+                MinWidth = _spanEquipmentAreaWidth,
+                IsVisible = false,
+                Style = rootSpanInfo.StyleName,
+                Margin = _spanEquipmentViewModel.IsSingleSpan ? 0 : _spanEquipmentBlockMargin,
+                DrawingOrder = 400
+            };
+
+            spanEquipmentBlock.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+
+            var fromPort = new BlockPort(BlockSideEnum.West, null, null, 0, -1, 0) { IsVisible = false, DrawingOrder = 420 };
+
+            spanEquipmentBlock.AddPort(fromPort);
+
+            var toPort = new BlockPort(BlockSideEnum.East, null, null, 0, -1, 0) { IsVisible = false, DrawingOrder = 420 };
+
+            spanEquipmentBlock.AddPort(toPort);
+
+            int terminalNo = 1;
+
+
+            var fromTerminal = new BlockPortTerminal(fromPort)
+            {
+                IsVisible = true,
+                ShapeType = TerminalShapeTypeEnum.Point,
+                PointStyle = "WestTerminalLabel",
+                PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
+                DrawingOrder = 520
+            };
+
+            fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+            var toTerminal = new BlockPortTerminal(toPort)
+            {
+                IsVisible = true,
+                ShapeType = TerminalShapeTypeEnum.Point,
+                PointStyle = "EastTerminalLabel",
+                PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                DrawingOrder = 520
+            };
+
+            toTerminal.SetReference(rootSpanInfo.OutgoingSegmentId, "SpanSegment");
+
+            var fiberCableLineLabel = _spanEquipmentViewModel.Data.GetCableEquipmentLineLabel(_spanEquipmentViewModel.SpanEquipment.Id);
+
+            var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+            terminalConnection.DrawingOrder = 600;
+            terminalConnection.SetReference(rootSpanInfo.SegmentId, "SpanSegment");
 
             return spanEquipmentBlock;
         }

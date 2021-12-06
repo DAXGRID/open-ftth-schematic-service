@@ -58,7 +58,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             }
             else
             {
-                NetTopologySuite.Geometries.LineString curve = CreateCurve();
+                NetTopologySuite.Geometries.LineString curve = CreateCurve(0,0,0);
 
                 result.Add(new DiagramObject(diagram)
                 {
@@ -75,7 +75,7 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         }
 
-        private NetTopologySuite.Geometries.LineString CreateCurve(double shiftX = 0, double shiftY = 0)
+        private NetTopologySuite.Geometries.LineString CreateCurve(double shiftX = 0, double shiftY = 0, double extraLengthBothEnds = 0)
         {
             double midX = 0;
             double midY = 0;
@@ -97,24 +97,32 @@ namespace OpenFTTH.Schematic.Business.Lines
             {
                 fromCurveStartPointX = FromTerminal.ConnectionPointX + FromTerminal.Thickness;
                 fromCurveStartPointY = FromTerminal.ConnectionPointY;
+
+                fromTerminalStartPointX -= extraLengthBothEnds;
             }
 
             if (FromTerminal.Port.Side == BlockSideEnum.North)
             {
                 fromCurveStartPointX = FromTerminal.ConnectionPointX;
                 fromCurveStartPointY = FromTerminal.ConnectionPointY - FromTerminal.Thickness;
+
+                fromTerminalStartPointY += extraLengthBothEnds;
             }
 
             if (FromTerminal.Port.Side == BlockSideEnum.East)
             {
                 fromCurveStartPointX = FromTerminal.ConnectionPointX - FromTerminal.Thickness;
                 fromCurveStartPointY = FromTerminal.ConnectionPointY;
+
+                fromTerminalStartPointX += extraLengthBothEnds;
             }
 
             if (FromTerminal.Port.Side == BlockSideEnum.South)
             {
                 fromCurveStartPointX = FromTerminal.ConnectionPointX;
                 fromCurveStartPointY = FromTerminal.ConnectionPointY + FromTerminal.Thickness;
+
+                fromTerminalStartPointY += extraLengthBothEnds;
             }
                         
             // Calculate to curve point
@@ -122,24 +130,32 @@ namespace OpenFTTH.Schematic.Business.Lines
             {
                 toCurveEndPointX = ToTerminal.ConnectionPointX + FromTerminal.Thickness;
                 toCurveEndPointY = ToTerminal.ConnectionPointY;
+
+                toTerminalEndPointX -= extraLengthBothEnds;
             }
 
             if (ToTerminal.Port.Side == BlockSideEnum.North)
             {
                 toCurveEndPointX = ToTerminal.ConnectionPointX;
                 toCurveEndPointY = ToTerminal.ConnectionPointY - FromTerminal.Thickness;
+
+                toTerminalEndPointY += extraLengthBothEnds;
             }
 
             if (ToTerminal.Port.Side == BlockSideEnum.East)
             {
                 toCurveEndPointX = ToTerminal.ConnectionPointX - FromTerminal.Thickness;
-                toCurveEndPointY = ToTerminal.ConnectionPointY;
+                toCurveEndPointY = ToTerminal.ConnectionPointY + extraLengthBothEnds;
+
+                toTerminalEndPointX += extraLengthBothEnds;
             }
 
             if (ToTerminal.Port.Side == BlockSideEnum.South)
             {
                 toCurveEndPointX = ToTerminal.ConnectionPointX;
                 toCurveEndPointY = ToTerminal.ConnectionPointY + FromTerminal.Thickness;
+
+                toTerminalEndPointY -= extraLengthBothEnds;
             }
 
             // V-N

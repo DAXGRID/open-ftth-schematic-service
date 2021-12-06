@@ -22,6 +22,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly Guid _spanEquipmentId;
         private readonly RouteNetworkElementRelatedData _data;
 
+        public RouteNetworkElementRelatedData Data => _data;
+
         private readonly SpanEquipmentWithRelatedInfo _spanEquipment;
         private readonly RouteNetworkInterestRelationKindEnum _relationKind;
 
@@ -59,7 +61,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             return GetSpanDiagramInfoForStructure(stylePrefix, spanStructure);
         }
 
-        public string GetSpanEquipmentLabel()
+        public string GetConduitEquipmentLabel()
         {
             string label = _data.SpanEquipmentSpecifications[_spanEquipment.SpecificationId].Name;
 
@@ -76,6 +78,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             return label;
         }
 
+       
+
         public List<SpanDiagramInfo> GetInnerSpanDiagramInfos(string stylePrefix)
         {
             var innerStructures = _spanEquipment.SpanStructures.Where(s => s.Level == 2 && s.Deleted == false);
@@ -90,7 +94,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             return spanInfos;
         }
 
-        private SpanDiagramInfo GetSpanDiagramInfoForStructure(string stylePrefix, SpanStructure structure)
+        public SpanDiagramInfo GetSpanDiagramInfoForStructure(string stylePrefix, SpanStructure structure)
         {
             var spec = _data.SpanStructureSpecifications[structure.SpecificationId];
 
@@ -246,6 +250,17 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public RouteNetworkInterestRelationKindEnum InterestRelationKind()
         {
             return _data.InterestRelations[_spanEquipment.WalkOfInterestId].RelationKind;
+        }
+
+        public bool IsCableWithinConduit
+        {
+            get
+            {
+                if (_data.CableToConduitSegmentParentRelations.ContainsKey(this.SpanEquipment.Id))
+                    return true;
+
+                return false;
+            }
         }
 
     }
