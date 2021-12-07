@@ -266,5 +266,100 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
 
 
+        [Fact, Order(21)]
+        public async void TestDrawingCableEndInsideNodeContainerCC1()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElement = TestRouteNetwork.CC_1;
+
+            // The span equipment/segment where to route the child span equipment
+            var routeThroughSpanEquipmentId = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(routeThroughSpanEquipmentId, out var routeThoughSpanEquipment);
+
+            var routeThroughSpanSegmentId = routeThoughSpanEquipment.SpanStructures[4].SpanSegments[0].Id;
+
+            // Setup command
+            var specs = new TestSpecifications(_commandDispatcher, _queryDispatcher).Run();
+
+            var routingHops = new RoutingHop[]
+            {
+                new RoutingHop(TestRouteNetwork.HH_1, routeThroughSpanSegmentId)
+            };
+
+            var placeSpanEquipmentCommand = new PlaceSpanEquipmentInUtilityNetwork(Guid.NewGuid(), new UserContext("test", Guid.Empty), Guid.NewGuid(), TestSpecifications.FiberCable_288Fiber, routingHops)
+            {
+                NamingInfo = new NamingInfo("K66660000", null),
+                ManufacturerId = Guid.NewGuid()
+            };
+
+            // Act
+            var placeSpanEquipmentResult = await _commandDispatcher.HandleAsync<PlaceSpanEquipmentInUtilityNetwork, Result>(placeSpanEquipmentCommand);
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(5);
+
+
+        }
+
+
+        [Fact, Order(22)]
+        public async void TestDrawingCableThrowhWellInsideNodeContainerCC1()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElement = TestRouteNetwork.CC_1;
+
+            // The span equipment/segment where to route the child span equipment
+            var routeThroughSpanEquipmentId = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
+            var routeThroughSpanEquipmentId2 = TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(routeThroughSpanEquipmentId, out var routeThoughSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(routeThroughSpanEquipmentId2, out var routeThoughSpanEquipment2);
+
+            var routeThroughSpanSegmentId = routeThoughSpanEquipment.SpanStructures[3].SpanSegments[0].Id;
+            var routeThroughSpanSegmentId2 = routeThoughSpanEquipment2.SpanStructures[2].SpanSegments[0].Id;
+
+            // Setup command
+            var specs = new TestSpecifications(_commandDispatcher, _queryDispatcher).Run();
+
+            var routingHops = new RoutingHop[]
+            {
+                new RoutingHop(TestRouteNetwork.HH_1, routeThroughSpanSegmentId),
+                new RoutingHop(TestRouteNetwork.CC_1, routeThroughSpanSegmentId2)
+            };
+
+            var placeSpanEquipmentCommand = new PlaceSpanEquipmentInUtilityNetwork(Guid.NewGuid(), new UserContext("test", Guid.Empty), Guid.NewGuid(), TestSpecifications.FiberCable_288Fiber, routingHops)
+            {
+                NamingInfo = new NamingInfo("K99991111", null),
+                ManufacturerId = Guid.NewGuid()
+            };
+
+            // Act
+            var placeSpanEquipmentResult = await _commandDispatcher.HandleAsync<PlaceSpanEquipmentInUtilityNetwork, Result>(placeSpanEquipmentCommand);
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(6);
+
+
+        }
+
+
+
     }
 }

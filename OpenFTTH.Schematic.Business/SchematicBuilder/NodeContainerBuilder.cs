@@ -385,15 +385,17 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     // Add from terminal / ingoing segment to ends
                     if (innerSpan.IngoingSpanSegment != null && innerSpan.IngoingSpanSegment.FromTerminalId != Guid.Empty)
                         AddToTerminalEnds(innerSpan.IngoingSpanSegment.FromTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
-
-                    if (innerSpan.IngoingSpanSegment != null && innerSpan.IngoingSpanSegment.ToTerminalId != Guid.Empty)
+                    else if (innerSpan.IngoingSpanSegment != null && innerSpan.IngoingSpanSegment.ToTerminalId != Guid.Empty)
+                        AddToTerminalEnds(innerSpan.IngoingSpanSegment.ToTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
+                    else if (innerSpan.IngoingSpanSegment != null)
                         AddToTerminalEnds(innerSpan.IngoingSpanSegment.ToTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
 
                     // Add to terminal / outgoing segment to ends
                     if (innerSpan.OutgoingSpanSegment != null && innerSpan.OutgoingSpanSegment.FromTerminalId != Guid.Empty)
                         AddToTerminalEnds(innerSpan.OutgoingSpanSegment.FromTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
-
-                    if (innerSpan.OutgoingSpanSegment != null && innerSpan.OutgoingSpanSegment.ToTerminalId != Guid.Empty)
+                    else if (innerSpan.OutgoingSpanSegment != null && innerSpan.OutgoingSpanSegment.ToTerminalId != Guid.Empty)
+                        AddToTerminalEnds(innerSpan.OutgoingSpanSegment.ToTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
+                    else if (innerSpan.OutgoingSpanSegment != null)
                         AddToTerminalEnds(innerSpan.OutgoingSpanSegment.ToTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
                 }
 
@@ -444,7 +446,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 Margin = viewModel.IsSingleSpan ? _portMargin / 2 : _portMargin,
                 Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName,
                 PointStyle = side.ToString() + "TerminalLabel",
-                PointLabel = viewModel.GetConduitEquipmentLabel()
+                PointLabel = viewModel.GetConduitEquipmentLabel(),
             };
 
             port.DrawingOrder = 420;
@@ -481,8 +483,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                 if (data.SpanSegment != null && data.SpanSegment.FromTerminalId != Guid.Empty)
                     AddToTerminalEnds(data.SpanSegment.FromTerminalId, data.SpanSegment, terminal, data.StyleName);
-
-                if (data.SpanSegment != null && data.SpanSegment.ToTerminalId != Guid.Empty)
+                else if (data.SpanSegment != null && data.SpanSegment.ToTerminalId != Guid.Empty)
+                    AddToTerminalEnds(data.SpanSegment.ToTerminalId, data.SpanSegment, terminal, data.StyleName);
+                else if (data.SpanSegment != null)
                     AddToTerminalEnds(data.SpanSegment.ToTerminalId, data.SpanSegment, terminal, data.StyleName);
 
                 innerSpansFound = true;
@@ -524,7 +527,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 {
                     if (!alreadyConnected.Contains(terminalEnd.DiagramTerminal))
                     {
-                        if (_terminalEndsByTerminalId[terminalEnd.TerminalId].Any(th => th.DiagramTerminal != terminalEnd.DiagramTerminal))
+                        if (terminalEnd.TerminalId != Guid.Empty && _terminalEndsByTerminalId[terminalEnd.TerminalId].Any(th => th.DiagramTerminal != terminalEnd.DiagramTerminal))
                         {
                             var otherDiagramTerminal = _terminalEndsByTerminalId[terminalEnd.TerminalId].First(th => th.DiagramTerminal != terminalEnd.DiagramTerminal);
 
@@ -580,6 +583,62 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                 }
 
 
+                            }
+                        }
+                        else // Not connected terminal end
+                        {
+                            var test = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations;
+
+
+                            // Add eventually cable running through inner conduit
+                            if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(terminalEnd.SpanSegment.Id))
+                            {
+                                // Check if cable is running from one port to another
+
+                                var cableId = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[terminalEnd.SpanSegment.Id].First();
+                                var fiberCableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
+
+
+                                if (_nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].Count == 2)
+                                {
+                                    // get other segment id
+                                    var otherEndSegmentId = _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].First(r => r != terminalEnd.SpanSegment.Id);
+                                    var otherDiagramTerminal = _terminalEndsByTerminalId[Guid.Empty].First(s => s.SpanSegment.Id == otherEndSegmentId);
+
+                                    alreadyConnected.Add(terminalEnd.DiagramTerminal);
+                                    alreadyConnected.Add(otherDiagramTerminal.DiagramTerminal);
+
+                                    var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
+                                      fromSide: terminalEnd.DiagramTerminal.Port.Side,
+                                      fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
+                                      fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
+                                      toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
+                                      toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
+                                      toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
+                                      label: fiberCableLineLabel,
+                                      style: "FiberCable",
+                                      lineShapeType: LineShapeTypeEnum.Line
+                                   );
+
+                                    cableTerminalConnection.SetReference(cableId, "SpanSegment");
+
+                                    cableTerminalConnection.DrawingOrder = 600;
+                                }
+                                else
+                                {
+                                    var cableTerminalConnection = nodeContainerBlock.AddTerminalHalfConnection(
+                                       fromSide: terminalEnd.DiagramTerminal.Port.Side,
+                                       fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
+                                       fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
+                                       label: fiberCableLineLabel,
+                                       style: "FiberCable",
+                                       50
+                                    );
+
+                                    cableTerminalConnection.SetReference(cableId, "SpanSegment");
+
+                                    cableTerminalConnection.DrawingOrder = 600;
+                                }
                             }
                         }
                     }

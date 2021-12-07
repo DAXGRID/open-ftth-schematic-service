@@ -57,6 +57,8 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         private List<LineBlockTerminalConnection> _terminalConnections = new List<LineBlockTerminalConnection>();
 
+        private List<LineBlockTerminalHalfConnection> _terminalHalfConnections = new List<LineBlockTerminalHalfConnection>();
+
         public LineBlock(bool isVisible = true)
         {
             this.IsVisible = isVisible;
@@ -89,6 +91,24 @@ namespace OpenFTTH.Schematic.Business.Lines
 
 
             _terminalConnections.Add(connection);
+
+            return connection;
+        }
+
+        public LineBlockTerminalHalfConnection AddTerminalHalfConnection(BlockSideEnum fromSide, int fromPortIndex, int fromTerminalIndex, string label, string style, double length)
+        {
+            var connection = new LineBlockTerminalHalfConnection();
+
+            connection.LineLength = length;
+            connection.Label = label;
+            connection.Style = style;
+            connection.FromTerminal = _sides[fromSide].GetPortByIndex(fromPortIndex).GetTerminalByIndex(fromTerminalIndex);
+
+            if (connection.FromTerminal == null)
+                throw new Exception("Can't find from terminal side: " + fromSide.ToString() + " port: " + fromPortIndex + " terminal: " + fromTerminalIndex);
+
+
+            _terminalHalfConnections.Add(connection);
 
             return connection;
         }
@@ -233,7 +253,13 @@ namespace OpenFTTH.Schematic.Business.Lines
             {
                 result.AddRange(connection.CreateDiagramObjects(diagram));
             }
-            
+
+            // Create all hal terminal connections
+            foreach (var connection in _terminalHalfConnections)
+            {
+                result.AddRange(connection.CreateDiagramObjects(diagram));
+            }
+
             return result;
         }
 
@@ -304,5 +330,7 @@ namespace OpenFTTH.Schematic.Business.Lines
             if (_sides.ContainsKey(side))
                 _sides[side].CenterAlignment = true;
         }
+
+     
     }
 }
