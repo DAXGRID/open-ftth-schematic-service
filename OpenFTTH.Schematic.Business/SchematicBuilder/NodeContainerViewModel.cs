@@ -21,7 +21,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 if (Data.NodeContainer.Racks != null && Data.NodeContainer.Racks.Length > 0)
                     return true;
 
-                // TODO: Check if any equipments placed directly in node
+                if (Data.NodeContainer.TerminalEquipmentReferences != null && Data.NodeContainer.TerminalEquipmentReferences.Length > 0)
+                    return true;
+
                 return false;
             }
         }
