@@ -645,7 +645,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                                         TerminalEndHolder otherDiagramTerminal = null;
 
-                                        if (_terminalEndsByTerminalId[Guid.Empty].Exists(s => s.SpanSegment.Id == otherEndSegmentId))
+                                        if (_terminalEndsByTerminalId.ContainsKey(Guid.Empty) && _terminalEndsByTerminalId[Guid.Empty].Exists(s => s.SpanSegment.Id == otherEndSegmentId))
                                         {
                                             otherDiagramTerminal = _terminalEndsByTerminalId[Guid.Empty].First(s => s.SpanSegment.Id == otherEndSegmentId);
                                         }
