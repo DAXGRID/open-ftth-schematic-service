@@ -30,6 +30,7 @@ namespace OpenFTTH.TestData
         public static Guid MultiConduit_5x10_SDU_1_to_SDU_2;
         public static Guid MultiConduit_5x10_SDU_1_to_J_1;
         public static Guid MultiConduit_5x10_SDU_2_to_J_1;
+        public static Guid MultiConduit_12x10_5x10_HH_1_to_HH_2;
 
         public static Guid CustomerConduit_CC_1_to_SDU_1;
         public static Guid CustomerConduit_CC_1_to_SDU_2;
@@ -37,6 +38,7 @@ namespace OpenFTTH.TestData
         public static Guid SingleConduit_CC_1_to_HH_10;
 
         public static Guid NodeContainer_HH_1;
+        public static Guid NodeContainer_HH_2;
         public static Guid NodeContainer_HH_10;
         public static Guid NodeContainer_CC_1;
         public static Guid NodeContainer_J_1;
@@ -72,6 +74,8 @@ namespace OpenFTTH.TestData
                 MultiConduit_5x10_SDU_1_to_J_1 = PlaceConduit(TestSpecifications.Multi_Ø40_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S7 });
                 MultiConduit_5x10_SDU_2_to_J_1 = PlaceConduit(TestSpecifications.Multi_Ø40_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S8 });
 
+                MultiConduit_12x10_5x10_HH_1_to_HH_2 = PlaceConduit(TestSpecifications.Multi_Ø50_12x7_5x10, new RouteNetworkElementIdList() { TestRouteNetwork.S2 });
+
                 // Place customer conduit 1 (engum møllevej external unit address id)
                 CustomerConduit_CC_1_to_SDU_1 = PlaceConduit(
                     TestSpecifications.CustomerConduit_Ø12_Orange, 
@@ -99,10 +103,16 @@ namespace OpenFTTH.TestData
 
                 // Place node containers
                 NodeContainer_HH_1 = PlaceNodeContainer(TestSpecifications.Well_Fiberpowertech_37_EK_378_400x800, TestSpecifications.Manu_Fiberpowertech, TestRouteNetwork.HH_1);
+                NodeContainer_HH_2 = PlaceNodeContainer(TestSpecifications.Well_Fiberpowertech_37_EK_378_400x800, TestSpecifications.Manu_Fiberpowertech, TestRouteNetwork.HH_2);
                 NodeContainer_HH_10 = PlaceNodeContainer(TestSpecifications.Well_Fiberpowertech_37_EK_378_400x800, TestSpecifications.Manu_Fiberpowertech, TestRouteNetwork.HH_10);
                 NodeContainer_CC_1 = PlaceNodeContainer(TestSpecifications.Conduit_Closure_Emtelle_Branch_Box, TestSpecifications.Manu_Emtelle, TestRouteNetwork.CC_1);
                 NodeContainer_J_1 = PlaceNodeContainer(TestSpecifications.Conduit_Closure_Emtelle_Branch_Box, TestSpecifications.Manu_Emtelle, TestRouteNetwork.J_1);
                 NodeContainer_FP_2 = PlaceNodeContainer(TestSpecifications.Well_Cubis_STAKKAbox_MODULA_600x450, TestSpecifications.Manu_Emtelle, TestRouteNetwork.FP_2);
+
+
+                // Affix conduits in H_2
+                AffixSpanEquipmentToContainer(FlexConduit_40_Red_HH_2_to_FP_2, NodeContainer_HH_2, NodeContainerSideEnum.North);
+                AffixSpanEquipmentToContainer(MultiConduit_12x10_5x10_HH_1_to_HH_2, NodeContainer_HH_2, NodeContainerSideEnum.West);
 
                 // Affix 5x10 and 3x10 in CC 1
                 AffixSpanEquipmentToContainer(MultiConduit_12x7_HH_1_to_HH_10, NodeContainer_CC_1, NodeContainerSideEnum.West);

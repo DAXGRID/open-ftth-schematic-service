@@ -175,7 +175,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         }
 
 
-        [Fact, Order(20)]
+        [Fact, Order(19)]
         public async void TestDrawingCableInConnectedConduitsInsideNodeContainer()
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
@@ -355,6 +355,78 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Assert
             diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(6);
+
+
+        }
+
+
+
+        [Fact, Order(23)]
+        public async void TestDrawingCableThroughWellInsideNodeContainerHH2()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElement = TestRouteNetwork.HH_2;
+
+
+            // The span equipment/segment where to route the child span equipment
+            var routeThroughSpanEquipmentId = TestUtilityNetwork.MultiConduit_12x10_5x10_HH_1_to_HH_2;
+            var routeThroughSpanEquipmentId2 = TestUtilityNetwork.FlexConduit_40_Red_HH_2_to_FP_2;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(routeThroughSpanEquipmentId, out var routeThoughSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(routeThroughSpanEquipmentId2, out var routeThoughSpanEquipment2);
+
+            var cable1RouteThroughSpanSegmentId1 = routeThoughSpanEquipment.SpanStructures[1].SpanSegments[0].Id;
+            var cable1RouteThroughSpanSegmentId2 = routeThoughSpanEquipment2.SpanStructures[0].SpanSegments[0].Id;
+
+            var cable2RouteThroughSpanSegmentId1 = routeThoughSpanEquipment.SpanStructures[2].SpanSegments[0].Id;
+            var cable2RouteThroughSpanSegmentId2 = routeThoughSpanEquipment2.SpanStructures[0].SpanSegments[0].Id;
+
+
+            // Cable 1
+            var routingHops = new RoutingHop[]
+            {
+                new RoutingHop(TestRouteNetwork.HH_1, cable1RouteThroughSpanSegmentId1),
+                new RoutingHop(TestRouteNetwork.HH_2, cable1RouteThroughSpanSegmentId2)
+            };
+
+            var placeSpanEquipmentCommand = new PlaceSpanEquipmentInUtilityNetwork(Guid.NewGuid(), new UserContext("test", Guid.Empty), Guid.NewGuid(), TestSpecifications.FiberCable_288Fiber, routingHops)
+            {
+                NamingInfo = new NamingInfo("K66600000", null),
+                ManufacturerId = Guid.NewGuid()
+            };
+
+            var placeSpanEquipmentResult1 = await _commandDispatcher.HandleAsync<PlaceSpanEquipmentInUtilityNetwork, Result>(placeSpanEquipmentCommand);
+
+            // Cable 2
+            var routingHops2 = new RoutingHop[]
+            {
+                new RoutingHop(TestRouteNetwork.HH_1, cable2RouteThroughSpanSegmentId1),
+                new RoutingHop(TestRouteNetwork.HH_2, cable2RouteThroughSpanSegmentId2)
+            };
+
+            var placeSpanEquipmentCommand2 = new PlaceSpanEquipmentInUtilityNetwork(Guid.NewGuid(), new UserContext("test", Guid.Empty), Guid.NewGuid(), TestSpecifications.FiberCable_288Fiber, routingHops2)
+            {
+                NamingInfo = new NamingInfo("K66700000", null),
+                ManufacturerId = Guid.NewGuid()
+            };
+
+            var placeSpanEquipmentResult2 = await _commandDispatcher.HandleAsync<PlaceSpanEquipmentInUtilityNetwork, Result>(placeSpanEquipmentCommand2);
+
+            // Assert
+            placeSpanEquipmentResult1.IsSuccess.Should().BeTrue();
+            placeSpanEquipmentResult2.IsSuccess.Should().BeTrue();
+
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(8);
 
 
         }

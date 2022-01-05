@@ -190,7 +190,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         }
 
 
-        [Fact, Order(20)]
+        [Fact, Order(21)]
         public async void TestAddFirstTerminalEquipmentInFP2Rack1()
         {
             var sutRouteNetworkElement = TestRouteNetwork.FP_2;
@@ -238,7 +238,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         }
 
 
-        [Fact, Order(21)]
+        [Fact, Order(22)]
         public async void TestAdd80EquipmentsInFP2Rack2()
         {
             var sutRouteNetworkElement = TestRouteNetwork.FP_2;

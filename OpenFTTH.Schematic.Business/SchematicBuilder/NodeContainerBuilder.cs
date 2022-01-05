@@ -435,7 +435,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private void AffixConduitEnd(LineBlock nodeContainerBlock, SpanEquipmentViewModel viewModel)
         {
-            var spanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
+            var routeSpanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
 
             BlockSideEnum side = MapFromContainerSide(viewModel.Affix.NodeContainerIngoingSide);
 
@@ -450,7 +450,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             };
 
             port.DrawingOrder = 420;
-            port.SetReference(viewModel.RootSpanDiagramInfo("OuterConduit").SegmentId, "SpanSegment");
+
+            port.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
 
             nodeContainerBlock.AddPort(port);
 
@@ -494,44 +495,76 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             // Create fake inner terminal used to display where the empty multi conduit is heading
             if (!innerSpansFound)
             {
-                var terminal = new BlockPortTerminal(port)
+                // Check if cables are related to the outer conduir
+                if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(routeSpanDiagramInfo.SegmentId))
                 {
-                    IsVisible = true,
-                    ShapeType = viewModel.IsSingleSpan ? TerminalShapeTypeEnum.PointAndPolygon : TerminalShapeTypeEnum.Point,
-                    PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(spanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(spanDiagramInfo.SegmentId),
-                    PolygonStyle = spanDiagramInfo.StyleName,
-                    DrawingOrder = 620
-                };
+                    var cableRelations = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[routeSpanDiagramInfo.SegmentId];
 
-                terminal.SetReference(spanDiagramInfo.SegmentId, "SpanSegment");
+                    foreach (var cableId in cableRelations)
+                    {
+                        var terminal = new BlockPortTerminal(port)
+                        {
+                            IsVisible = false,
+                            ShapeType = TerminalShapeTypeEnum.Point,
+                            PointStyle = side.ToString() + "TerminalLabel",
+                            PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(routeSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(routeSpanDiagramInfo.SegmentId),
+                            PolygonStyle = routeSpanDiagramInfo.StyleName,
+                            DrawingOrder = 620
+                        };
 
-                if (viewModel.IsSingleSpan)
+                        terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
+
+                        // Create a fake terminal for the cable
+                        AddToTerminalEnds(cableId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+                    }
+                }
+                else
                 {
-                    if (spanDiagramInfo.SpanSegment != null && spanDiagramInfo.SpanSegment.FromTerminalId != Guid.Empty)
-                        AddToTerminalEnds(spanDiagramInfo.SpanSegment.FromTerminalId, spanDiagramInfo.SpanSegment, terminal, spanDiagramInfo.StyleName);
 
-                    if (spanDiagramInfo.SpanSegment != null && spanDiagramInfo.SpanSegment.ToTerminalId != Guid.Empty)
-                        AddToTerminalEnds(spanDiagramInfo.SpanSegment.ToTerminalId, spanDiagramInfo.SpanSegment, terminal, spanDiagramInfo.StyleName);
+                    var terminal = new BlockPortTerminal(port)
+                    {
+                        IsVisible = true,
+                        ShapeType = viewModel.IsSingleSpan ? TerminalShapeTypeEnum.PointAndPolygon : TerminalShapeTypeEnum.Point,
+                        PointStyle = side.ToString() + "TerminalLabel",
+                        PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(routeSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(routeSpanDiagramInfo.SegmentId),
+                        PolygonStyle = routeSpanDiagramInfo.StyleName,
+                        DrawingOrder = 620
+                    };
+
+                    terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
+
+                    if (viewModel.IsSingleSpan)
+                    {
+                        if (routeSpanDiagramInfo.SpanSegment != null && routeSpanDiagramInfo.SpanSegment.FromTerminalId != Guid.Empty)
+                            AddToTerminalEnds(routeSpanDiagramInfo.SpanSegment.FromTerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+
+                        if (routeSpanDiagramInfo.SpanSegment != null && routeSpanDiagramInfo.SpanSegment.ToTerminalId != Guid.Empty)
+                            AddToTerminalEnds(routeSpanDiagramInfo.SpanSegment.ToTerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+                    }
                 }
             }
         }
 
         private void ConnectEnds(LineBlock nodeContainerBlock)
         {
-            HashSet<BlockPortTerminal> alreadyConnected = new HashSet<BlockPortTerminal>();
+            System.Diagnostics.Debug.WriteLine($"***ConnectEnds***");
+
+
+            HashSet<BlockPortTerminal> terminalAlreadyConnected = new HashSet<BlockPortTerminal>();
+
+            HashSet<Guid> cableAlreadyConnected = new HashSet<Guid>();
 
             foreach (var terminalEndList in _terminalEndsByTerminalId.Values)
             {
                 foreach (var terminalEnd in terminalEndList)
                 {
-                    if (!alreadyConnected.Contains(terminalEnd.DiagramTerminal))
+                    if (!terminalAlreadyConnected.Contains(terminalEnd.DiagramTerminal))
                     {
                         if (terminalEnd.TerminalId != Guid.Empty && _terminalEndsByTerminalId[terminalEnd.TerminalId].Any(th => th.DiagramTerminal != terminalEnd.DiagramTerminal))
                         {
                             var otherDiagramTerminal = _terminalEndsByTerminalId[terminalEnd.TerminalId].First(th => th.DiagramTerminal != terminalEnd.DiagramTerminal);
 
-                            if (!alreadyConnected.Contains(otherDiagramTerminal.DiagramTerminal))
+                            if (!terminalAlreadyConnected.Contains(otherDiagramTerminal.DiagramTerminal))
                             {
 
                                 var terminalConnection = nodeContainerBlock.AddTerminalConnection(
@@ -554,8 +587,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                                 terminalConnection.SetReference(terminalEnd.SpanSegment.Id, "SpanSegment");
 
-                                alreadyConnected.Add(terminalEnd.DiagramTerminal);
-                                alreadyConnected.Add(otherDiagramTerminal.DiagramTerminal);
+                                terminalAlreadyConnected.Add(terminalEnd.DiagramTerminal);
+                                terminalAlreadyConnected.Add(otherDiagramTerminal.DiagramTerminal);
 
 
                                 // Add eventually cable running through inner conduit
@@ -564,6 +597,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                     var cableId = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[terminalEnd.SpanSegment.Id].First();
                                     var fiberCableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
 
+                                    System.Diagnostics.Debug.WriteLine($"Will connect cable: {cableId} through conduit connection");
 
                                     var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
                                        fromSide: terminalEnd.DiagramTerminal.Port.Side,
@@ -595,49 +629,81 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                             {
                                 // Check if cable is running from one port to another
 
-                                var cableId = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[terminalEnd.SpanSegment.Id].First();
-                                var fiberCableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
+                                var cableIds = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[terminalEnd.SpanSegment.Id];
 
-
-                                if (_nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].Count == 2)
+                                foreach (var cableId in cableIds)
                                 {
-                                    // get other segment id
-                                    var otherEndSegmentId = _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].First(r => r != terminalEnd.SpanSegment.Id);
-                                    var otherDiagramTerminal = _terminalEndsByTerminalId[Guid.Empty].First(s => s.SpanSegment.Id == otherEndSegmentId);
+                                    System.Diagnostics.Debug.WriteLine($"Try connecting cable: {cableId} terminalEnd: {terminalEnd.TerminalId} terminalEnd segment id: {terminalEnd.SpanSegment.Id} port-to-port");
 
-                                    alreadyConnected.Add(terminalEnd.DiagramTerminal);
-                                    alreadyConnected.Add(otherDiagramTerminal.DiagramTerminal);
+                                    var cableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
 
-                                    var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
-                                      fromSide: terminalEnd.DiagramTerminal.Port.Side,
-                                      fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
-                                      fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
-                                      toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
-                                      toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
-                                      toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
-                                      label: fiberCableLineLabel,
-                                      style: "FiberCable",
-                                      lineShapeType: LineShapeTypeEnum.Line
-                                   );
+                                    // Only connect if cable goes through two span segments and terminal end it not the fake one (where terminal id equal the cable id)
+                                    if (_nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].Count == 2 && cableId != terminalEnd.TerminalId)
+                                    {
+                                        // get other segment id
+                                        var otherEndSegmentId = _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].First(r => r != terminalEnd.SpanSegment.Id);
 
-                                    cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                                        TerminalEndHolder otherDiagramTerminal = null;
 
-                                    cableTerminalConnection.DrawingOrder = 600;
-                                }
-                                else
-                                {
-                                    var cableTerminalConnection = nodeContainerBlock.AddTerminalHalfConnection(
-                                       fromSide: terminalEnd.DiagramTerminal.Port.Side,
-                                       fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
-                                       fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
-                                       label: fiberCableLineLabel,
-                                       style: "FiberCable",
-                                       50
-                                    );
+                                        if (_terminalEndsByTerminalId[Guid.Empty].Exists(s => s.SpanSegment.Id == otherEndSegmentId))
+                                        {
+                                            otherDiagramTerminal = _terminalEndsByTerminalId[Guid.Empty].First(s => s.SpanSegment.Id == otherEndSegmentId);
+                                        }
+                                        else if (_terminalEndsByTerminalId.ContainsKey(cableId))
+                                        {
+                                            otherDiagramTerminal = _terminalEndsByTerminalId[cableId].First(s => s.SpanSegment.Id == otherEndSegmentId);
+                                        }
 
-                                    cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                                        foreach (var cableIdConnected in cableAlreadyConnected)
+                                            System.Diagnostics.Debug.WriteLine($" Already connected cable: {cableIdConnected}");
 
-                                    cableTerminalConnection.DrawingOrder = 600;
+                                        if (otherDiagramTerminal != null && !cableAlreadyConnected.Contains(cableId))
+                                        {
+                                            System.Diagnostics.Debug.WriteLine($"Will connect cable: {cableId} port-to-port");
+
+                                            cableAlreadyConnected.Add(cableId);
+
+                                            var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
+                                              fromSide: terminalEnd.DiagramTerminal.Port.Side,
+                                              fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
+                                              fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
+                                              toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
+                                              toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
+                                              toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
+                                              label: cableLineLabel,
+                                              style: "FiberCable",
+                                              lineShapeType: LineShapeTypeEnum.Line
+                                           );
+
+                                            cableTerminalConnection.SetReference(cableId, "SpanSegment");
+
+                                            cableTerminalConnection.DrawingOrder = 600;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var segmentIds = _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId];
+
+                                        // Only make half-connection if the cable is not running between two parent span segments
+                                        if (segmentIds.Count == 1)
+                                        {
+
+                                            System.Diagnostics.Debug.WriteLine($"Will connect cable: {cableId} half connection. Number of segment relations: {segmentIds.Count}");
+
+                                            var cableTerminalConnection = nodeContainerBlock.AddTerminalHalfConnection(
+                                               fromSide: terminalEnd.DiagramTerminal.Port.Side,
+                                               fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
+                                               fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
+                                               label: cableLineLabel,
+                                               style: "FiberCable",
+                                               50
+                                            );
+
+                                            cableTerminalConnection.SetReference(cableId, "SpanSegment");
+
+                                            cableTerminalConnection.DrawingOrder = 600;
+                                        }
+                                    }
                                 }
                             }
                         }
