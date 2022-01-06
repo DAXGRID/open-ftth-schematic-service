@@ -355,13 +355,62 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Assert
             diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(6);
+        }
+
+
+        [Fact, Order(23)]
+        public async void TestDrawingCableThrowSingleConduitInWellInsideNodeContainerCC1()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElement = TestRouteNetwork.CC_1;
+
+            // The span equipment/segment where to route the child span equipment
+            var routeThroughSpanEquipmentId = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
+            var routeThroughSpanEquipmentId2 = TestUtilityNetwork.CustomerConduit_CC_1_to_SDU_1;
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(routeThroughSpanEquipmentId, out var routeThoughSpanEquipment);
+            utilityNetwork.TryGetEquipment<SpanEquipment>(routeThroughSpanEquipmentId2, out var routeThoughSpanEquipment2);
+
+            var routeThroughSpanSegmentId = routeThoughSpanEquipment.SpanStructures[6].SpanSegments[0].Id;
+            var routeThroughSpanSegmentId2 = routeThoughSpanEquipment2.SpanStructures[0].SpanSegments[0].Id;
+
+            // Setup command
+            var specs = new TestSpecifications(_commandDispatcher, _queryDispatcher).Run();
+
+            var routingHops = new RoutingHop[]
+            {
+                new RoutingHop(TestRouteNetwork.HH_1, routeThroughSpanSegmentId)
+            };
+
+            var placeSpanEquipmentCommand = new PlaceSpanEquipmentInUtilityNetwork(Guid.NewGuid(), new UserContext("test", Guid.Empty), Guid.NewGuid(), TestSpecifications.FiberCable_288Fiber, routingHops)
+            {
+                NamingInfo = new NamingInfo("K999922222", null),
+                ManufacturerId = Guid.NewGuid()
+            };
+
+            // Act
+            var placeSpanEquipmentResult = await _commandDispatcher.HandleAsync<PlaceSpanEquipmentInUtilityNetwork, Result>(placeSpanEquipmentCommand);
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+            // Assert
+            placeSpanEquipmentResult.IsSuccess.Should().BeTrue();
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(7);
+
+            diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.Geometry is Polygon).Should().Be(9);
 
 
         }
 
 
-
-        [Fact, Order(23)]
+        [Fact, Order(24)]
         public async void TestDrawingCableThroughWellInsideNodeContainerHH2()
         {
             var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
@@ -426,12 +475,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
                 new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
 
             // Assert
-            diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(8);
-
-
+            diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(9);
         }
-
-
-
     }
 }
