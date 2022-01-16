@@ -1,14 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.Schematic.Business.QueryHandler;
-using OpenFTTH.Util;
+using OpenFTTH.UtilityGraphService.API.Model.Trace;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
-using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork.Tracing;
-using OpenFTTH.UtilityGraphService.Business.SpanEquipments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RouteNetworkTrace = OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork.Tracing.RouteNetworkTrace;
 
 namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {
@@ -27,7 +24,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly SpanEquipmentWithRelatedInfo _spanEquipment;
         private readonly RouteNetworkInterestRelationKindEnum _relationKind;
 
-        private readonly Dictionary<Guid, RouteNetworkTrace> _traceByBySpanId = new();
+        private readonly Dictionary<Guid, RouteNetworkTraceResult> _traceByBySpanId = new();
 
         public SpanEquipment SpanEquipment => _spanEquipment;
 

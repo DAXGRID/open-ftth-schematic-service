@@ -3,13 +3,13 @@ using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.Util;
+using OpenFTTH.UtilityGraphService.API.Model.Trace;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
-using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork.Tracing;
 using OpenFTTH.UtilityGraphService.API.Queries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RouteNetworkTrace = OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork.Tracing.RouteNetworkTrace;
+
 
 namespace OpenFTTH.Schematic.Business.SchematicBuilder
 {
@@ -25,7 +25,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public LookupCollection<RouteNetworkInterest> RouteNetworkInterests { get; set; }
         public LookupCollection<SpanEquipmentWithRelatedInfo> SpanEquipments { get; set; }
         public LookupCollection<TerminalEquipment> TerminalEquipments { get; set; }
-        public LookupCollection<RouteNetworkTrace> RouteNetworkTraces { get; set; }
+        public LookupCollection<RouteNetworkTraceResult> RouteNetworkTraces { get; set; }
         public Dictionary<Guid, RouteNetworkElementInterestRelation> InterestRelations { get; set; }
         public NodeContainer NodeContainer { get; set; }
         public Guid NodeContainerRouteNetworkElementId { get; set; }
@@ -178,22 +178,25 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             foreach (var cable in data.SpanEquipments.Where(s => s.IsCable))
             {
-                if (cable.ParentAffixes != null && cable.ParentAffixes.Length > 0)
+                if (cable.UtilityNetworkHops != null)
                 {
-                    foreach (var parrentAffix in cable.ParentAffixes)
+                    foreach (var hop in cable.UtilityNetworkHops)
                     {
-                        if (accessibleConduitSpanSegmentIds.Contains(parrentAffix.SpanSegmentId))
+                        foreach (var parrentAffix in hop.ParentAffixes)
                         {
-                            if (data.CableToConduitSegmentParentRelations.ContainsKey(cable.Id))
-                                data.CableToConduitSegmentParentRelations[cable.Id].Add(parrentAffix.SpanSegmentId);
-                            else
-                                data.CableToConduitSegmentParentRelations[cable.Id] = new List<Guid>() { parrentAffix.SpanSegmentId };
+                            if (accessibleConduitSpanSegmentIds.Contains(parrentAffix.SpanSegmentId))
+                            {
+                                if (data.CableToConduitSegmentParentRelations.ContainsKey(cable.Id))
+                                    data.CableToConduitSegmentParentRelations[cable.Id].Add(parrentAffix.SpanSegmentId);
+                                else
+                                    data.CableToConduitSegmentParentRelations[cable.Id] = new List<Guid>() { parrentAffix.SpanSegmentId };
 
 
-                            if (data.ConduitSegmentToCableChildRelations.ContainsKey(parrentAffix.SpanSegmentId))
-                                data.ConduitSegmentToCableChildRelations[parrentAffix.SpanSegmentId].Add(cable.Id);
-                            else
-                                data.ConduitSegmentToCableChildRelations[parrentAffix.SpanSegmentId] = new List<Guid>() { cable.Id };
+                                if (data.ConduitSegmentToCableChildRelations.ContainsKey(parrentAffix.SpanSegmentId))
+                                    data.ConduitSegmentToCableChildRelations[parrentAffix.SpanSegmentId].Add(cable.Id);
+                                else
+                                    data.ConduitSegmentToCableChildRelations[parrentAffix.SpanSegmentId] = new List<Guid>() { cable.Id };
+                            }
                         }
                     }
                 }
