@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenFTTH.RouteNetwork.API.Model;
+using OpenFTTH.Schematic.Business.Lines;
 using OpenFTTH.Schematic.Business.QueryHandler;
 using OpenFTTH.UtilityGraphService.API.Model.Trace;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
@@ -30,6 +31,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         public Guid RouteNetworkElementIdOfInterest => _data.RouteNetworkElementId;
 
+        private SpanDiagramInfo _cachedComputedRouteDiagramInfo = null;
+
         public SpanEquipmentViewModel(ILogger<GetDiagramQueryHandler> logger, Guid routeElementId, Guid spanEquipmentId, RouteNetworkElementRelatedData data)
         {
             _logger = logger;
@@ -51,11 +54,16 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         }
 
         public SpanDiagramInfo RootSpanDiagramInfo(string stylePrefix)
-        { 
+        {
+            if (_cachedComputedRouteDiagramInfo != null)
+                return _cachedComputedRouteDiagramInfo;
+
             var spanStructure = _spanEquipment.SpanStructures.First(s => s.Level == 1);
             var spec = _data.SpanStructureSpecifications[spanStructure.SpecificationId];
 
-            return GetSpanDiagramInfoForStructure(stylePrefix, spanStructure);
+            _cachedComputedRouteDiagramInfo = GetSpanDiagramInfoForStructure(stylePrefix, spanStructure);
+
+            return _cachedComputedRouteDiagramInfo;
         }
 
         public string GetConduitEquipmentLabel()
@@ -88,7 +96,12 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 spanInfos.Add(GetSpanDiagramInfoForStructure(stylePrefix, structure));
             }
 
-            return spanInfos;
+            // If a conduit going into west or east side, we want to have inner conduits drawed from top-down along the y-axis
+            if (BlockSideWhereSpanEquipmentShouldBeAffixed() == BlockSideEnum.West || BlockSideWhereSpanEquipmentShouldBeAffixed() == BlockSideEnum.East)
+                return spanInfos.OrderBy(i => (1000 - i.Position)).ToList();
+            // Else we just draw them in order along the x-axis reflected by their structure position
+            else
+                return spanInfos;
         }
 
         public SpanDiagramInfo GetSpanDiagramInfoForStructure(string stylePrefix, SpanStructure structure)
@@ -258,6 +271,36 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                 return false;
             }
+        }
+
+        public BlockSideEnum BlockSideWhereSpanEquipmentShouldBeAffixed()
+        {
+            if (!IsAttachedToNodeContainer())
+                return BlockSideEnum.West;
+
+            if (Affix.NodeContainerIngoingSide == NodeContainerSideEnum.West)
+                return BlockSideEnum.West;
+            else if (Affix.NodeContainerIngoingSide == NodeContainerSideEnum.North)
+                return BlockSideEnum.North;
+            else if (Affix.NodeContainerIngoingSide == NodeContainerSideEnum.East)
+                return BlockSideEnum.East;
+            else
+                return BlockSideEnum.South;
+        }
+
+        public BlockSideEnum OppositeBlockSideWhereSpanEquipmentShouldBeAffixed()
+        {
+            if (!IsAttachedToNodeContainer())
+                return BlockSideEnum.East;
+
+            if (Affix.NodeContainerIngoingSide == NodeContainerSideEnum.West)
+                return BlockSideEnum.East;
+            else if (Affix.NodeContainerIngoingSide == NodeContainerSideEnum.North)
+                return BlockSideEnum.South;
+            else if (Affix.NodeContainerIngoingSide == NodeContainerSideEnum.East)
+                return BlockSideEnum.West;
+            else
+                return BlockSideEnum.North;
         }
 
     }

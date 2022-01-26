@@ -173,7 +173,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             foreach (var spanEquipment in _nodeContainerViewModel.Data.SpanEquipments.Where(s => s.IsAttachedToNodeContainer(_nodeContainerViewModel.Data)))
                 affixedSpanEquipmentViewModels.Add(new SpanEquipmentViewModel(_logger, _nodeContainerViewModel.Data.RouteNetworkElementId, spanEquipment.Id, _nodeContainerViewModel.Data));
 
-            var organizer = new NodeContainerSpanEquipmentOrganizer(affixedSpanEquipmentViewModels);
+            //var organizer = new NodeContainerSpanEquipmentOrganizer(affixedSpanEquipmentViewModels);
 
 
             foreach (var viewModel in GetOrderedSpanEquipmentViewModels(affixedSpanEquipmentViewModels))
@@ -244,10 +244,14 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             if (viewModel.IsPassThrough)
             {
                 AffixPassThroughConduit(nodeContainerBlock, viewModel);
+
+                _nodeContainerViewModel.PortViewModels.Add(new NodeContainerBlockPortViewModel(_nodeContainerViewModel, viewModel, NodeContainerBlockPortViewModelKind.PassThrough));
             }
             else
             {
                 AffixConduitEnd(nodeContainerBlock, viewModel);
+
+                _nodeContainerViewModel.PortViewModels.Add(new NodeContainerBlockPortViewModel(_nodeContainerViewModel, viewModel, NodeContainerBlockPortViewModelKind.End));
             }
         }
 
@@ -255,8 +259,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         {
             var spanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
 
-            BlockSideEnum fromSide = MapFromContainerSide(viewModel.Affix.NodeContainerIngoingSide);
-            BlockSideEnum toSide = OppositeSide(fromSide);
+            BlockSideEnum fromSide = viewModel.BlockSideWhereSpanEquipmentShouldBeAffixed();
+            BlockSideEnum toSide = viewModel.OppositeBlockSideWhereSpanEquipmentShouldBeAffixed();
 
             bool portsVisible = true;
 
@@ -299,14 +303,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 portConnection.DrawingOrder = 410;
             }
 
-            List<SpanDiagramInfo> innerSpanData = null;
-
-            // If a conduit going into west or east side, we want to have inner conduits drawed from top-down along the y-axis
-            if (fromSide == BlockSideEnum.West || fromSide == BlockSideEnum.East)
-                innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit").OrderBy(i => (1000 - i.Position)).ToList();
-            // Else we just draw them in order allong the x-axis
-            else
-                innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit");
+            List<SpanDiagramInfo> innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit");
 
             bool innerSpansFound = false;
 
@@ -433,100 +430,37 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         }
 
+        #region Conduit End handling
+
         private void AffixConduitEnd(LineBlock nodeContainerBlock, SpanEquipmentViewModel viewModel)
         {
             var routeSpanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
 
-            BlockSideEnum side = MapFromContainerSide(viewModel.Affix.NodeContainerIngoingSide);
+            var blockSide = viewModel.BlockSideWhereSpanEquipmentShouldBeAffixed();
 
-            // Port
-            var port = new BlockPort(side)
-            {
-                IsVisible = viewModel.IsSingleSpan ? false: true,
-                Margin = viewModel.IsSingleSpan ? _portMargin / 2 : _portMargin,
-                Style = viewModel.RootSpanDiagramInfo("OuterConduit").StyleName,
-                PointStyle = side.ToString() + "TerminalLabel",
-                PointLabel = viewModel.GetConduitEquipmentLabel(),
-            };
+            // Create block port representing the outer conduit
+            var outerConduitPort = CreatePortForOuterConduitEnd(viewModel, blockSide);
 
-            port.DrawingOrder = 420;
+            nodeContainerBlock.AddPort(outerConduitPort);
 
-            port.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
-
-            nodeContainerBlock.AddPort(port);
-
-            List<SpanDiagramInfo> innerSpanData = null;
-
-            // If a conduit going into west or east side, we want to have inner conduits drawed from top-down along the y-axis
-            if (side == BlockSideEnum.West || side == BlockSideEnum.East)
-                innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit").OrderBy(i => (1000 - i.Position)).ToList();
-            // Else we just draw them in order allong the x-axis
-            else
-                innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit");
+            List<SpanDiagramInfo> innerSpanData = viewModel.GetInnerSpanDiagramInfos("InnerConduit");
 
             bool innerSpansFound = false;
 
-            // Create inner conduits as terminals
-            foreach (var data in innerSpanData)
+            // Create inner conduit ends as port terminals
+            foreach (var innerSpanDiagramInfo in innerSpanData)
             {
-                var terminal = new BlockPortTerminal(port)
-                {
-                    IsVisible = true,
-                    ShapeType = TerminalShapeTypeEnum.PointAndPolygon,
-                    PointStyle = side.ToString() + "TerminalLabel",
-                    PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(data.SegmentId) : viewModel.GetOutgoingRouteNodeName(data.SegmentId),
-                    PolygonStyle = data.StyleName
-                };
-
-                terminal.DrawingOrder = 620;
-
-                terminal.SetReference(data.SegmentId, "SpanSegment");
-
-                if (data.SpanSegment != null && data.SpanSegment.FromTerminalId != Guid.Empty)
-                    AddToTerminalEnds(data.SpanSegment.FromTerminalId, data.SpanSegment, terminal, data.StyleName);
-                else if (data.SpanSegment != null && data.SpanSegment.ToTerminalId != Guid.Empty)
-                    AddToTerminalEnds(data.SpanSegment.ToTerminalId, data.SpanSegment, terminal, data.StyleName);
-                else if (data.SpanSegment != null)
-                    AddToTerminalEnds(data.SpanSegment.ToTerminalId, data.SpanSegment, terminal, data.StyleName);
-
+                CreateTerminalForInnerConduitEnd(viewModel, outerConduitPort, innerSpanDiagramInfo);
                 innerSpansFound = true;
             }
 
-            // Create fake inner terminal used to display where the empty multi conduit is heading
+            // We're dealing with a multi conduit without any inner conduits or a single span conduit
             if (!innerSpansFound)
             {
-                // We're dealing with a single span conduit used for one cable
+                // We're dealing with a single span conduit
                 if (viewModel.IsSingleSpan)
                 {
-                    var terminal = new BlockPortTerminal(port)
-                    {
-                        IsVisible = true,
-                        ShapeType = viewModel.IsSingleSpan ? TerminalShapeTypeEnum.PointAndPolygon : TerminalShapeTypeEnum.Point,
-                        PointStyle = side.ToString() + "TerminalLabel",
-                        PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(routeSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(routeSpanDiagramInfo.SegmentId),
-                        PolygonStyle = routeSpanDiagramInfo.StyleName,
-                        DrawingOrder = 620
-                    };
-
-                    terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
-
-                    if (routeSpanDiagramInfo.SpanSegment != null && routeSpanDiagramInfo.SpanSegment.FromTerminalId != Guid.Empty)
-                        AddToTerminalEnds(routeSpanDiagramInfo.SpanSegment.FromTerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
-
-                    if (routeSpanDiagramInfo.SpanSegment != null && routeSpanDiagramInfo.SpanSegment.ToTerminalId != Guid.Empty)
-                        AddToTerminalEnds(routeSpanDiagramInfo.SpanSegment.ToTerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
-
-                    // Check if cables are related to the outer conduir
-                    if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(routeSpanDiagramInfo.SegmentId))
-                    {
-                        var cableRelations = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[routeSpanDiagramInfo.SegmentId];
-
-                        foreach (var cableId in cableRelations)
-                        {
-                            // Add cable to terminal end relation
-                            AddToTerminalEnds(cableId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
-                        }
-                    }
+                    CreateTerminalForSingleConduitEnd(viewModel, outerConduitPort);
                 }
                 // We're dealing with a multi level conduit with no inner conduits
                 else
@@ -534,44 +468,143 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     // Check if cables are related to the outer conduir
                     if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(routeSpanDiagramInfo.SegmentId))
                     {
-                        var cableRelations = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[routeSpanDiagramInfo.SegmentId];
-
-                        foreach (var cableId in cableRelations)
-                        {
-                            var terminal = new BlockPortTerminal(port)
-                            {
-                                IsVisible = viewModel.IsSingleSpan && viewModel.SpanEquipment.SpanStructures.Length == 1,
-                                ShapeType = TerminalShapeTypeEnum.Point,
-                                PointStyle = side.ToString() + "TerminalLabel",
-                                PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(routeSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(routeSpanDiagramInfo.SegmentId),
-                                PolygonStyle = routeSpanDiagramInfo.StyleName,
-                                DrawingOrder = 620
-                            };
-
-                            terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
-
-                            // Create a fake terminal for the cable
-                            AddToTerminalEnds(cableId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
-                        }
+                        CreateTerminalsForCablesRelatedToSingleConduitEnd(viewModel, outerConduitPort);
                     }
                     // No cables so we create one terminal that shows where the empty multi conduit is heading
                     else
                     {
-                        var terminal = new BlockPortTerminal(port)
-                        {
-                            IsVisible = true,
-                            ShapeType = viewModel.IsSingleSpan ? TerminalShapeTypeEnum.PointAndPolygon : TerminalShapeTypeEnum.Point,
-                            PointStyle = side.ToString() + "TerminalLabel",
-                            PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(routeSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(routeSpanDiagramInfo.SegmentId),
-                            PolygonStyle = routeSpanDiagramInfo.StyleName,
-                            DrawingOrder = 620
-                        };
-
-                        terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
+                        CreateTerminalForShowingWhereEmptySingleConduitIsHeading(viewModel, outerConduitPort);
                     }
                 }
             }
         }
+  
+        private BlockPort CreatePortForOuterConduitEnd(SpanEquipmentViewModel viewModel, BlockSideEnum blockSide)
+        {
+            var routeSpanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
+
+            var port = new BlockPort(blockSide)
+            {
+                IsVisible = viewModel.IsSingleSpan ? false : true,
+                Margin = viewModel.IsSingleSpan ? _portMargin / 2 : _portMargin,
+                Style = routeSpanDiagramInfo.StyleName,
+                PointStyle = blockSide.ToString() + "TerminalLabel",
+                PointLabel = viewModel.GetConduitEquipmentLabel(),
+            };
+
+            port.DrawingOrder = 420;
+
+            port.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
+
+            return port;
+        }
+
+        private BlockPortTerminal CreateTerminalForInnerConduitEnd(SpanEquipmentViewModel viewModel, BlockPort outerConduitPort, SpanDiagramInfo innerSpanDiagramInfo)
+        {
+            var terminal = new BlockPortTerminal(outerConduitPort)
+            {
+                IsVisible = true,
+                ShapeType = TerminalShapeTypeEnum.PointAndPolygon,
+                PointStyle = outerConduitPort.Side.ToString() + "TerminalLabel",
+                PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(innerSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(innerSpanDiagramInfo.SegmentId),
+                PolygonStyle = innerSpanDiagramInfo.StyleName
+            };
+
+            terminal.DrawingOrder = 620;
+
+            terminal.SetReference(innerSpanDiagramInfo.SegmentId, "SpanSegment");
+
+            if (innerSpanDiagramInfo.SpanSegment != null && innerSpanDiagramInfo.SpanSegment.FromTerminalId != Guid.Empty)
+                AddToTerminalEnds(innerSpanDiagramInfo.SpanSegment.FromTerminalId, innerSpanDiagramInfo.SpanSegment, terminal, innerSpanDiagramInfo.StyleName);
+            else if (innerSpanDiagramInfo.SpanSegment != null && innerSpanDiagramInfo.SpanSegment.ToTerminalId != Guid.Empty)
+                AddToTerminalEnds(innerSpanDiagramInfo.SpanSegment.ToTerminalId, innerSpanDiagramInfo.SpanSegment, terminal, innerSpanDiagramInfo.StyleName);
+            else if (innerSpanDiagramInfo.SpanSegment != null)
+                AddToTerminalEnds(innerSpanDiagramInfo.SpanSegment.ToTerminalId, innerSpanDiagramInfo.SpanSegment, terminal, innerSpanDiagramInfo.StyleName);
+
+
+            return terminal;
+        }
+        
+        private void CreateTerminalForSingleConduitEnd(SpanEquipmentViewModel viewModel, BlockPort outerConduitPort)
+        {
+            var routeSpanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
+
+            var terminal = new BlockPortTerminal(outerConduitPort)
+            {
+                IsVisible = true,
+                ShapeType = viewModel.IsSingleSpan ? TerminalShapeTypeEnum.PointAndPolygon : TerminalShapeTypeEnum.Point,
+                PointStyle = outerConduitPort.Side.ToString() + "TerminalLabel",
+                PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(routeSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(routeSpanDiagramInfo.SegmentId),
+                PolygonStyle = routeSpanDiagramInfo.StyleName,
+                DrawingOrder = 620
+            };
+
+            terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
+
+            if (routeSpanDiagramInfo.SpanSegment != null && routeSpanDiagramInfo.SpanSegment.FromTerminalId != Guid.Empty)
+                AddToTerminalEnds(routeSpanDiagramInfo.SpanSegment.FromTerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+
+            if (routeSpanDiagramInfo.SpanSegment != null && routeSpanDiagramInfo.SpanSegment.ToTerminalId != Guid.Empty)
+                AddToTerminalEnds(routeSpanDiagramInfo.SpanSegment.ToTerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+
+            // Check if cables are related to the conduit
+            if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(routeSpanDiagramInfo.SegmentId))
+            {
+                var cableRelations = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[routeSpanDiagramInfo.SegmentId];
+
+                foreach (var cableId in cableRelations)
+                {
+                    // Add cable to terminal end relation
+                    AddToTerminalEnds(cableId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+                }
+            }
+        }
+
+        private void CreateTerminalsForCablesRelatedToSingleConduitEnd(SpanEquipmentViewModel viewModel, BlockPort outerConduitPort)
+        {
+            var routeSpanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
+
+            var cableRelations = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[routeSpanDiagramInfo.SegmentId];
+
+            foreach (var cableId in cableRelations)
+            {
+                var terminal = new BlockPortTerminal(outerConduitPort)
+                {
+                    IsVisible = viewModel.IsSingleSpan && viewModel.SpanEquipment.SpanStructures.Length == 1,
+                    ShapeType = TerminalShapeTypeEnum.Point,
+                    PointStyle = outerConduitPort.Side + "TerminalLabel",
+                    PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(routeSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(routeSpanDiagramInfo.SegmentId),
+                    PolygonStyle = routeSpanDiagramInfo.StyleName,
+                    DrawingOrder = 620
+                };
+
+                terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
+
+                // Create a fake terminal for the cable
+                AddToTerminalEnds(cableId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+            }
+        }
+
+        private void CreateTerminalForShowingWhereEmptySingleConduitIsHeading(SpanEquipmentViewModel viewModel, BlockPort outerConduitPort)
+        {
+            var routeSpanDiagramInfo = viewModel.RootSpanDiagramInfo("OuterConduit");
+
+            var terminal = new BlockPortTerminal(outerConduitPort)
+            {
+                IsVisible = true,
+                ShapeType = viewModel.IsSingleSpan ? TerminalShapeTypeEnum.PointAndPolygon : TerminalShapeTypeEnum.Point,
+                PointStyle = outerConduitPort.Side.ToString() + "TerminalLabel",
+                PointLabel = viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? viewModel.GetIngoingRouteNodeName(routeSpanDiagramInfo.SegmentId) : viewModel.GetOutgoingRouteNodeName(routeSpanDiagramInfo.SegmentId),
+                PolygonStyle = routeSpanDiagramInfo.StyleName,
+                DrawingOrder = 620
+            };
+
+            terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
+
+        }
+
+        #endregion
+
 
         private void ConnectEnds(LineBlock nodeContainerBlock)
         {
@@ -765,29 +798,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             }
         }
 
-        private static BlockSideEnum OppositeSide(BlockSideEnum fromSide)
-        {
-            if (fromSide == BlockSideEnum.West)
-                return BlockSideEnum.East;
-            else if (fromSide == BlockSideEnum.North)
-                return BlockSideEnum.South;
-            else if (fromSide == BlockSideEnum.East)
-                return BlockSideEnum.West;
-            else
-                return BlockSideEnum.North;
-        }
+       
 
-        private static BlockSideEnum MapFromContainerSide(NodeContainerSideEnum nodeContainerIngoingSide)
-        {
-            if (nodeContainerIngoingSide == NodeContainerSideEnum.West)
-                return BlockSideEnum.West;
-            else if (nodeContainerIngoingSide == NodeContainerSideEnum.North)
-                return BlockSideEnum.North;
-            else if (nodeContainerIngoingSide == NodeContainerSideEnum.East)
-                return BlockSideEnum.East;
-            else
-                return BlockSideEnum.South;
-        }
+      
 
         private class TerminalEndHolder
         {

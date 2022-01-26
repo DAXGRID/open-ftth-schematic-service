@@ -116,5 +116,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
           
             return viewModels;
         }
+
+        public List<NodeContainerBlockPortViewModel> PortViewModels = new();
     }
  }
