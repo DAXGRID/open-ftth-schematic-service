@@ -329,7 +329,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 }
             }
         }
-
+        public Guid IngoingTerminalId => IngoingSpanSegment != null ? IngoingSpanSegment.ToTerminalId : Guid.Empty;
+        public Guid OutgoingTerminalId => OutgoingSpanSegment != null ? OutgoingSpanSegment.FromTerminalId : Guid.Empty;
         public Guid SegmentId
         {
             get
@@ -345,6 +346,19 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             }
         }
 
-        
+        public Guid TerminalId
+        {
+            get
+            {
+                if (IngoingTerminalId != Guid.Empty)
+                {
+                    return IngoingTerminalId;
+                }
+                else
+                {
+                    return OutgoingTerminalId;
+                }
+            }
+        }
     }
 }

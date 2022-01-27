@@ -309,6 +309,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             int terminalNo = 1;
 
+            if (innerSpanData.Count == 6)
+            {
+
+            }
+
             foreach (var innerSpan in innerSpanData)
             {
                 TerminalShapeTypeEnum terminalShapeType = TerminalShapeTypeEnum.Point;
@@ -328,8 +333,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 }
                 else
                 {
-                    //if (viewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.Start)
-                    
                     fromNodeName = viewModel.GetIngoingRouteNodeName(innerSpan.IngoingSpanSegment.Id);
                     toNodeName = viewModel.GetOutgoingRouteNodeName(innerSpan.OutgoingSpanSegment.Id);
                 }
@@ -380,20 +383,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 else
                 {
                     // Add from terminal / ingoing segment to ends
-                    if (innerSpan.IngoingSpanSegment != null && innerSpan.IngoingSpanSegment.FromTerminalId != Guid.Empty)
-                        AddToTerminalEnds(innerSpan.IngoingSpanSegment.FromTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
-                    else if (innerSpan.IngoingSpanSegment != null && innerSpan.IngoingSpanSegment.ToTerminalId != Guid.Empty)
-                        AddToTerminalEnds(innerSpan.IngoingSpanSegment.ToTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
-                    else if (innerSpan.IngoingSpanSegment != null)
-                        AddToTerminalEnds(innerSpan.IngoingSpanSegment.ToTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
+                    AddToTerminalEnds(innerSpan.IngoingTerminalId, innerSpan.IngoingSpanSegment, fromTerminal, innerSpan.StyleName);
 
                     // Add to terminal / outgoing segment to ends
-                    if (innerSpan.OutgoingSpanSegment != null && innerSpan.OutgoingSpanSegment.FromTerminalId != Guid.Empty)
-                        AddToTerminalEnds(innerSpan.OutgoingSpanSegment.FromTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
-                    else if (innerSpan.OutgoingSpanSegment != null && innerSpan.OutgoingSpanSegment.ToTerminalId != Guid.Empty)
-                        AddToTerminalEnds(innerSpan.OutgoingSpanSegment.ToTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
-                    else if (innerSpan.OutgoingSpanSegment != null)
-                        AddToTerminalEnds(innerSpan.OutgoingSpanSegment.ToTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
+                    AddToTerminalEnds(innerSpan.OutgoingTerminalId, innerSpan.OutgoingSpanSegment, toTerminal, innerSpan.StyleName);
                 }
 
                 terminalNo++;
@@ -514,13 +507,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             terminal.SetReference(innerSpanDiagramInfo.SegmentId, "SpanSegment");
 
-            if (innerSpanDiagramInfo.SpanSegment != null && innerSpanDiagramInfo.SpanSegment.FromTerminalId != Guid.Empty)
-                AddToTerminalEnds(innerSpanDiagramInfo.SpanSegment.FromTerminalId, innerSpanDiagramInfo.SpanSegment, terminal, innerSpanDiagramInfo.StyleName);
-            else if (innerSpanDiagramInfo.SpanSegment != null && innerSpanDiagramInfo.SpanSegment.ToTerminalId != Guid.Empty)
-                AddToTerminalEnds(innerSpanDiagramInfo.SpanSegment.ToTerminalId, innerSpanDiagramInfo.SpanSegment, terminal, innerSpanDiagramInfo.StyleName);
-            else if (innerSpanDiagramInfo.SpanSegment != null)
-                AddToTerminalEnds(innerSpanDiagramInfo.SpanSegment.ToTerminalId, innerSpanDiagramInfo.SpanSegment, terminal, innerSpanDiagramInfo.StyleName);
-
+            AddToTerminalEnds(innerSpanDiagramInfo.TerminalId, innerSpanDiagramInfo.SpanSegment, terminal, innerSpanDiagramInfo.StyleName);
 
             return terminal;
         }
@@ -541,11 +528,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
 
-            if (routeSpanDiagramInfo.SpanSegment != null && routeSpanDiagramInfo.SpanSegment.FromTerminalId != Guid.Empty)
-                AddToTerminalEnds(routeSpanDiagramInfo.SpanSegment.FromTerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
-
-            if (routeSpanDiagramInfo.SpanSegment != null && routeSpanDiagramInfo.SpanSegment.ToTerminalId != Guid.Empty)
-                AddToTerminalEnds(routeSpanDiagramInfo.SpanSegment.ToTerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+            AddToTerminalEnds(routeSpanDiagramInfo.TerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
 
             // Check if cables are related to the conduit
             if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(routeSpanDiagramInfo.SegmentId))
