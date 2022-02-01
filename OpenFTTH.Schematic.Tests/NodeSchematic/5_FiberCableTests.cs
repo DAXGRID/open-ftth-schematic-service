@@ -428,7 +428,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             var flexConduitSpanSegmentId = routeThoughSpanEquipment2.SpanStructures[0].SpanSegments[0].Id;
 
 
-
             // Cable 1
             var routingHops = new RoutingHop[]
             {
@@ -492,6 +491,52 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Assert
             diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(10);
+        }
+
+
+
+        [Fact, Order(31)]
+        public async void TestDrawingCableThroughOuterConduitInsideNodeSegment()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElement = TestRouteNetwork.S3;
+
+         
+            // Assert
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(3);
+        }
+
+
+
+        [Fact, Order(30)]
+        public async void TestDrawingCableThroughOuterConduitEndInsideNode()
+        {
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            var sutRouteNetworkElement = TestRouteNetwork.FP_2;
+
+
+            // Assert
+            var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
+
+
+            var diagram = getDiagramQueryResult.Value.Diagram;
+
+            if (System.Environment.OSVersion.Platform.ToString() == "Win32NT")
+                new GeoJsonExporter(diagram).Export("c:/temp/diagram/test.geojson");
+
+            // Assert
+            diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(3);
         }
     }
 }

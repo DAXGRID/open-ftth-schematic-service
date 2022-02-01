@@ -168,32 +168,30 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             if (!innerSpansFound)
             {
-                var fromTerminal = new BlockPortTerminal(fromPort)
-                {
-                    IsVisible = true,
-                    ShapeType = TerminalShapeTypeEnum.Point,
-                    PointStyle = "WestTerminalLabel",
-                    PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
-                    DrawingOrder = 520
-                };
-
-                fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
-
-                var toTerminal = new BlockPortTerminal(toPort)
-                {
-                    IsVisible = true,
-                    ShapeType = TerminalShapeTypeEnum.Point,
-                    PointStyle = "EastTerminalLabel",
-                    PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
-                    DrawingOrder = 520
-                };
-
-                toTerminal.SetReference(rootSpanInfo.OutgoingSegmentId, "SpanSegment");
-
-
                 // If a single conduit
                 if (_spanEquipmentViewModel.IsSingleSpan)
                 {
+                    var fromTerminal = new BlockPortTerminal(fromPort)
+                    {
+                        IsVisible = true,
+                        ShapeType = TerminalShapeTypeEnum.Point,
+                        PointStyle = "WestTerminalLabel",
+                        PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
+                        DrawingOrder = 520
+                    };
+
+                    fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+                    var toTerminal = new BlockPortTerminal(toPort)
+                    {
+                        IsVisible = true,
+                        ShapeType = TerminalShapeTypeEnum.Point,
+                        PointStyle = "EastTerminalLabel",
+                        PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                        DrawingOrder = 520
+                    };
+
+                    toTerminal.SetReference(rootSpanInfo.OutgoingSegmentId, "SpanSegment");
                     var terminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, null, rootSpanInfo.StyleName, LineShapeTypeEnum.Polygon);
                     terminalConnection.DrawingOrder = 510;
                     terminalConnection.SetReference(rootSpanInfo.SegmentId, "SpanSegment");
@@ -212,9 +210,70 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     }
 
                 }
+                // // We're dealing with a multi level conduit with no inner conduits
+                else
+                {
+                    // Check if cables are related to the outer conduit
+                    if (_spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(rootSpanInfo.SegmentId))
+                    {
+                        //CreateTerminalsForCablesRelatedToSingleConduitEnd(viewModel, outerConduitPort);
+                     
+                        var cableRelations = _spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations[rootSpanInfo.SegmentId];
 
+                        foreach (var cableId in cableRelations)
+                        {
+                            var fromTerminal = new BlockPortTerminal(fromPort)
+                            {
+                                IsVisible = true,
+                                ShapeType = TerminalShapeTypeEnum.Point,
+                                PointStyle = "WestTerminalLabel",
+                                PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
+                                DrawingOrder = 620
+                            };
 
-                terminalNo++;
+                            fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+                            var toTerminal = new BlockPortTerminal(toPort)
+                            {
+                                IsVisible = true,
+                                ShapeType = TerminalShapeTypeEnum.Point,
+                                PointStyle = "EastTerminalLabel",
+                                PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                                DrawingOrder = 620
+                            };
+
+                            var fiberCableLineLabel = _spanEquipmentViewModel.Data.GetCableEquipmentLineLabel(cableId);
+                            var cableTerminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, fromTerminal.Index, BlockSideEnum.East, 1, toTerminal.Index, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+                            cableTerminalConnection.DrawingOrder = 600;
+                            cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                        }
+                    }
+                    // No cables so we create one terminal that shows where the empty multi conduit is heading
+                    else
+                    {
+                        //CreateTerminalForShowingWhereEmptySingleConduitIsHeading(viewModel, outerConduitPort);
+
+                        var fromTerminal = new BlockPortTerminal(fromPort)
+                        {
+                            IsVisible = true,
+                            ShapeType = TerminalShapeTypeEnum.Point,
+                            PointStyle = "WestTerminalLabel",
+                            PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
+                            DrawingOrder = 520
+                        };
+
+                        fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+                        var toTerminal = new BlockPortTerminal(toPort)
+                        {
+                            IsVisible = true,
+                            ShapeType = TerminalShapeTypeEnum.Point,
+                            PointStyle = "EastTerminalLabel",
+                            PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                            DrawingOrder = 520
+                        };
+                    }
+                }
             }
 
             return spanEquipmentBlock;
@@ -301,21 +360,22 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             if (!innerSpansFound)
             {
-                var fromTerminal = new BlockPortTerminal(fromPort)
-                {
-                    IsVisible = true,
-                    ShapeType = TerminalShapeTypeEnum.Point,
-                    PointStyle = "WestTerminalLabel",
-                    PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
-                    DrawingOrder = 520
-                };
-
-                fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
-
+               
 
                 // If a single conduit
                 if (_spanEquipmentViewModel.IsSingleSpan)
                 {
+                    var fromTerminal = new BlockPortTerminal(fromPort)
+                    {
+                        IsVisible = true,
+                        ShapeType = TerminalShapeTypeEnum.Point,
+                        PointStyle = "WestTerminalLabel",
+                        PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                        DrawingOrder = 520
+                    };
+
+                    fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
                     new BlockPortTerminal(toPort)
                     {
                         IsVisible = true,
@@ -337,7 +397,66 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                         cableTerminalConnection.DrawingOrder = 600;
                         cableTerminalConnection.SetReference(cableId, "SpanSegment");
                     }
+                }
+                // We're dealing with a multi level conduit with no inner conduits
+                else
+                {
+                    // Check if cables are related to the outer conduit
+                    if (_spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(rootSpanInfo.SegmentId))
+                    {
+                        //CreateTerminalsForCablesRelatedToSingleConduitEnd(viewModel, outerConduitPort);
 
+                        var cableRelations = _spanEquipmentViewModel.Data.ConduitSegmentToCableChildRelations[rootSpanInfo.SegmentId];
+
+                        foreach (var cableId in cableRelations)
+                        {
+                            var fromTerminal = new BlockPortTerminal(fromPort)
+                            {
+                                IsVisible = true,
+                                ShapeType = TerminalShapeTypeEnum.Point,
+                                PointStyle = "WestTerminalLabel",
+                                PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                                DrawingOrder = 620
+                            };
+
+                            fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+                            var toTerminal = new BlockPortTerminal(toPort)
+                            {
+                                IsVisible = true,
+                                ShapeType = TerminalShapeTypeEnum.None,
+                                DrawingOrder = 620
+                            };
+
+                            var fiberCableLineLabel = _spanEquipmentViewModel.Data.GetCableEquipmentLineLabel(cableId);
+                            var cableTerminalConnection = spanEquipmentBlock.AddTerminalConnection(BlockSideEnum.West, 1, fromTerminal.Index, BlockSideEnum.East, 1, toTerminal.Index, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+                            cableTerminalConnection.DrawingOrder = 600;
+                            cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                        }
+                    }
+                    // No cables so we create one terminal that shows where the empty multi conduit is heading
+                    else
+                    {
+                        //CreateTerminalForShowingWhereEmptySingleConduitIsHeading(viewModel, outerConduitPort);
+
+                        var fromTerminal = new BlockPortTerminal(fromPort)
+                        {
+                            IsVisible = true,
+                            ShapeType = TerminalShapeTypeEnum.Point,
+                            PointStyle = "WestTerminalLabel",
+                            PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                            DrawingOrder = 520
+                        };
+
+                        fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
+
+                        new BlockPortTerminal(toPort)
+                        {
+                            IsVisible = true,
+                            ShapeType = TerminalShapeTypeEnum.None,
+                            DrawingOrder = 620
+                        };
+                    }
                 }
             }
 
