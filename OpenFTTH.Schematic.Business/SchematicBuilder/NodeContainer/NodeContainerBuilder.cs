@@ -458,7 +458,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 // We're dealing with a multi level conduit with no inner conduits
                 else
                 {
-                    // Check if cables are related to the outer conduir
+                    // Check if cables are related to the outer conduit
                     if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(routeSpanDiagramInfo.SegmentId))
                     {
                         CreateTerminalsForCablesRelatedToSingleConduitEnd(viewModel, outerConduitPort);
@@ -680,14 +680,23 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                                 var cableIds = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[terminalEnd.SpanSegment.Id];
 
+                                bool multipleCablesConnectedToOuterConduit = cableIds.Count > 1;
+
+                                System.Diagnostics.Debug.WriteLine($"Number of cables: {cableIds.Count} related to terminal end: {terminalEnd.TerminalId} segment id: {terminalEnd.SpanSegment.Id}");
+
                                 foreach (var cableId in cableIds)
                                 {
                                     var cableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
 
-                                    System.Diagnostics.Debug.WriteLine($"Not connected conduits ends. Try connecting cable: {cableId} {cableLineLabel} terminalEnd: {terminalEnd.TerminalId} terminalEnd segment id: {terminalEnd.SpanSegment.Id} port-to-port");
+                                    if (multipleCablesConnectedToOuterConduit)
+                                    {
+                                        // Break of not the cable that matches the terminal end
+                                        if (cableId != terminalEnd.TerminalId)
+                                            break;
+                                    }
 
-                                    // Only connect if cable goes through two span segments and terminal end it not the fake one (where terminal id equal the cable id)
-                                    if (_nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].Count == 2 && cableId != terminalEnd.TerminalId)
+                                    // Only connect if cable goes through two span segments
+                                    if (_nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].Count == 2)
                                     {
                                         // get other segment id
                                         var otherEndSegmentId = _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].First(r => r != terminalEnd.SpanSegment.Id);
@@ -703,12 +712,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                             otherDiagramTerminal = _terminalEndsByTerminalId[cableId].First(s => s.SpanSegment.Id == otherEndSegmentId);
                                         }
 
-                                        foreach (var cableIdConnected in cableAlreadyConnected)
-                                            System.Diagnostics.Debug.WriteLine($"   Already connected cable: {cableIdConnected}");
-
                                         if (otherDiagramTerminal != null && !cableAlreadyConnected.Contains(cableId))
                                         {
-                                            System.Diagnostics.Debug.WriteLine($" Will connect cable: {cableId} {cableLineLabel} port-to-port");
+                                            System.Diagnostics.Debug.WriteLine($" Will connect cable: {cableId} {cableLineLabel} {terminalEnd.DiagramTerminal.Port.Side} {terminalEnd.DiagramTerminal.Port.Index},{terminalEnd.DiagramTerminal.Index} -> {otherDiagramTerminal.DiagramTerminal.Port.Side} {otherDiagramTerminal.DiagramTerminal.Port.Index},{otherDiagramTerminal.DiagramTerminal.Index} ({terminalEnd.TerminalId} -> {otherDiagramTerminal.TerminalId}");
 
                                             cableAlreadyConnected.Add(cableId);
 
