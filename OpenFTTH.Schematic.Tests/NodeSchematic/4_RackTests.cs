@@ -71,20 +71,19 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Act
             var placeRackCmd = new PlaceRackInNodeContainer(
-              Guid.NewGuid(),
-              new UserContext("test", Guid.Empty),
-              TestUtilityNetwork.NodeContainer_FP_2,
-              TestSpecifications.Rack_ESTI,
-              "Rack 1",
-              80
+                Guid.NewGuid(),
+                new UserContext("test", Guid.Empty),
+                TestUtilityNetwork.NodeContainer_FP_2,
+                Guid.NewGuid(),
+                TestSpecifications.Rack_ESTI,
+                "Rack 1",
+                80
             );
 
             var placeRackResult = await _commandDispatcher.HandleAsync<PlaceRackInNodeContainer, Result>(placeRackCmd);
 
             // Assert
             placeRackResult.IsSuccess.Should().BeTrue();
-
-
 
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
 
@@ -117,6 +116,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
               Guid.NewGuid(),
               new UserContext("test", Guid.Empty),
               TestUtilityNetwork.NodeContainer_FP_2,
+              Guid.NewGuid(),
               TestSpecifications.Rack_ESTI,
               "Rack 2",
               80
@@ -126,8 +126,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Assert
             placeRackResult.IsSuccess.Should().BeTrue();
-
-
 
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(sutRouteNetworkElement));
 
@@ -157,7 +155,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Act
             var placeEquipmentCmd = new PlaceTerminalEquipmentInNodeContainer(
-              correlationId: Guid.NewGuid(),
+                terminalEquipmentId: Guid.NewGuid(),
+                correlationId: Guid.NewGuid(),
                 userContext: new UserContext("test", Guid.Empty),
                 nodeContainerId: sutNodeContainer,
                 terminalEquipmentSpecificationId: TestSpecifications.SpliceClosure_BUDI1S_16SCTrays,
@@ -202,7 +201,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Act
             var placeEquipmentCmd = new PlaceTerminalEquipmentInNodeContainer(
-              correlationId: Guid.NewGuid(),
+                terminalEquipmentId: Guid.NewGuid(),
+                correlationId: Guid.NewGuid(),
                 userContext: new UserContext("test", Guid.Empty),
                 nodeContainerId: sutNodeContainer,
                 terminalEquipmentSpecificationId: TestSpecifications.Subrack_GPS_144_LC,
@@ -234,7 +234,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipment").Should().Be(4);
             diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentNameLabel").Should().Be(4);
             diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentTypeLabel").Should().Be(4);
-
         }
 
 
@@ -250,7 +249,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Act
             var placeEquipmentCmd = new PlaceTerminalEquipmentInNodeContainer(
-              correlationId: Guid.NewGuid(),
+                terminalEquipmentId: Guid.NewGuid(),
+                correlationId: Guid.NewGuid(),
                 userContext: new UserContext("test", Guid.Empty),
                 nodeContainerId: sutNodeContainer,
                 terminalEquipmentSpecificationId: TestSpecifications.Subrack_LISA_APC_UPC,

@@ -81,7 +81,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Affix 5x10 to west side
             var conduit1Id = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
 
-            var conduit1 = _eventStore.Projections.Get<UtilityNetworkProjection>().SpanEquipments[conduit1Id];
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+            utilityNetwork.TryGetEquipment<SpanEquipment>(conduit1Id, out var conduit1);
 
             var conduit1AffixCommand = new AffixSpanEquipmentToNodeContainer(Guid.NewGuid(), new UserContext("test", Guid.Empty),
                 spanEquipmentOrSegmentId: conduit1.SpanStructures[0].SpanSegments[0].Id,
@@ -94,7 +95,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Affix 3x10 to north side
             var conduit2Id = TestUtilityNetwork.MultiConduit_3x10_CC_1_to_SP_1;
 
-            var conduit2 = _eventStore.Projections.Get<UtilityNetworkProjection>().SpanEquipments[conduit2Id];
+            utilityNetwork.TryGetEquipment<SpanEquipment>(conduit2Id, out var conduit2);
 
             var conduit2AffixCommand = new AffixSpanEquipmentToNodeContainer(Guid.NewGuid(), new UserContext("test", Guid.Empty),
                 spanEquipmentOrSegmentId: conduit2.SpanStructures[0].SpanSegments[0].Id,
@@ -107,7 +108,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Affix flex conduit to south side
             var conduit3Id = TestUtilityNetwork.FlexConduit_40_Red_CC_1_to_SP_1;
 
-            var conduit3 = _eventStore.Projections.Get<UtilityNetworkProjection>().SpanEquipments[conduit3Id];
+            utilityNetwork.TryGetEquipment<SpanEquipment>(conduit3Id, out var conduit3);
 
             var conduit3AffixCommand = new AffixSpanEquipmentToNodeContainer(Guid.NewGuid(), new UserContext("test", Guid.Empty),
                 spanEquipmentOrSegmentId: conduit3.SpanStructures[0].SpanSegments[0].Id,
@@ -377,7 +378,8 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Affix 5x10 to west side
             var conduit1Id = TestUtilityNetwork.MultiConduit_12x7_HH_1_to_HH_10;
 
-            var conduit1 = _eventStore.Projections.Get<UtilityNetworkProjection>().SpanEquipments[conduit1Id];
+            var utilityNetwork = _eventStore.Projections.Get<UtilityNetworkProjection>();
+            utilityNetwork.TryGetEquipment<SpanEquipment>(conduit1Id, out var conduit1);
 
             var conduit1AffixCommand = new AffixSpanEquipmentToNodeContainer(Guid.NewGuid(), new UserContext("test", Guid.Empty),
                 spanEquipmentOrSegmentId: conduit1.SpanStructures[0].SpanSegments[0].Id,
@@ -386,7 +388,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             );
 
             var conduit1AffixResult = await _commandDispatcher.HandleAsync<AffixSpanEquipmentToNodeContainer, Result>(conduit1AffixCommand);
-         
+
             // Act
             var getDiagramQueryResult = await _queryDispatcher.HandleAsync<GetDiagram, Result<GetDiagramResult>>(new GetDiagram(TestRouteNetwork.HH_10));
 

@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite" Version="2.3.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.4.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="OpenFTTH.Address.API" Version="1.1.0" />
-    <PackageReference Include="OpenFTTH.Address.Business" Version="1.1.0" />
-    <PackageReference Include="OpenFTTH.CQRS" Version="1.5.2" />
-    <PackageReference Include="OpenFTTH.EventSourcing" Version="1.4.0" />
-    <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="1.6.7" />
-    <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="1.6.7" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="1.25.0" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="1.25.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="OpenFTTH.Address.API" Version="2.0.0" />
+    <PackageReference Include="OpenFTTH.Address.Business" Version="2.0.0" />
+    <PackageReference Include="OpenFTTH.CQRS" Version="2.0.1" />
+    <PackageReference Include="OpenFTTH.EventSourcing" Version="2.0.0" />
+    <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="2.1.0" />
+    <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="1.6.8" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="2.0.0" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
