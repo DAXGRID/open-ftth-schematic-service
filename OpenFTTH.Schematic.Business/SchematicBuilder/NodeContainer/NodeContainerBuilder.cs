@@ -593,7 +593,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         {
             System.Diagnostics.Debug.WriteLine($"***ConnectEnds***");
 
-
             HashSet<BlockPortTerminal> conduitEndTerminalAlreadyConnected = new HashSet<BlockPortTerminal>();
 
             HashSet<Guid> cableAlreadyConnected = new HashSet<Guid>();
@@ -605,11 +604,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     if (!conduitEndTerminalAlreadyConnected.Contains(terminalEnd.DiagramTerminal))
                     {
                         // If connected conduit ends
-                        if (terminalEnd.TerminalId != Guid.Empty && _terminalEndsByTerminalId[terminalEnd.TerminalId].Any(th => th.DiagramTerminal != terminalEnd.DiagramTerminal))
+                        if (terminalEnd.TerminalId != Guid.Empty && _terminalEndsByTerminalId.ContainsKey(terminalEnd.TerminalId) && _terminalEndsByTerminalId[terminalEnd.TerminalId].Any(th => th.DiagramTerminal != terminalEnd.DiagramTerminal))
                         {
-                            var otherDiagramTerminal = _terminalEndsByTerminalId[terminalEnd.TerminalId].First(th => th.DiagramTerminal != terminalEnd.DiagramTerminal);
+                            var otherDiagramTerminal = _terminalEndsByTerminalId[terminalEnd.TerminalId].FirstOrDefault(th => th.DiagramTerminal != terminalEnd.DiagramTerminal);
 
-                            if (!conduitEndTerminalAlreadyConnected.Contains(otherDiagramTerminal.DiagramTerminal))
+                            if (otherDiagramTerminal != null && !conduitEndTerminalAlreadyConnected.Contains(otherDiagramTerminal.DiagramTerminal))
                             {
 
                                 System.Diagnostics.Debug.WriteLine($"Will connect conduit ends segmentId: {terminalEnd.SpanSegment.Id} to segmentId: {otherDiagramTerminal.SpanSegment.Id}");
@@ -696,7 +695,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                     }
 
                                     // Only connect if cable goes through two span segments
-                                    if (_nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].Count == 2)
+                                    if (_nodeContainerViewModel.Data.CableToConduitSegmentParentRelations.ContainsKey(cableId) && _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].Count == 2)
                                     {
                                         // get other segment id
                                         var otherEndSegmentId = _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].First(r => r != terminalEnd.SpanSegment.Id);
