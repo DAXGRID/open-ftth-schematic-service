@@ -641,26 +641,30 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                 // Add eventually cable running through inner conduit
                                 if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(terminalEnd.SpanSegment.Id))
                                 {
-                                    var cableId = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[terminalEnd.SpanSegment.Id].First();
-                                    var fiberCableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
+                                    var cableId = _nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations[terminalEnd.SpanSegment.Id].FirstOrDefault();
 
-                                    System.Diagnostics.Debug.WriteLine($" Will connect cable: {cableId} {fiberCableLineLabel} through conduit connection");
+                                    if (cableId != Guid.Empty)
+                                    {
+                                        var fiberCableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
 
-                                    var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
-                                       fromSide: terminalEnd.DiagramTerminal.Port.Side,
-                                       fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
-                                       fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
-                                       toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
-                                       toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
-                                       toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
-                                       label: fiberCableLineLabel,
-                                       style: "FiberCable",
-                                       lineShapeType: LineShapeTypeEnum.Line
-                                    );
+                                        System.Diagnostics.Debug.WriteLine($" Will connect cable: {cableId} {fiberCableLineLabel} through conduit connection");
 
-                                    cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                                        var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
+                                           fromSide: terminalEnd.DiagramTerminal.Port.Side,
+                                           fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
+                                           fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
+                                           toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
+                                           toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
+                                           toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
+                                           label: fiberCableLineLabel,
+                                           style: "FiberCable",
+                                           lineShapeType: LineShapeTypeEnum.Line
+                                        );
 
-                                    cableTerminalConnection.DrawingOrder = 600;
+                                        cableTerminalConnection.SetReference(cableId, "SpanSegment");
+
+                                        cableTerminalConnection.DrawingOrder = 600;
+                                    }
                                 }
 
 
@@ -698,40 +702,43 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                     if (_nodeContainerViewModel.Data.CableToConduitSegmentParentRelations.ContainsKey(cableId) && _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].Count == 2)
                                     {
                                         // get other segment id
-                                        var otherEndSegmentId = _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].First(r => r != terminalEnd.SpanSegment.Id);
+                                        var otherEndSegmentId = _nodeContainerViewModel.Data.CableToConduitSegmentParentRelations[cableId].FirstOrDefault(r => r != terminalEnd.SpanSegment.Id);
 
-                                        TerminalEndHolder otherDiagramTerminal = null;
-
-                                        if (_terminalEndsByTerminalId.ContainsKey(Guid.Empty) && _terminalEndsByTerminalId[Guid.Empty].Exists(s => s.SpanSegment.Id == otherEndSegmentId))
+                                        if (otherEndSegmentId != Guid.Empty)
                                         {
-                                            otherDiagramTerminal = _terminalEndsByTerminalId[Guid.Empty].First(s => s.SpanSegment.Id == otherEndSegmentId);
-                                        }
-                                        else if (_terminalEndsByTerminalId.ContainsKey(cableId))
-                                        {
-                                            otherDiagramTerminal = _terminalEndsByTerminalId[cableId].First(s => s.SpanSegment.Id == otherEndSegmentId);
-                                        }
+                                            TerminalEndHolder otherDiagramTerminal = null;
 
-                                        if (otherDiagramTerminal != null && !cableAlreadyConnected.Contains(cableId))
-                                        {
-                                            System.Diagnostics.Debug.WriteLine($" Will connect cable: {cableId} {cableLineLabel} {terminalEnd.DiagramTerminal.Port.Side} {terminalEnd.DiagramTerminal.Port.Index},{terminalEnd.DiagramTerminal.Index} -> {otherDiagramTerminal.DiagramTerminal.Port.Side} {otherDiagramTerminal.DiagramTerminal.Port.Index},{otherDiagramTerminal.DiagramTerminal.Index} ({terminalEnd.TerminalId} -> {otherDiagramTerminal.TerminalId}");
+                                            if (_terminalEndsByTerminalId.ContainsKey(Guid.Empty) && _terminalEndsByTerminalId[Guid.Empty].Exists(s => s.SpanSegment.Id == otherEndSegmentId))
+                                            {
+                                                otherDiagramTerminal = _terminalEndsByTerminalId[Guid.Empty].FirstOrDefault(s => s.SpanSegment.Id == otherEndSegmentId);
+                                            }
+                                            else if (_terminalEndsByTerminalId.ContainsKey(cableId))
+                                            {
+                                                otherDiagramTerminal = _terminalEndsByTerminalId[cableId].FirstOrDefault(s => s.SpanSegment.Id == otherEndSegmentId);
+                                            }
 
-                                            cableAlreadyConnected.Add(cableId);
+                                            if (otherDiagramTerminal != null && !cableAlreadyConnected.Contains(cableId))
+                                            {
+                                                System.Diagnostics.Debug.WriteLine($" Will connect cable: {cableId} {cableLineLabel} {terminalEnd.DiagramTerminal.Port.Side} {terminalEnd.DiagramTerminal.Port.Index},{terminalEnd.DiagramTerminal.Index} -> {otherDiagramTerminal.DiagramTerminal.Port.Side} {otherDiagramTerminal.DiagramTerminal.Port.Index},{otherDiagramTerminal.DiagramTerminal.Index} ({terminalEnd.TerminalId} -> {otherDiagramTerminal.TerminalId}");
 
-                                            var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
-                                              fromSide: terminalEnd.DiagramTerminal.Port.Side,
-                                              fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
-                                              fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
-                                              toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
-                                              toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
-                                              toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
-                                              label: cableLineLabel,
-                                              style: "FiberCable",
-                                              lineShapeType: LineShapeTypeEnum.Line
-                                           );
+                                                cableAlreadyConnected.Add(cableId);
 
-                                            cableTerminalConnection.SetReference(cableId, "SpanSegment");
+                                                var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(
+                                                  fromSide: terminalEnd.DiagramTerminal.Port.Side,
+                                                  fromPortIndex: terminalEnd.DiagramTerminal.Port.Index,
+                                                  fromTerminalIndex: terminalEnd.DiagramTerminal.Index,
+                                                  toSide: otherDiagramTerminal.DiagramTerminal.Port.Side,
+                                                  toPortIndex: otherDiagramTerminal.DiagramTerminal.Port.Index,
+                                                  toTerminalIndex: otherDiagramTerminal.DiagramTerminal.Index,
+                                                  label: cableLineLabel,
+                                                  style: "FiberCable",
+                                                  lineShapeType: LineShapeTypeEnum.Line
+                                               );
 
-                                            cableTerminalConnection.DrawingOrder = 600;
+                                                cableTerminalConnection.SetReference(cableId, "SpanSegment");
+
+                                                cableTerminalConnection.DrawingOrder = 600;
+                                            }
                                         }
                                     }
                                     else
