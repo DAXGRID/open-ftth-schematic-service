@@ -173,7 +173,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             return spanDiagramInfo;
         }
 
-        public string GetIngoingRouteNodeName(Guid spanSegmentId)
+        public string GetFromRouteNodeName(Guid spanSegmentId)
         {
             if (_traceByBySpanId.TryGetValue(spanSegmentId, out var routeNetworkTraceBySegment))
             {
@@ -184,12 +184,10 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 return routeNetworkTraceByEquipment.FromRouteNodeName;
             }
             else
-                throw new ApplicationException("Can't find incoming route node name in route network traces.");
-                
-            //return _data.RouteNetworkElements[_spanEquipment.NodesOfInterestIds.First()].Name;
+                throw new ApplicationException("Can't find from route node name in route network traces.");
         }
 
-        public string GetOutgoingRouteNodeName(Guid spanSegmentId)
+        public string GetToRouteNodeName(Guid spanSegmentId)
         {
             if (_traceByBySpanId.TryGetValue(spanSegmentId, out var routeNetworkTraceBySegment))
             {
@@ -200,7 +198,17 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 return routeNetworkTraceByEquipment.ToRouteNodeName;
             }
             else
-                throw new ApplicationException("Can't find incoming route node name in route network traces.");
+                throw new ApplicationException("Can't find to route node name in route network traces.");
+        }
+
+        public string GetOutgoingLabel(Guid spanSegmentId)
+        {
+            return InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? GetFromRouteNodeName(spanSegmentId) : GetToRouteNodeName(spanSegmentId);
+        }
+
+        public string GetIngoingLabel(Guid spanSegmentId)
+        {
+            return InterestRelationKind() != RouteNetworkInterestRelationKindEnum.End ? GetFromRouteNodeName(spanSegmentId) : GetToRouteNodeName(spanSegmentId);
         }
 
         public bool IsAttachedToNodeContainer()

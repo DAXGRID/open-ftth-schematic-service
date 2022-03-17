@@ -4,6 +4,7 @@ using OpenFTTH.CQRS;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.QueryHandler;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -80,25 +81,41 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private double AddDetachedSpanEquipmentsToDiagram(double yOffsetInitial)
         {
-            double yOffset = yOffsetInitial;
-
             var detachedSpanEquipments = _data.SpanEquipments.Where(s => !s.IsAttachedToNodeContainer(_data));
 
-            var orderedDetachedSpanEquipments = detachedSpanEquipments.OrderBy(s => s.IsPassThrough(_data)).ThenBy(s => s.IsMultiLevel(_data)).Reverse();
+            //var orderedDetachedSpanEquipments = detachedSpanEquipments.OrderBy(s => s.IsCable).ThenBy(s => s.IsPassThrough(_data)).ThenBy(s => s.IsMultiLevel(_data)).Reverse();
 
-            foreach (var spanEquipment in orderedDetachedSpanEquipments)
+            List<SpanEquipmentViewModel> unorderedReadModels = new();
+
+            foreach (var spanEquipment in detachedSpanEquipments)
             {
                 var readModel = new SpanEquipmentViewModel(_logger, _routeNetworkElementId, spanEquipment.Id, _data);
 
                 if (!readModel.IsCableWithinConduit)
                 {
-                    var builder = new DetachedSpanEquipmentBuilder(_logger, readModel);
-
-                    var size = builder.CreateDiagramObjects(_diagram, 0, yOffset);
-
-                    yOffset += size.Height + _spaceBetweenSections;
+                    unorderedReadModels.Add(readModel);
                 }
             }
+
+            double yOffset = yOffsetInitial;
+
+            var orderedReadModels = unorderedReadModels.
+                OrderBy(s => s.SpanEquipment.IsPassThrough(_data)).
+                ThenBy(s => s.SpanEquipment.IsCable).
+                ThenBy(s => s.SpanEquipment.IsMultiLevel(_data)).
+                ThenBy(s => s.GetOutgoingLabel(s.SpanEquipment.SpanStructures[0].SpanSegments[0].Id))
+                .Reverse();
+
+
+            foreach (var readModel in orderedReadModels)
+            {
+                var builder = new DetachedSpanEquipmentBuilder(_logger, readModel);
+
+                var size = builder.CreateDiagramObjects(_diagram, 0, yOffset);
+
+                yOffset += size.Height + _spaceBetweenSections;
+            }
+
 
             return yOffset;
         }

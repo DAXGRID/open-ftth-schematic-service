@@ -33,6 +33,8 @@ namespace OpenFTTH.TestData
         public static Guid MultiConduit_12x10_5x10_HH_1_to_HH_2;
 
         public static Guid CustomerConduit_CC_1_to_SDU_1;
+        public static Guid CustomerConduit_CC_2_Reversed_to_SDU_1;
+        
         public static Guid CustomerConduit_CC_1_to_SDU_2;
         public static Guid CustomerConduit_CC_1_to_SDU_3;
         public static Guid SingleConduit_CC_1_to_HH_10;
@@ -80,6 +82,13 @@ namespace OpenFTTH.TestData
                 CustomerConduit_CC_1_to_SDU_1 = PlaceConduit(
                     TestSpecifications.CustomerConduit_Ø12_Orange, 
                     new RouteNetworkElementIdList() { TestRouteNetwork.S5, TestRouteNetwork.S6, TestRouteNetwork.S7 }, 
+                    new AddressInfo() { UnitAddressId = Guid.Parse("0a3f50bc-aa89-32b8-e044-0003ba298018") }
+                );
+
+                // Place reversed customer conduit 2 (engum møllevej external unit address id)
+                CustomerConduit_CC_2_Reversed_to_SDU_1 = PlaceConduit(
+                    TestSpecifications.CustomerConduit_Ø12_Orange,
+                    new RouteNetworkElementIdList() { TestRouteNetwork.S7, TestRouteNetwork.S6, TestRouteNetwork.S5 },
                     new AddressInfo() { UnitAddressId = Guid.Parse("0a3f50bc-aa89-32b8-e044-0003ba298018") }
                 );
 

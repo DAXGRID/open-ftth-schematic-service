@@ -404,7 +404,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             // Assert
             diagram.DiagramObjects.Count(o => o.Style == "FiberCable" && o.Geometry is LineString).Should().Be(7);
 
-            diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.Geometry is Polygon).Should().Be(9);
+            diagram.DiagramObjects.Count(o => o.Style == "OuterConduitOrange" && o.Geometry is Polygon).Should().Be(10);
 
 
         }

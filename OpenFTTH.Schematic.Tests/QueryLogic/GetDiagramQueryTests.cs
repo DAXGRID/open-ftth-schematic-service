@@ -62,8 +62,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             diagram.DiagramObjects.Count(o => o.Style == "NodeContainerSideSouth").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style.StartsWith("NodeContainerSide") && o.IdentifiedObject.RefClass == "NodeContainer" && o.IdentifiedObject.RefId != Guid.Empty).Should().Be(4);
 
-            // Check that no conduit are drawed and labelled to end in the CC-1 node (because this means they are shown as pass-throughs, instead of conduit just ending in the node, which is wrong)
-            diagram.DiagramObjects.Count(o => o.Label == "CC-1").Should().Be(0);
 
             // Check that 3x10 is rendered as an conduit heading towards in SP-1
             diagram.DiagramObjects.Count(o => o.Style == "SouthTerminalLabel" && o.Label == "SP-1").Should().Be(3);
@@ -128,7 +126,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             // Check that no conduit are drawed and labelled to end in the CC-1 node (because this means they are shown as pass-throughs, instead of conduit just ending in the node, which is wrong)
             diagram.DiagramObjects.Count(o => o.Label == "HH-1").Should().Be(22);
-            diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(0);
+            diagram.DiagramObjects.Count(o => o.Label == "HH-10").Should().Be(1);
         }
 
         [Fact, Order(31)]

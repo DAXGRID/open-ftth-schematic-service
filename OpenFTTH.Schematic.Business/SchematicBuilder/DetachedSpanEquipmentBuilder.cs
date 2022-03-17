@@ -128,7 +128,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "WestTerminalLabel",
-                    PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(spanInfo.SegmentId),
+                    PointLabel = _spanEquipmentViewModel.GetFromRouteNodeName(spanInfo.SegmentId),
                     DrawingOrder = 520
                 };
 
@@ -139,7 +139,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "EastTerminalLabel",
-                    PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(spanInfo.SegmentId),
+                    PointLabel = _spanEquipmentViewModel.GetToRouteNodeName(spanInfo.SegmentId),
                     DrawingOrder = 520
                 };
 
@@ -176,7 +176,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                         IsVisible = true,
                         ShapeType = TerminalShapeTypeEnum.Point,
                         PointStyle = "WestTerminalLabel",
-                        PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
+                        PointLabel = _spanEquipmentViewModel.GetFromRouteNodeName(rootSpanInfo.SegmentId),
                         DrawingOrder = 520
                     };
 
@@ -187,7 +187,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                         IsVisible = true,
                         ShapeType = TerminalShapeTypeEnum.Point,
                         PointStyle = "EastTerminalLabel",
-                        PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                        PointLabel = _spanEquipmentViewModel.GetToRouteNodeName(rootSpanInfo.SegmentId),
                         DrawingOrder = 520
                     };
 
@@ -227,7 +227,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                 IsVisible = true,
                                 ShapeType = TerminalShapeTypeEnum.Point,
                                 PointStyle = "WestTerminalLabel",
-                                PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
+                                PointLabel = _spanEquipmentViewModel.GetFromRouteNodeName(rootSpanInfo.SegmentId),
                                 DrawingOrder = 620
                             };
 
@@ -238,7 +238,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                 IsVisible = true,
                                 ShapeType = TerminalShapeTypeEnum.Point,
                                 PointStyle = "EastTerminalLabel",
-                                PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                                PointLabel = _spanEquipmentViewModel.GetToRouteNodeName(rootSpanInfo.SegmentId),
                                 DrawingOrder = 620
                             };
 
@@ -258,7 +258,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                             IsVisible = true,
                             ShapeType = TerminalShapeTypeEnum.Point,
                             PointStyle = "WestTerminalLabel",
-                            PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
+                            PointLabel = _spanEquipmentViewModel.GetFromRouteNodeName(rootSpanInfo.SegmentId),
                             DrawingOrder = 520
                         };
 
@@ -269,7 +269,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                             IsVisible = true,
                             ShapeType = TerminalShapeTypeEnum.Point,
                             PointStyle = "EastTerminalLabel",
-                            PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                            PointLabel = _spanEquipmentViewModel.GetToRouteNodeName(rootSpanInfo.SegmentId),
                             DrawingOrder = 520
                         };
                     }
@@ -281,6 +281,11 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
         private LineBlock CreateConduitEndBlock()
         {
+            if (_spanEquipmentViewModel?.SpanEquipment?.AddressInfo?.UnitAddressId == Guid.Parse("0a3f50bc-aa89-32b8-e044-0003ba298018"))
+            {
+
+            }
+
             // Create outer conduits
             var rootSpanInfo = _spanEquipmentViewModel.RootSpanDiagramInfo("OuterConduit");
 
@@ -323,7 +328,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     IsVisible = true,
                     ShapeType = TerminalShapeTypeEnum.Point,
                     PointStyle = "WestTerminalLabel",
-                    PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(data.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(data.SegmentId),
+                    PointLabel = _spanEquipmentViewModel.GetOutgoingLabel(data.SegmentId),
                     DrawingOrder = 520
                 };
 
@@ -370,16 +375,18 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                         IsVisible = true,
                         ShapeType = TerminalShapeTypeEnum.Point,
                         PointStyle = "WestTerminalLabel",
-                        PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                        PointLabel = _spanEquipmentViewModel.GetOutgoingLabel(rootSpanInfo.SegmentId),
                         DrawingOrder = 520
                     };
 
                     fromTerminal.SetReference(rootSpanInfo.IngoingSegmentId, "SpanSegment");
 
-                    new BlockPortTerminal(toPort)
+                    var toTerminal = new BlockPortTerminal(toPort)
                     {
                         IsVisible = true,
-                        ShapeType = TerminalShapeTypeEnum.None,
+                        ShapeType = TerminalShapeTypeEnum.Point,
+                        PointStyle = "EastTerminalLabel",
+                        PointLabel = _spanEquipmentViewModel.GetIngoingLabel(rootSpanInfo.SegmentId),
                         DrawingOrder = 520
                     };
 
@@ -415,7 +422,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                                 IsVisible = true,
                                 ShapeType = TerminalShapeTypeEnum.Point,
                                 PointStyle = "WestTerminalLabel",
-                                PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                                PointLabel = _spanEquipmentViewModel.GetOutgoingLabel(rootSpanInfo.SegmentId),
                                 DrawingOrder = 620
                             };
 
@@ -444,7 +451,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                             IsVisible = true,
                             ShapeType = TerminalShapeTypeEnum.Point,
                             PointStyle = "WestTerminalLabel",
-                            PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                            PointLabel = _spanEquipmentViewModel.GetOutgoingLabel(rootSpanInfo.SegmentId),
                             DrawingOrder = 520
                         };
 
@@ -497,7 +504,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 IsVisible = true,
                 ShapeType = TerminalShapeTypeEnum.Point,
                 PointStyle = "WestTerminalLabel",
-                PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                PointLabel = _spanEquipmentViewModel.InterestRelationKind() == RouteNetworkInterestRelationKindEnum.End ? _spanEquipmentViewModel.GetFromRouteNodeName(rootSpanInfo.SegmentId) : _spanEquipmentViewModel.GetToRouteNodeName(rootSpanInfo.SegmentId),
                 DrawingOrder = 520
             };
 
@@ -552,7 +559,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 IsVisible = true,
                 ShapeType = TerminalShapeTypeEnum.Point,
                 PointStyle = "WestTerminalLabel",
-                PointLabel = _spanEquipmentViewModel.GetIngoingRouteNodeName(rootSpanInfo.SegmentId),
+                PointLabel = _spanEquipmentViewModel.GetFromRouteNodeName(rootSpanInfo.SegmentId),
                 DrawingOrder = 520
             };
 
@@ -563,7 +570,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 IsVisible = true,
                 ShapeType = TerminalShapeTypeEnum.Point,
                 PointStyle = "EastTerminalLabel",
-                PointLabel = _spanEquipmentViewModel.GetOutgoingRouteNodeName(rootSpanInfo.SegmentId),
+                PointLabel = _spanEquipmentViewModel.GetToRouteNodeName(rootSpanInfo.SegmentId),
                 DrawingOrder = 520
             };
 
