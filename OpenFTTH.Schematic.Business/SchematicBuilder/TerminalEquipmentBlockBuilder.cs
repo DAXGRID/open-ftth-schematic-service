@@ -37,7 +37,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 DrawingOrder = 100
             };
 
-            foreach (var rackViewModel in _nodeContainerViewModel.GetRackViewModels())
+            foreach (var rackViewModel in _nodeContainerViewModel.GetRackViewModels().OrderBy(r => r.Name))
             {
                 equipmentBlock.Children.Add(new RackDiagramElement(equipmentBlock, rackViewModel));
             }

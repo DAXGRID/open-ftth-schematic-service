@@ -83,7 +83,7 @@ namespace OpenFTTH.Schematic.Business.Canvas
             }
 
             // Create rack label
-            result.Add(CreateRackLabel(diagram, offsetX + _innerFrameMargin, offsetY + 15 + Height - _innerFrameMargin, _rackViewModel.Name + "(" + _rackViewModel.SpecName + ")"));
+            result.Add(CreateRackLabel(diagram, offsetX + _innerFrameMargin, offsetY + 15 + Height - _innerFrameMargin, _rackViewModel.Name));
 
 
             // Create terminal equipments in rack

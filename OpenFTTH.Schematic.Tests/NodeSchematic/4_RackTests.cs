@@ -76,7 +76,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
                 TestUtilityNetwork.NodeContainer_FP_2,
                 Guid.NewGuid(),
                 TestSpecifications.Rack_ESTI,
-                "Rack 1",
+                "Rack 2",
                 80
             );
 
@@ -118,7 +118,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
               TestUtilityNetwork.NodeContainer_FP_2,
               Guid.NewGuid(),
               TestSpecifications.Rack_ESTI,
-              "Rack 2",
+              "Rack 1",
               80
             );
 
