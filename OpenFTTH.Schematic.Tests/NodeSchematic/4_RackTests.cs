@@ -233,7 +233,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
 
             diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipment").Should().Be(4);
             diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentNameLabel").Should().Be(4);
-            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentTypeLabel").Should().Be(4);
+            diagram.DiagramObjects.Count(o => o.Style == "TerminalEquipmentTypeLabel").Should().Be(1);
         }
 
 

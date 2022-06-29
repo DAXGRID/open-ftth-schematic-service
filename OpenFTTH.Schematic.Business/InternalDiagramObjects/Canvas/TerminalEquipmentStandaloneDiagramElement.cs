@@ -9,6 +9,9 @@ namespace OpenFTTH.Schematic.Business.Canvas
 {
     public class TerminalEquipmentStandaloneDiagramElement : TerminalEquipmentDiagramBlockElement
     {
+        static double _width = 200;
+        static double _height = 200;
+
         TerminalEquipmentViewModel _terminalEquipmentViewModel;
 
         private string _style = "Rack";
@@ -34,8 +37,8 @@ namespace OpenFTTH.Schematic.Business.Canvas
         {
             _terminalEquipmentViewModel = terminalEquipmentViewModel;
             _terminalEquipmentBlock = canvasBlock;
-            Width = 400;
-            Height = 400;
+            Width = _width;
+            Height = _height;
         }
    
         public override List<DiagramObject> CreateDiagramObjects(Diagram diagram, double offsetX, double offsetY)
@@ -54,8 +57,8 @@ namespace OpenFTTH.Schematic.Business.Canvas
             result.Add(terminalEquipmentPoly);
 
             // Create name label
-            result.Add(CreateTerminalEquipmentNameLabel(diagram, offsetX + 200, offsetY + 230, _terminalEquipmentViewModel.Name));
-            result.Add(CreateTerminalEquipmentTypeLabel(diagram, offsetX + 200, offsetY + 170, "(" + _terminalEquipmentViewModel.SpecName + ")"));
+            result.Add(CreateTerminalEquipmentNameLabel(diagram, offsetX + (Width / 2), offsetY + (Width / 2) + 30, _terminalEquipmentViewModel.Name));
+            result.Add(CreateTerminalEquipmentTypeLabel(diagram, offsetX + (Width / 2), offsetY + (Width / 2) + 70, "(" + _terminalEquipmentViewModel.SpecName + ")"));
 
             return result;
         }

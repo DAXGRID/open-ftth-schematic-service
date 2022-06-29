@@ -32,8 +32,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 MinWidth = width,
                 IsVisible = false,
                 Style = "TerminalEquipmentBlock",
-                Margin = 100,
-                SpaceBetweenChildren = 100,
+                Margin = 50,
+                SpaceBetweenChildren = 50,
                 DrawingOrder = 100
             };
 

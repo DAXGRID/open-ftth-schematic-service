@@ -12,7 +12,8 @@ namespace OpenFTTH.Schematic.Business.Canvas
     {
         RackViewModel _rackViewModel;
 
-        static double _rackUnitHeight = 10;
+        static double _rackWidth = 200;
+        static double _rackUnitHeight = 5;
         static double _innerFrameMargin = 40;
 
         private string _style = "Rack";
@@ -38,7 +39,7 @@ namespace OpenFTTH.Schematic.Business.Canvas
         {
             _rackViewModel = rackViewModel;
             _terminalEquipmentBlock = canvasBlock;
-            Width = 400;
+            Width = _rackWidth;
             Height = (_rackUnitHeight * rackViewModel.MinHeightInUnits) + (_innerFrameMargin * 2);
         }
    

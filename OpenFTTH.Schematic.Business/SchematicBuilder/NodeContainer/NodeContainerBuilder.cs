@@ -23,8 +23,8 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         private readonly ILogger<GetDiagramQueryHandler> _logger;
         private readonly NodeContainerViewModel _nodeContainerViewModel;
 
-        private double _initialMinWidth = 300;
-        private readonly double _nodeContainerBlockMargin = 60;
+        private double _initialMinWidth = 150;
+        private readonly double _nodeContainerBlockMargin = 20;
         private readonly double _portMargin = 10;
         private readonly double _typeLabelOffset = 8;
 
