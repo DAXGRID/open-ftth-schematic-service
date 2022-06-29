@@ -26,6 +26,10 @@ namespace OpenFTTH.Schematic.API.Model.DiagramLayout
                 envelope.ExpandToInclude(0 - Margin, 0);
                 envelope.ExpandToInclude(envelope.MaxX + Margin, 0);
 
+                // Set marking on top and bottom
+                envelope.ExpandToInclude(0, 0 - Margin);
+                envelope.ExpandToInclude(0, envelope.MaxY + Margin);
+
                 return envelope;
             }
         }
