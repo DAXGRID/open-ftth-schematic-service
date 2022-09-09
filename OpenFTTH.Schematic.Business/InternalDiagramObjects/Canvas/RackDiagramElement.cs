@@ -107,7 +107,7 @@ namespace OpenFTTH.Schematic.Business.Canvas
                 new DiagramObject(diagram)
                 {
                     Geometry = GeometryBuilder.Rectangle(offsetX, offsetY, height, terminalEquipmentBlockWidth),
-                    Style = "TerminalEquipment",
+                    Style = rackMount.Style,
                     DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)400,
                     IdentifiedObject = new IdentifiedObjectReference() { RefClass = "TerminalEquipment", RefId = rackMount.TerminalEquipmentId }
                 }

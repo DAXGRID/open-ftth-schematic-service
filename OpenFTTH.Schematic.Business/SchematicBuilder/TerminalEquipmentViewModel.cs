@@ -9,5 +9,6 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
         public string SpecName { get; set; }
         public int SubrackPosition { get; set; }
         public int SubrackHeight { get; set; }
+        public string Style { get; set; }
     }
 }

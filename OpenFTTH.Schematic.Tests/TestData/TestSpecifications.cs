@@ -38,6 +38,12 @@ namespace OpenFTTH.TestData
         public static Guid Well_Fiberpowertech_37_EK_338_550x1165 = Guid.Parse("b93c3bcf-3013-4b6c-814d-06ff14d9139f");
         public static Guid Well_Fiberpowertech_37_EK_328_800x800 = Guid.Parse("6c1c9ab8-b1f2-4021-bece-d9b4f65c6723");
 
+        public static Guid Building_Corehus = Guid.Parse("47acefcf-ff8e-40d6-880f-aa1f497a282e");
+        public static Guid Building_Teknikhus = Guid.Parse("0e2aac87-909b-47b4-8021-6fd1345dada9");
+        public static Guid Building_Flexhus = Guid.Parse("f9a5d838-a9c4-409a-9b4b-a01f7042f830");
+        public static Guid Building_Customer = Guid.Parse("11ec46f6-7b88-4117-80a0-7d410ad31a6a");
+
+
         // 50mm Straight In-line Elongated Enclosure (gammel model)
         public static Guid Conduit_Closure_Emtelle_Straight_In_line = Guid.Parse("a7bf7613-6ed3-4b38-a509-ea1c34e62660");
 
@@ -161,6 +167,7 @@ namespace OpenFTTH.TestData
 
 
         // Termianl Equipment Structure
+        public static Guid SpliceTray_Uknown4Pin = Guid.Parse("19b70c93-fcfa-4266-b5f8-d736e7a1c36f");
         public static Guid SpliceTray_Uknown12Pin = Guid.Parse("42e126cf-9654-4f0e-b3c2-15bce380fd4e");
         public static Guid SpliceTray_Uknown24Pin = Guid.Parse("629e7a6c-7326-4cfb-bf8b-df1f78b7473e");
         public static Guid SpliceTray_SE12Pin = Guid.Parse("fdd67d8c-de49-46d6-ac88-af392f539019");
@@ -188,6 +195,8 @@ namespace OpenFTTH.TestData
         public static Guid Subrack_LISA_APC_UPC = Guid.Parse("778b9d6f-7add-40eb-ae9d-da9660dc1799");
         public static Guid Subrack_GPS_72_SC = Guid.Parse("aa8027fc-25d6-498e-98e6-4eb7d634070c");
         public static Guid Subrack_GPS_144_LC = Guid.Parse("d1748de5-de10-45d9-a2a9-1b5b344bf159");
+
+        public static Guid CustomerTermination = Guid.Parse("b0a3e179-ef1a-405c-8b4e-0082d8fc8c3d");
 
 
         public FluentResults.Result<TestSpecifications> Run()
@@ -280,6 +289,29 @@ namespace OpenFTTH.TestData
                 ManufacturerRefs = new Guid[] { Manu_Fiberpowertech }
             });
 
+            // Bygninger
+            AddSpecification(new NodeContainerSpecification(Building_Corehus, "Buildings", "Corehus")
+            {
+                Description = "Corehus"
+            });
+
+            // Bygninger
+            AddSpecification(new NodeContainerSpecification(Building_Teknikhus, "Buildings", "Teknikhus")
+            {
+                Description = "Teknikhus"
+            });
+
+            // Bygninger
+            AddSpecification(new NodeContainerSpecification(Building_Flexhus, "Buildings", "Flexhus")
+            {
+                Description = "Flexhus"
+            });
+
+            // Bygninger
+            AddSpecification(new NodeContainerSpecification(Building_Customer, "Buildings", "Bygningsenhed")
+            {
+                Description = "Bygningsenhed"
+            });
         }
 
         private void AddSpanEquipmentSpecifications()
@@ -1149,6 +1181,18 @@ namespace OpenFTTH.TestData
 
         private void AddTerminalEquipmentSpecifications()
         {
+            // 4 Pin Tray Uknown Type
+            AddSpecification(new TerminalStructureSpecification(SpliceTray_Uknown4Pin, "SpliceTray", "Splidsebakke 4 Søm", "Bakke 4 Søm",
+                new TerminalTemplate[]
+                {
+                    new TerminalTemplate("1", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("2", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("3", TerminalDirectionEnum.BI, false, true),
+                    new TerminalTemplate("4", TerminalDirectionEnum.BI, false, true),
+                }
+            ));
+
+
             // 12 Fiber Tray Uknown Type
             AddSpecification(new TerminalEquipmentSpecification(SpliceClosure_Uknown12Fiber, "SpliceClosure", "Ukendt Splidseboks 12 Fiber", "Splidseboks", false, 0,
                 new TerminalStructureTemplate[]
@@ -1355,6 +1399,18 @@ namespace OpenFTTH.TestData
             )
             { ManufacturerRefs = new Guid[] { Manu_CommScope } });
 
+
+            // Customer termination
+            AddSpecification(new TerminalEquipmentSpecification(CustomerTermination, "Kundeterminering", "Kundeterminering", "Kundeterminering med 4 søm", false, 0,
+                new TerminalStructureTemplate[]
+                {
+                    new TerminalStructureTemplate(SpliceTray_Uknown4Pin, 1)
+               }
+            )
+            {
+                IsAddressable = true,
+                IsCustomerTermination = true
+            });
         }
 
 

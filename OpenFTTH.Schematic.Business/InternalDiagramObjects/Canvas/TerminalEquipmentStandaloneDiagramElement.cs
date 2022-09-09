@@ -49,7 +49,7 @@ namespace OpenFTTH.Schematic.Business.Canvas
             var terminalEquipmentPoly = new DiagramObject(diagram)
             {
                 Geometry = GeometryBuilder.Rectangle(offsetX, offsetY, Height, Width),
-                Style = "TerminalEquipment",
+                Style = _terminalEquipmentViewModel.Style,
                 DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)100,
                 IdentifiedObject = new IdentifiedObjectReference() { RefClass = "TerminalEquipment", RefId = _terminalEquipmentViewModel.TerminalEquipmentId }
             };
