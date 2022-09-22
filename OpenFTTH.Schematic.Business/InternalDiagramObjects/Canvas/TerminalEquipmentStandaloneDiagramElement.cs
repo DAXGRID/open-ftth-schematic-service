@@ -50,7 +50,7 @@ namespace OpenFTTH.Schematic.Business.Canvas
             {
                 Geometry = GeometryBuilder.Rectangle(offsetX, offsetY, Height, Width),
                 Style = _terminalEquipmentViewModel.Style,
-                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)100,
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)400,
                 IdentifiedObject = new IdentifiedObjectReference() { RefClass = "TerminalEquipment", RefId = _terminalEquipmentViewModel.TerminalEquipmentId }
             };
 
@@ -70,7 +70,7 @@ namespace OpenFTTH.Schematic.Business.Canvas
                 Style = "TerminalEquipmentNameLabel",
                 Label = label,
                 Geometry = GeometryBuilder.Point(x, y),
-                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)400
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)500
             };
 
             return labelDiagramObject;
@@ -83,7 +83,7 @@ namespace OpenFTTH.Schematic.Business.Canvas
                 Style = "TerminalEquipmentTypeLabel",
                 Label = label,
                 Geometry = GeometryBuilder.Point(x, y),
-                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)400
+                DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)500
             };
 
             return labelDiagramObject;

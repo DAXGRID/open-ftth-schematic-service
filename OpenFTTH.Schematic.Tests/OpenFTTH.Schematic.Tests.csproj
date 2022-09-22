@@ -16,8 +16,8 @@
     <PackageReference Include="OpenFTTH.EventSourcing" Version="2.3.1" />
     <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="2.1.0" />
     <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="2.1.0" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="2.12.4" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="2.12.4" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="2.12.9" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="2.12.9" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="Xunit.DependencyInjection" Version="8.3.0" />
     <PackageReference Include="Xunit.Extensions.Ordering" Version="1.4.5" />
