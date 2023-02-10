@@ -5,17 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite" Version="2.4.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.5.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="OpenFTTH.Address.API" Version="2.1.0" />
     <PackageReference Include="OpenFTTH.Address.Business" Version="2.1.0" />
     <PackageReference Include="OpenFTTH.CQRS" Version="2.1.1" />
-    <PackageReference Include="OpenFTTH.EventSourcing" Version="2.9.1" />
-    <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="2.1.0" />
-    <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="2.1.0" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="2.12.11" />
-    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="2.12.11" />
+    <PackageReference Include="OpenFTTH.EventSourcing" Version="3.0.5" />
+    <PackageReference Include="OpenFTTH.RouteNetwork.API" Version="3.0.0" />
+    <PackageReference Include="OpenFTTH.RouteNetwork.Business" Version="3.0.0" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.API" Version="4.0.0" />
+    <PackageReference Include="OpenFTTH.UtilityGraphService.Business" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>

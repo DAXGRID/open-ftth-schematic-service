@@ -6,9 +6,11 @@ using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.EventSourcing.InMem;
 using OpenFTTH.EventSourcing.Postgres;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Projection;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using OpenFTTH.TestData;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace OpenFTTH.Schematic.Tests
@@ -51,6 +53,13 @@ namespace OpenFTTH.Schematic.Tests
             services.AddCQRS(businessAssemblies);
 
             services.AddProjections(businessAssemblies);
+
+            var routeNetworkProjectionImpl = services
+                .First(descriptor =>
+                       descriptor.ImplementationType == typeof(RouteNetworkProjection));
+
+            // We remove this because it times out doing testing.
+            services.Remove(routeNetworkProjectionImpl);
 
             // In-mem address service for testing
             services.AddSingleton<IAddressRepository>(x =>
