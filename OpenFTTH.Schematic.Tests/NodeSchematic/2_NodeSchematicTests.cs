@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
-using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.API.Queries;
 using OpenFTTH.Schematic.Business.IO;

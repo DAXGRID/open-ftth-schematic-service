@@ -3,7 +3,6 @@ using OpenFTTH.CQRS;
 using OpenFTTH.Events.Core.Infos;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.TestData;
 using OpenFTTH.UtilityGraphService.API.Commands;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
 using System;
@@ -34,7 +33,7 @@ namespace OpenFTTH.TestData
 
         public static Guid CustomerConduit_CC_1_to_SDU_1;
         public static Guid CustomerConduit_CC_2_Reversed_to_SDU_1;
-        
+
         public static Guid CustomerConduit_CC_1_to_SDU_2;
         public static Guid CustomerConduit_CC_1_to_SDU_3;
         public static Guid SingleConduit_CC_1_to_HH_10;
@@ -81,8 +80,8 @@ namespace OpenFTTH.TestData
 
                 // Place customer conduit 1 (engum møllevej external unit address id)
                 CustomerConduit_CC_1_to_SDU_1 = PlaceConduit(
-                    TestSpecifications.CustomerConduit_Ø12_Orange, 
-                    new RouteNetworkElementIdList() { TestRouteNetwork.S5, TestRouteNetwork.S6, TestRouteNetwork.S7 }, 
+                    TestSpecifications.CustomerConduit_Ø12_Orange,
+                    new RouteNetworkElementIdList() { TestRouteNetwork.S5, TestRouteNetwork.S6, TestRouteNetwork.S7 },
                     new AddressInfo() { UnitAddressId = Guid.Parse("0a3f50bc-aa89-32b8-e044-0003ba298018") }
                 );
 
@@ -95,7 +94,7 @@ namespace OpenFTTH.TestData
 
                 // Place customer conduit 2 (Vesterbrogade 7A, Hedensted external access address id)
                 CustomerConduit_CC_1_to_SDU_2 = PlaceConduit(
-                    TestSpecifications.CustomerConduit_Ø12_Orange, 
+                    TestSpecifications.CustomerConduit_Ø12_Orange,
                     new RouteNetworkElementIdList() { TestRouteNetwork.S5, TestRouteNetwork.S6, TestRouteNetwork.S8 },
                     new AddressInfo() { AccessAddressId = Guid.Parse("0a3f508f-8504-32b8-e044-0003ba298018") }
                 );
@@ -109,7 +108,7 @@ namespace OpenFTTH.TestData
 
                 // Place single conduit
                 SingleConduit_CC_1_to_HH_10 = PlaceConduit(TestSpecifications.CustomerConduit_Ø12_Orange, new RouteNetworkElementIdList() { TestRouteNetwork.S13, TestRouteNetwork.S5, TestRouteNetwork.S6, TestRouteNetwork.S8 });
-                
+
 
                 // Place node containers
                 NodeContainer_HH_1 = PlaceNodeContainer(TestSpecifications.Well_Fiberpowertech_37_EK_378_400x800, TestSpecifications.Manu_Fiberpowertech, TestRouteNetwork.HH_1);
@@ -161,7 +160,7 @@ namespace OpenFTTH.TestData
                 AddressInfo = addressInfo
             };
 
-            var placeSpanEquipmentResult =  _commandDispatcher.HandleAsync<PlaceSpanEquipmentInRouteNetwork, Result>(placeSpanEquipmentCommand).Result;
+            var placeSpanEquipmentResult = _commandDispatcher.HandleAsync<PlaceSpanEquipmentInRouteNetwork, Result>(placeSpanEquipmentCommand).Result;
 
             if (placeSpanEquipmentResult.IsFailed)
                 throw new ApplicationException(placeSpanEquipmentResult.Errors.First().Message);

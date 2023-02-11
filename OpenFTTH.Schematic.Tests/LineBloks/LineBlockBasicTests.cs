@@ -1,9 +1,9 @@
+using FluentAssertions;
 using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.Business.IO;
 using OpenFTTH.Schematic.Business.Lines;
-using Xunit;
-using FluentAssertions;
 using System.Linq;
+using Xunit;
 
 namespace OpenFTTH.Schematic.Tests.LineBlocks
 {
@@ -51,7 +51,7 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
 
         [Fact]
         public void LabelTest2()
-        { 
+        {
             Diagram diagram = new Diagram();
 
             var lineBlock = new LineBlock()
@@ -61,7 +61,7 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
                 Margin = 20
             };
 
-            
+
             // Vest
             var vestPort1 = new BlockPort(BlockSideEnum.West);
             lineBlock.AddPort(vestPort1);
@@ -128,7 +128,7 @@ namespace OpenFTTH.Schematic.Tests.LineBlocks
             // Vest
             var vestPort = new BlockPort(BlockSideEnum.West) { IsVisible = false };
             lineBlock.AddPort(vestPort);
-            AddTerminalsToPort(vestPort,4);
+            AddTerminalsToPort(vestPort, 4);
 
             // North
             var northPort = new BlockPort(BlockSideEnum.North) { IsVisible = false };
