@@ -2,10 +2,8 @@
 using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
-using OpenFTTH.Schematic.API.Model.DiagramLayout;
 using OpenFTTH.Schematic.API.Queries;
 using OpenFTTH.Schematic.Business.IO;
-using OpenFTTH.Schematic.Business.SchematicBuilder;
 using OpenFTTH.TestData;
 using OpenFTTH.UtilityGraphService.API.Commands;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
@@ -124,7 +122,7 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
         }
 
 
-       
+
 
 
 
