@@ -4,10 +4,10 @@ using Xunit.Extensions.Ordering;
 
 namespace OpenFTTH.Schematic.Tests.NodeSchematic
 {
-    [Order(1)]
-    public class SetupProjections
+    [Order(0)]
+    public class TestSetup
     {
-        public SetupProjections(IEventStore eventStore)
+        public TestSetup(IEventStore eventStore)
         {
             eventStore.ScanForProjections();
         }
