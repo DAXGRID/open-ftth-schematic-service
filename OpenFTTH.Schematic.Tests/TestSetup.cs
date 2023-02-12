@@ -2,7 +2,7 @@ using OpenFTTH.EventSourcing;
 using Xunit;
 using Xunit.Extensions.Ordering;
 
-namespace OpenFTTH.Schematic.Tests.NodeSchematic
+namespace OpenFTTH.Schematic.Tests
 {
     [Order(0)]
     public class TestSetup
