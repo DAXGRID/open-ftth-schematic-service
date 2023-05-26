@@ -375,7 +375,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                         var fiberCableLineLabel = _nodeContainerViewModel.Data.GetCableEquipmentLineLabel(cableId);
 
 
-                        var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(BlockSideEnum.West, 1, terminalNo, BlockSideEnum.East, 1, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
+                        var cableTerminalConnection = nodeContainerBlock.AddTerminalConnection(fromSide, fromPort.Index, terminalNo, toSide, toPort.Index, terminalNo, fiberCableLineLabel, "FiberCable", LineShapeTypeEnum.Line);
                         cableTerminalConnection.DrawingOrder = 600;
                         cableTerminalConnection.SetReference(cableId, "SpanSegment");
                     }
