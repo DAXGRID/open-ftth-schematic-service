@@ -1,10 +1,12 @@
 ﻿using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.Events.Core.Infos;
+using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.UtilityGraphService.API.Commands;
 using OpenFTTH.UtilityGraphService.API.Model.UtilityNetwork;
+using OpenFTTH.UtilityGraphService.Business.Graph;
 using System;
 using System.Linq;
 using System.Threading;
@@ -23,6 +25,7 @@ namespace OpenFTTH.TestData
         public static Guid MultiConduit_10x10_HH_1_to_HH_10;
         public static Guid FlexConduit_40_Red_HH_2_to_FP_2;
         public static Guid FlexConduit_40_Red_CC_1_to_SP_1;
+        public static Guid FlexConduit_40_Red_SP_1_to_J_1;
         public static Guid MultiConduit_3x10_CC_1_to_SP_1;
         public static Guid MultiConduit_3x10_CC_1_to_HH_11;
         public static Guid FlexConduit_40_Red_SDU_1_to_SDU_2;
@@ -45,6 +48,7 @@ namespace OpenFTTH.TestData
         public static Guid NodeContainer_J_1;
         public static Guid NodeContainer_FP_2;
         public static Guid NodeContainer_SDU_1;
+        public static Guid NodeContainer_SP_1;
 
         public TestUtilityNetwork(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
@@ -69,6 +73,8 @@ namespace OpenFTTH.TestData
                 MultiConduit_10x10_HH_1_to_HH_10 = PlaceConduit(TestSpecifications.Multi_Ø50_10x10, new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S4, TestRouteNetwork.S13 });
                 FlexConduit_40_Red_HH_2_to_FP_2 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S3 });
                 FlexConduit_40_Red_CC_1_to_SP_1 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S5 });
+                FlexConduit_40_Red_SP_1_to_J_1 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S6 });
+
                 MultiConduit_3x10_CC_1_to_SP_1 = PlaceConduit(TestSpecifications.Multi_Ø32_3x10, new RouteNetworkElementIdList() { TestRouteNetwork.S5 });
                 MultiConduit_3x10_CC_1_to_HH_11 = PlaceConduit(TestSpecifications.Multi_Ø32_3x10, new RouteNetworkElementIdList() { TestRouteNetwork.S5, TestRouteNetwork.S6, TestRouteNetwork.S9, TestRouteNetwork.S11 });
                 FlexConduit_40_Red_SDU_1_to_SDU_2 = PlaceConduit(TestSpecifications.Flex_Ø40_Red, new RouteNetworkElementIdList() { TestRouteNetwork.S7, TestRouteNetwork.S8 });
@@ -118,6 +124,8 @@ namespace OpenFTTH.TestData
                 NodeContainer_J_1 = PlaceNodeContainer(TestSpecifications.Conduit_Closure_Emtelle_Branch_Box, TestSpecifications.Manu_Emtelle, TestRouteNetwork.J_1);
                 NodeContainer_FP_2 = PlaceNodeContainer(TestSpecifications.Well_Cubis_STAKKAbox_MODULA_600x450, TestSpecifications.Manu_Emtelle, TestRouteNetwork.FP_2);
                 NodeContainer_SDU_1 = PlaceNodeContainer(TestSpecifications.Building_Customer, Guid.Empty, TestRouteNetwork.SDU_1);
+                NodeContainer_SP_1 = PlaceNodeContainer(TestSpecifications.Well_Cubis_STAKKAbox_MODULA_600x450, TestSpecifications.Manu_Emtelle, TestRouteNetwork.SP_1);
+
 
                 // Affix conduits in H_2
                 AffixSpanEquipmentToContainer(FlexConduit_40_Red_HH_2_to_FP_2, NodeContainer_HH_2, NodeContainerSideEnum.North);
@@ -135,9 +143,14 @@ namespace OpenFTTH.TestData
 
                 // Affix customer conduit in CC_1
                 AffixSpanEquipmentToContainer(CustomerConduit_CC_1_to_SDU_1, NodeContainer_CC_1, NodeContainerSideEnum.North);
-                // Affix customer conduit in CC_1
                 AffixSpanEquipmentToContainer(CustomerConduit_CC_1_to_SDU_2, NodeContainer_CC_1, NodeContainerSideEnum.North);
 
+
+                // Affix conduits in SP_1
+                AffixSpanEquipmentToContainer(FlexConduit_40_Red_CC_1_to_SP_1, NodeContainer_SP_1, NodeContainerSideEnum.South);
+                AffixSpanEquipmentToContainer(FlexConduit_40_Red_SP_1_to_J_1, NodeContainer_SP_1, NodeContainerSideEnum.North);
+
+               
 
                 Thread.Sleep(100);
 
@@ -199,6 +212,24 @@ namespace OpenFTTH.TestData
 
             if (affixResult.IsFailed)
                 throw new ApplicationException(affixResult.Errors.First().Message);
+        }
+
+        public static SpanEquipment AffixCableToSingleConduit(IEventStore eventStore, ICommandDispatcher commandDispatcher, Guid routeNodeId, Guid cableId, Guid conduitId)
+        {
+            var utilityNetwork = eventStore.Projections.Get<UtilityNetworkProjection>();
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(conduitId, out var conduit);
+
+            var affixtCommand = new AffixSpanEquipmentToParent(Guid.NewGuid(), new UserContext("test", Guid.Empty), routeNodeId, cableId, conduit.SpanStructures[0].SpanSegments[0].Id);
+
+            var affixCommandResult = commandDispatcher.HandleAsync<AffixSpanEquipmentToParent, Result>(affixtCommand).Result;
+
+            if (affixCommandResult.IsFailed)
+                throw new ApplicationException(affixCommandResult.Errors.First().Message);
+
+            utilityNetwork.TryGetEquipment<SpanEquipment>(cableId, out var cableAfterAffix);
+
+            return cableAfterAffix;
         }
     }
 }

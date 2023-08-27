@@ -528,7 +528,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
             terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
 
-            AddToTerminalEnds(routeSpanDiagramInfo.TerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+            AddToTerminalEnds(routeSpanDiagramInfo.TerminalId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName, true);
 
             // Check if cables are related to the conduit
             if (_nodeContainerViewModel.Data.ConduitSegmentToCableChildRelations.ContainsKey(routeSpanDiagramInfo.SegmentId))
@@ -564,7 +564,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                 terminal.SetReference(routeSpanDiagramInfo.SegmentId, "SpanSegment");
 
                 // Create a fake terminal for the cable
-                AddToTerminalEnds(cableId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName);
+                AddToTerminalEnds(cableId, routeSpanDiagramInfo.SpanSegment, terminal, routeSpanDiagramInfo.StyleName, true);
             }
         }
 
@@ -604,7 +604,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
                     if (!conduitEndTerminalAlreadyConnected.Contains(terminalEnd.DiagramTerminal))
                     {
                         // If connected conduit ends
-                        if (terminalEnd.TerminalId != Guid.Empty && _terminalEndsByTerminalId.ContainsKey(terminalEnd.TerminalId) && _terminalEndsByTerminalId[terminalEnd.TerminalId].Any(th => th.DiagramTerminal != terminalEnd.DiagramTerminal))
+                        if (terminalEnd.TerminalId != Guid.Empty && _terminalEndsByTerminalId.ContainsKey(terminalEnd.TerminalId) && _terminalEndsByTerminalId[terminalEnd.TerminalId].Any(th => th.DiagramTerminal != terminalEnd.DiagramTerminal) && !terminalEnd.IsCableInsideOuterConduitTerminal)
                         {
                             var otherDiagramTerminal = _terminalEndsByTerminalId[terminalEnd.TerminalId].FirstOrDefault(th => th.DiagramTerminal != terminalEnd.DiagramTerminal);
 
@@ -693,9 +693,9 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
 
                                     if (multipleCablesConnectedToOuterConduit)
                                     {
-                                        // Break of not the cable that matches the terminal end
+                                        // Continue search if the cable don't matches the terminal end
                                         if (cableId != terminalEnd.TerminalId)
-                                            break;
+                                            continue;
                                     }
 
                                     // Only connect if cable goes through two span segments
@@ -773,14 +773,15 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             }
         }
 
-        private void AddToTerminalEnds(Guid terminalId, SpanSegment spanSegment, BlockPortTerminal digramTerminal, string style)
+        private void AddToTerminalEnds(Guid terminalId, SpanSegment spanSegment, BlockPortTerminal digramTerminal, string style, bool isCableInsideOuterConduitTerminal = false)
         {
             var terminalEndHolder = new TerminalEndHolder()
             {
                 TerminalId = terminalId,
                 SpanSegment = spanSegment,
                 DiagramTerminal = digramTerminal,
-                Style = style
+                Style = style,
+                IsCableInsideOuterConduitTerminal = isCableInsideOuterConduitTerminal
             };
 
             if (_terminalEndsByTerminalId.TryGetValue(terminalId, out var terminalEndHolders))
@@ -803,6 +804,7 @@ namespace OpenFTTH.Schematic.Business.SchematicBuilder
             public SpanSegment SpanSegment { get; set; }
             public BlockPortTerminal DiagramTerminal { get; set; }
             public string Style { get; set; }
+            public bool IsCableInsideOuterConduitTerminal { get; internal set; }
         }
     }
 }
