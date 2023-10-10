@@ -18,6 +18,8 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         private Guid _refId;
         private string _refClass;
+        private Envelope _canvasEnvelope = null;
+
 
         public void SetReference(Guid refId, string refClass)
         {
@@ -27,6 +29,8 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         internal IEnumerable<DiagramObject> CreateDiagramObjects(Diagram diagram)
         {
+            _canvasEnvelope = diagram.Envelope;
+
             List<DiagramObject> result = new List<DiagramObject>();
 
             if (LineShapeType == LineShapeTypeEnum.Polygon)
@@ -77,260 +81,466 @@ namespace OpenFTTH.Schematic.Business.Lines
 
         private NetTopologySuite.Geometries.LineString CreateCurve(double shiftX = 0, double shiftY = 0, double extraLengthBothEnds = 0)
         {
-            double midX = 0;
-            double midY = 0;
+            double midX1 = 0;
+            double midY1 = 0;
+
+            double midX2 = -1;
+            double midY2 = -1;
+
+            bool sameSide = false;
+
 
             double fromTerminalStartPointX = FromTerminal.ConnectionPointX;
-            double fromTerminalStartPointY = FromTerminal.ConnectionPointY;
-            double toTerminalEndPointX = ToTerminal.ConnectionPointX;
-            double toTerminalEndPointY = ToTerminal.ConnectionPointY;
+            double fromTerminalPointY = FromTerminal.ConnectionPointY;
+            double toTerminalPointX = ToTerminal.ConnectionPointX;
+            double toTerminalPointY = ToTerminal.ConnectionPointY;
 
-            double fromCurveStartPointX = 0;
-            double fromCurveStartPointY = 0;
+            double fromCurvePointX = 0;
+            double fromCurvePointY = 0;
 
-            double toCurveEndPointX = 0;
-            double toCurveEndPointY = 0;
+            double toCurvePointX = 0;
+            double toCurvePointY = 0;
 
 
             // Calculate from curve point
             if (FromTerminal.Port.Side == BlockSideEnum.West)
             {
-                fromCurveStartPointX = FromTerminal.ConnectionPointX + FromTerminal.Thickness;
-                fromCurveStartPointY = FromTerminal.ConnectionPointY;
+                fromCurvePointX = FromTerminal.ConnectionPointX + FromTerminal.Thickness;
+                fromCurvePointY = FromTerminal.ConnectionPointY;
 
                 fromTerminalStartPointX -= extraLengthBothEnds;
             }
 
             if (FromTerminal.Port.Side == BlockSideEnum.North)
             {
-                fromCurveStartPointX = FromTerminal.ConnectionPointX;
-                fromCurveStartPointY = FromTerminal.ConnectionPointY - FromTerminal.Thickness;
+                fromCurvePointX = FromTerminal.ConnectionPointX;
+                fromCurvePointY = FromTerminal.ConnectionPointY - FromTerminal.Thickness;
 
-                fromTerminalStartPointY += extraLengthBothEnds;
+                fromTerminalPointY += extraLengthBothEnds;
             }
 
             if (FromTerminal.Port.Side == BlockSideEnum.East)
             {
-                fromCurveStartPointX = FromTerminal.ConnectionPointX - FromTerminal.Thickness;
-                fromCurveStartPointY = FromTerminal.ConnectionPointY;
+                fromCurvePointX = FromTerminal.ConnectionPointX - FromTerminal.Thickness;
+                fromCurvePointY = FromTerminal.ConnectionPointY;
 
                 fromTerminalStartPointX += extraLengthBothEnds;
             }
 
             if (FromTerminal.Port.Side == BlockSideEnum.South)
             {
-                fromCurveStartPointX = FromTerminal.ConnectionPointX;
-                fromCurveStartPointY = FromTerminal.ConnectionPointY + FromTerminal.Thickness;
+                fromCurvePointX = FromTerminal.ConnectionPointX;
+                fromCurvePointY = FromTerminal.ConnectionPointY + FromTerminal.Thickness;
 
-                fromTerminalStartPointY += extraLengthBothEnds;
+                fromTerminalPointY += extraLengthBothEnds;
             }
                         
             // Calculate to curve point
             if (ToTerminal.Port.Side == BlockSideEnum.West)
             {
-                toCurveEndPointX = ToTerminal.ConnectionPointX + FromTerminal.Thickness;
-                toCurveEndPointY = ToTerminal.ConnectionPointY;
+                toCurvePointX = ToTerminal.ConnectionPointX + FromTerminal.Thickness;
+                toCurvePointY = ToTerminal.ConnectionPointY;
 
-                toTerminalEndPointX -= extraLengthBothEnds;
+                toTerminalPointX -= extraLengthBothEnds;
             }
 
             if (ToTerminal.Port.Side == BlockSideEnum.North)
             {
-                toCurveEndPointX = ToTerminal.ConnectionPointX;
-                toCurveEndPointY = ToTerminal.ConnectionPointY - FromTerminal.Thickness;
+                toCurvePointX = ToTerminal.ConnectionPointX;
+                toCurvePointY = ToTerminal.ConnectionPointY - FromTerminal.Thickness;
 
-                toTerminalEndPointY += extraLengthBothEnds;
+                toTerminalPointY += extraLengthBothEnds;
             }
 
             if (ToTerminal.Port.Side == BlockSideEnum.East)
             {
-                toCurveEndPointX = ToTerminal.ConnectionPointX - FromTerminal.Thickness;
-                toCurveEndPointY = ToTerminal.ConnectionPointY + extraLengthBothEnds;
+                toCurvePointX = ToTerminal.ConnectionPointX - FromTerminal.Thickness;
+                toCurvePointY = ToTerminal.ConnectionPointY + extraLengthBothEnds;
 
-                toTerminalEndPointX += extraLengthBothEnds;
+                toTerminalPointX += extraLengthBothEnds;
             }
 
             if (ToTerminal.Port.Side == BlockSideEnum.South)
             {
-                toCurveEndPointX = ToTerminal.ConnectionPointX;
-                toCurveEndPointY = ToTerminal.ConnectionPointY + FromTerminal.Thickness;
+                toCurvePointX = ToTerminal.ConnectionPointX;
+                toCurvePointY = ToTerminal.ConnectionPointY + FromTerminal.Thickness;
 
-                toTerminalEndPointY -= extraLengthBothEnds;
+                toTerminalPointY -= extraLengthBothEnds;
             }
 
             // V-N
             if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.North)
             {
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointX -= shiftX;
+                fromCurvePointY += shiftY;
+                toCurvePointX -= shiftX;
 
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointX -= shiftX;
+                fromTerminalPointY += shiftY;
+                toTerminalPointX -= shiftX;
 
-                midX = toCurveEndPointX;
-                midY = fromCurveStartPointY;
+                midX1 = toCurvePointX;
+                midY1 = fromCurvePointY;
             }
 
             // N-V
             if (FromTerminal.Port.Side == BlockSideEnum.North && ToTerminal.Port.Side == BlockSideEnum.West)
             {
-                fromCurveStartPointX -= shiftX;
-                toCurveEndPointY += shiftY;
+                fromCurvePointX -= shiftX;
+                toCurvePointY += shiftY;
 
                 fromTerminalStartPointX -= shiftX;
-                toTerminalEndPointY += shiftY;
+                toTerminalPointY += shiftY;
 
-                midX = fromCurveStartPointX;
-                midY = toCurveEndPointY;
+                midX1 = fromCurvePointX;
+                midY1 = toCurvePointY;
             }
 
             // V-S
             if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.South)
             {
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointX += shiftX;
+                fromCurvePointY += shiftY;
+                toCurvePointX += shiftX;
 
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointX += shiftX;
+                fromTerminalPointY += shiftY;
+                toTerminalPointX += shiftX;
 
-                midX = toCurveEndPointX;
-                midY = fromCurveStartPointY;
+                midX1 = toCurvePointX;
+                midY1 = fromCurvePointY;
             }
 
             // S-V
             if (FromTerminal.Port.Side == BlockSideEnum.South && ToTerminal.Port.Side == BlockSideEnum.West)
             {
                 //TODO
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointX += shiftX;
+                fromCurvePointY += shiftY;
+                toCurvePointX += shiftX;
 
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointX += shiftX;
+                fromTerminalPointY += shiftY;
+                toTerminalPointX += shiftX;
 
-                midX = toCurveEndPointX;
-                midY = fromCurveStartPointY;
+                midX1 = fromCurvePointX;
+                midY1 = toCurvePointY;
             }
 
 
             // N-E
             if (FromTerminal.Port.Side == BlockSideEnum.North && ToTerminal.Port.Side == BlockSideEnum.East)
             {
-                fromCurveStartPointX += shiftX;
-                toCurveEndPointY += shiftY;
+                fromCurvePointX += shiftX;
+                toCurvePointY += shiftY;
 
                 fromTerminalStartPointX += shiftX;
-                toTerminalEndPointY += shiftY;
+                toTerminalPointY += shiftY;
 
-                midX = fromCurveStartPointX;
-                midY = toCurveEndPointY;
+                midX1 = fromCurvePointX;
+                midY1 = toCurvePointY;
             }
 
             // E-N
             if (FromTerminal.Port.Side == BlockSideEnum.East && ToTerminal.Port.Side == BlockSideEnum.North)
             {
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointX += shiftX;
+                fromCurvePointY += shiftY;
+                toCurvePointX += shiftX;
 
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointX += shiftX;
+                fromTerminalPointY += shiftY;
+                toTerminalPointX += shiftX;
 
-                midX = toCurveEndPointX;
-                midY = fromCurveStartPointY;
+                midX1 = toCurvePointX;
+                midY1 = fromCurvePointY;
             }
 
             // N-S
             if (FromTerminal.Port.Side == BlockSideEnum.North && ToTerminal.Port.Side == BlockSideEnum.South)
             {
-                fromCurveStartPointX += shiftX;
-                toCurveEndPointX += shiftX;
+                fromCurvePointX += shiftX;
+                toCurvePointX += shiftX;
 
                 fromTerminalStartPointX += shiftX;
-                toTerminalEndPointX += shiftX;
+                toTerminalPointX += shiftX;
 
-                midX = fromCurveStartPointX;
-                midY = fromCurveStartPointY - ((fromCurveStartPointY - toCurveEndPointY) / 2);
+                var xSpan = fromCurvePointX > toCurvePointX ? fromCurvePointX - toCurvePointX : toCurvePointX - fromCurvePointX;
+
+                var ySpan = fromCurvePointY > toCurvePointY ? fromCurvePointY - toCurvePointY : toCurvePointY - fromCurvePointY;
+
+                midY2 = toCurvePointY + (ySpan / 3);
+                midY1 = toCurvePointY + ((ySpan / 3) * 2);
+
+                if (fromCurvePointX > toCurvePointX)
+                {
+                    midX2 = toCurvePointX + (0.1 * xSpan);
+                    midX1 = toCurvePointX + (0.9 * xSpan);
+                }
+                else
+                {
+                    midX2 = fromCurvePointX + (0.9 * xSpan);
+                    midX1 = fromCurvePointX + (0.1 * xSpan);
+                }
             }
 
             // S-N
             if (FromTerminal.Port.Side == BlockSideEnum.South && ToTerminal.Port.Side == BlockSideEnum.North)
             {
-                fromCurveStartPointX += shiftX;
-                toCurveEndPointX += shiftX;
+                fromCurvePointX += shiftX;
+                toCurvePointX += shiftX;
 
                 fromTerminalStartPointX += shiftX;
-                toTerminalEndPointX += shiftX;
+                toTerminalPointX += shiftX;
 
-                midX = fromCurveStartPointX;
-                midY = toCurveEndPointY - ((toCurveEndPointY - fromCurveStartPointY) / 2);
+                var xSpan = fromCurvePointX > toCurvePointX ? fromCurvePointX - toCurvePointX : toCurvePointX - fromCurvePointX;
+
+                var ySpan = fromCurvePointY > toCurvePointY ? fromCurvePointY - toCurvePointY : toCurvePointY - fromCurvePointY;
+
+                midY1 = fromCurvePointY + (ySpan / 3);
+                midY2 = fromCurvePointY + ((ySpan / 3) * 2);
+
+                if (fromCurvePointX > toCurvePointX)
+                {
+                    midX1 = toCurvePointX + (0.9 * xSpan);
+                    midX2 = toCurvePointX + (0.1 * xSpan);
+                }
+                else
+                {
+                    midX1 = fromCurvePointX + (0.1 * xSpan);
+                    midX2 = fromCurvePointX + (0.9 * xSpan);
+                }
             }
-
-
 
             // E-S
             if (FromTerminal.Port.Side == BlockSideEnum.East && ToTerminal.Port.Side == BlockSideEnum.South)
             {
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointX -= shiftX;
+                fromCurvePointY += shiftY;
+                toCurvePointX -= shiftX;
 
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointX -= shiftX;
+                fromTerminalPointY += shiftY;
+                toTerminalPointX -= shiftX;
 
-                midX = toCurveEndPointX;
-                midY = fromCurveStartPointY;
+                midX1 = toCurvePointX;
+                midY1 = fromCurvePointY;
             }
 
             // S-E
             if (FromTerminal.Port.Side == BlockSideEnum.South && ToTerminal.Port.Side == BlockSideEnum.East)
             {
-                fromCurveStartPointX += shiftX;
-                toCurveEndPointY -= shiftY;
+                fromCurvePointX += shiftX;
+                toCurvePointY -= shiftY;
 
                 fromTerminalStartPointX += shiftX;
-                toTerminalEndPointY -= shiftY;
+                toTerminalPointY -= shiftY;
 
-                midX = fromTerminalStartPointX;
-                midY = toCurveEndPointY;
+                midX1 = fromTerminalStartPointX;
+                midY1 = toCurvePointY;
             }
 
             // E-V
             if (FromTerminal.Port.Side == BlockSideEnum.East && ToTerminal.Port.Side == BlockSideEnum.West)
             {
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointY += shiftY;
+                fromCurvePointY += shiftY;
+                toCurvePointY += shiftY;
 
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointY += shiftY;
+                fromTerminalPointY += shiftY;
+                toTerminalPointY += shiftY;
 
-                midX = fromCurveStartPointX - ((fromCurveStartPointX - toCurveEndPointX) / 2);
-                midY = fromCurveStartPointY;
+                var xSpan = (fromCurvePointX - toCurvePointX);
+
+                var ySpan = fromCurvePointY > toCurvePointY ? fromCurvePointY - toCurvePointY : toCurvePointY - fromCurvePointY;
+
+                midX2 = toCurvePointX + (xSpan / 3);
+                midX1 = toCurvePointX + ((xSpan / 3) * 2);
+
+                if (fromCurvePointY > toCurvePointY)
+                {
+                    midY2 = toCurvePointY + (0.1 * ySpan);
+                    midY1 = toCurvePointY + (0.9 * ySpan);
+                }
+                else
+                {
+                    midY2 = fromCurvePointY + (0.9 * ySpan);
+                    midY1 = fromCurvePointY + (0.1 * ySpan);
+                }
             }
 
             // V-E
             if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.East)
             {
-                fromCurveStartPointY += shiftY;
-                toCurveEndPointY += shiftY;
+                fromCurvePointY += shiftY;
+                toCurvePointY += shiftY;
 
-                fromTerminalStartPointY += shiftY;
-                toTerminalEndPointY += shiftY;
+                fromTerminalPointY += shiftY;
+                toTerminalPointY += shiftY;
 
-                midX = toCurveEndPointX - ((toCurveEndPointX - fromCurveStartPointX) / 2);
-                midY = fromCurveStartPointY;
+                var xSpan = (toCurvePointX - fromCurvePointX);
+
+                var ySpan = fromCurvePointY > toCurvePointY ? fromCurvePointY - toCurvePointY : toCurvePointY - fromCurvePointY;
+
+                midX1 = fromCurvePointX + (xSpan / 3);
+                midX2 = fromCurvePointX + ((xSpan / 3) * 2);
+
+                if (fromCurvePointY > toCurvePointY)
+                {
+                    midY1 = toCurvePointY + (0.9 * ySpan);
+                    midY2 = toCurvePointY + (0.1 * ySpan);
+                }
+                else
+                {
+                    midY1 = fromCurvePointY + (0.1 * ySpan);
+                    midY2 = fromCurvePointY + (0.9 * ySpan);
+                }
             }
+
+
+            // V-V
+            if (FromTerminal.Port.Side == BlockSideEnum.West && ToTerminal.Port.Side == BlockSideEnum.West)
+            {
+                fromCurvePointY += shiftY;
+                toCurvePointY += shiftY;
+
+                fromTerminalPointY += shiftY;
+                toTerminalPointY += shiftY;
+
+                var ySpan = fromCurvePointY > toCurvePointY ? fromCurvePointY - toCurvePointY : toCurvePointY - fromCurvePointY;
+
+                var canvasWith = _canvasEnvelope.Width * 10000;
+
+                // If width of canvas is less than ySpan use 90% of canvas with - to prevent that curve is drawed outside canvas
+                if (canvasWith < ySpan)
+                    ySpan = canvasWith * 0.9;
+
+                midX1 = fromCurvePointX + ySpan;
+                midX2 = fromCurvePointX + ySpan;
+
+                if (fromCurvePointY > toCurvePointY)
+                {
+                    midY1 = toCurvePointY + (0.9 * ySpan);
+                    midY2 = toCurvePointY + (0.1 * ySpan);
+                }
+                else
+                {
+                    midY1 = fromCurvePointY + (0.1 * ySpan);
+                    midY2 = fromCurvePointY + (0.9 * ySpan);
+                }
+
+                sameSide = true;
+            }
+
+            // E-E
+            if (FromTerminal.Port.Side == BlockSideEnum.East && ToTerminal.Port.Side == BlockSideEnum.East)
+            {
+                fromCurvePointY += shiftY;
+                toCurvePointY += shiftY;
+
+                fromTerminalPointY += shiftY;
+                toTerminalPointY += shiftY;
+
+                var ySpan = fromCurvePointY > toCurvePointY ? fromCurvePointY - toCurvePointY : toCurvePointY - fromCurvePointY;
+
+                var canvasWith = _canvasEnvelope.Width * 10000;
+
+                // If width of canvas is less than ySpan use 90% of canvas with - to prevent that curve is drawed outside canvas
+                if (canvasWith < ySpan)
+                    ySpan = canvasWith * 0.9;
+
+                midX1 = fromCurvePointX - ySpan;
+                midX2 = fromCurvePointX - ySpan;
+
+                if (fromCurvePointY > toCurvePointY)
+                {
+                    midY1 = toCurvePointY + (0.9 * ySpan);
+                    midY2 = toCurvePointY + (0.1 * ySpan);
+                }
+                else
+                {
+                    midY1 = fromCurvePointY + (0.1 * ySpan);
+                    midY2 = fromCurvePointY + (0.9 * ySpan);
+                }
+
+                sameSide = true;
+            }
+
+            // S-S
+            if (FromTerminal.Port.Side == BlockSideEnum.South && ToTerminal.Port.Side == BlockSideEnum.South)
+            {
+                fromCurvePointY += shiftY;
+                toCurvePointY += shiftY;
+
+                fromTerminalPointY += shiftY;
+                toTerminalPointY += shiftY;
+
+                var xSpan = fromCurvePointX > toCurvePointX ? fromCurvePointX - toCurvePointX : toCurvePointX - fromCurvePointX;
+
+                var canvasHeight = _canvasEnvelope.Height * 10000;
+
+                // If hight of canvas is less than ySpan use 90% of canvas hight - to prevent that curve is drawed outside canvas
+                if (canvasHeight < xSpan)
+                    xSpan = canvasHeight * 0.9;
+
+                midY1 = fromCurvePointY + xSpan;
+                midY2 = fromCurvePointY + xSpan;
+
+                if (fromCurvePointX > toCurvePointX)
+                {
+                    midX1 = toCurvePointX + (0.9 * xSpan);
+                    midX2 = toCurvePointX + (0.1 * xSpan);
+                }
+                else
+                {
+                    midX1 = fromCurvePointX + (0.1 * xSpan);
+                    midX2 = fromCurvePointX + (0.9 * xSpan);
+                }
+
+                sameSide = true;
+            }
+
+            // N-N
+            if (FromTerminal.Port.Side == BlockSideEnum.North && ToTerminal.Port.Side == BlockSideEnum.North)
+            {
+                fromCurvePointY += shiftY;
+                toCurvePointY += shiftY;
+
+                fromTerminalPointY += shiftY;
+                toTerminalPointY += shiftY;
+
+                var xSpan = fromCurvePointX > toCurvePointX ? fromCurvePointX - toCurvePointX : toCurvePointX - fromCurvePointX;
+
+                var canvasHeight = _canvasEnvelope.Height * 10000;
+
+                // If hight of canvas is less than ySpan use 90% of canvas hight - to prevent that curve is drawed outside canvas
+                if (canvasHeight < xSpan)
+                    xSpan = canvasHeight * 0.9;
+
+                midY1 = fromCurvePointY - xSpan;
+                midY2 = fromCurvePointY - xSpan;
+
+                if (fromCurvePointX > toCurvePointX)
+                {
+                    midX1 = toCurvePointX + (0.9 * xSpan);
+                    midX2 = toCurvePointX + (0.1 * xSpan);
+                }
+                else
+                {
+                    midX1 = fromCurvePointX + (0.1 * xSpan);
+                    midX2 = fromCurvePointX + (0.9 * xSpan);
+                }
+
+                sameSide = true;
+            }
+
+
 
             LineString curve = null;
 
             // straigh line
-            if ((fromTerminalStartPointX == toTerminalEndPointX) || (fromTerminalStartPointY == toTerminalEndPointY))
+            if (!sameSide && ((fromTerminalStartPointX == toTerminalPointX) || (fromTerminalPointY == toTerminalPointY)))
             {
                 List<Coordinate> pnts = new List<Coordinate>();
-                pnts.Add(new Coordinate(GeometryBuilder.Convert(fromTerminalStartPointX), GeometryBuilder.Convert(fromTerminalStartPointY)));
-                pnts.Add(new Coordinate(GeometryBuilder.Convert(toTerminalEndPointX), GeometryBuilder.Convert(toTerminalEndPointY)));
+                pnts.Add(new Coordinate(GeometryBuilder.Convert(fromTerminalStartPointX), GeometryBuilder.Convert(fromTerminalPointY)));
+                pnts.Add(new Coordinate(GeometryBuilder.Convert(toTerminalPointX), GeometryBuilder.Convert(toTerminalPointY)));
                 curve = new LineString(pnts.ToArray());
             }
             else
             {
-                curve = GeometryBuilder.Beizer(fromCurveStartPointX, fromCurveStartPointY, midX, midY, toCurveEndPointX, toCurveEndPointY, fromTerminalStartPointX, fromTerminalStartPointY, toTerminalEndPointX, toTerminalEndPointY);
+                if (midX2 == -1)
+                    curve = GeometryBuilder.Beizer(fromCurvePointX, fromCurvePointY, midX1, midY1, toCurvePointX, toCurvePointY, fromTerminalStartPointX, fromTerminalPointY, toTerminalPointX, toTerminalPointY);
+                else
+                    curve = GeometryBuilder.Beizer(fromCurvePointX, fromCurvePointY, midX1, midY1, midX2, midY2, toCurvePointX, toCurvePointY, fromTerminalStartPointX, fromTerminalPointY, toTerminalPointX, toTerminalPointY);
             }
             return curve;
         }

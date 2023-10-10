@@ -76,6 +76,46 @@ namespace OpenFTTH.Schematic.Business.Drawing
             return new LineString(pnts);
         }
 
+        public static LineString Beizer(double curveStartX, double curveStartY, double viaX1, double viaY1, double viaX2, double viaY2, double curveEndX, double curveEndY, double startX, double startY, double endX, double endY)
+        {
+            int nPoints = 50;
+
+            double[] ps = new double[8];
+
+            ps[0] = curveStartX;
+            ps[1] = curveStartY;
+            ps[2] = viaX1;
+            ps[3] = viaY1;
+            ps[4] = viaX2;
+            ps[5] = viaY2;
+            ps[6] = curveEndX;
+            ps[7] = curveEndY;
+
+            double[] result = new double[nPoints * 2];
+
+            var bc = new BezierCurve();
+            bc.Bezier2D(ps, nPoints, result);
+
+            Coordinate[] pnts = new Coordinate[nPoints + 2];
+
+            // Add first point
+            pnts[0] = new Coordinate(Convert(startX), Convert(startY));
+
+            var pntIndex = 1;
+
+            for (int i = 0; i < ((nPoints * 2) - 1); i += 2)
+            {
+                pnts[pntIndex] = new Coordinate(Convert(result[i]), Convert(result[i + 1]));
+                pntIndex++;
+            }
+
+            // Add last point
+            pnts[nPoints + 1] = new Coordinate(Convert(endX), Convert(endY));
+
+
+            return new LineString(pnts);
+        }
+
         /// <summary>
         /// Convert from mm to wgs84 valid coordinate
         /// </summary>
