@@ -59,6 +59,7 @@ namespace OpenFTTH.Schematic.Business.Canvas
             result.Add(rackPoly);
 
             // Create rack block rectangle
+            /*
             var subRackSpacePoly = new DiagramObject(diagram)
             {
                 Geometry = GeometryBuilder.Rectangle(offsetX + _innerFrameMargin, offsetY + _innerFrameMargin, Height - (_innerFrameMargin * 2), Width - (_innerFrameMargin * 2)),
@@ -67,6 +68,40 @@ namespace OpenFTTH.Schematic.Business.Canvas
             };
 
             result.Add(subRackSpacePoly);
+            */
+
+            // Create free space rectangles
+
+            HashSet<int> positionUsed = new();
+
+            foreach (var rackMount in _rackViewModel.TerminalEquipments)
+            {
+                for (int position = rackMount.SubrackPosition; position < (rackMount.SubrackPosition + rackMount.SubrackHeight); position++)
+                {
+                    positionUsed.Add(position);
+                }
+            }
+
+            for (int position = 0; position < _rackViewModel.MinHeightInUnits; position++)
+            {
+                if (!positionUsed.Contains(position))
+                {
+                    var subRackSpacePoly = new DiagramObject(diagram)
+                    {
+                        Geometry = GeometryBuilder.Rectangle(offsetX + _innerFrameMargin, offsetY + _innerFrameMargin + (position * _rackUnitHeight), _rackUnitHeight, Width - (_innerFrameMargin * 2)),
+                        Style = "FreeRackSpace",
+                        DrawingOrder = _terminalEquipmentBlock.DrawingOrder + (ushort)200
+                    };
+
+                    subRackSpacePoly.Properties = new List<KeyValuePair<string, string>>()
+                    {
+                        new KeyValuePair<string, string>("position", position.ToString()),
+                        new KeyValuePair<string, string>("rackId", _rackViewModel.RackId.ToString())
+                    };
+
+                    result.Add(subRackSpacePoly);
+                }
+            }
 
 
             // Create Unit texts

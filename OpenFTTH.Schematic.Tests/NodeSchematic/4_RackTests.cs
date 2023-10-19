@@ -97,9 +97,9 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
 
             diagram.DiagramObjects.Count(o => o.Style == "Rack").Should().Be(1);
-            diagram.DiagramObjects.Count(o => o.Style == "SubrackSpace").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "RackLabel").Should().Be(1);
             diagram.DiagramObjects.Count(o => o.Style == "RackUnitLabel").Should().Be(81);
+            diagram.DiagramObjects.Count(o => o.Style == "FreeRackSpace").Should().Be(80);
 
             diagram.DiagramObjects.Count(o => o.Style == "Rack" && o.IdentifiedObject.RefId != Guid.Empty).Should().Be(1);
         }
@@ -138,7 +138,6 @@ namespace OpenFTTH.Schematic.Tests.NodeSchematic
             getDiagramQueryResult.IsSuccess.Should().BeTrue();
 
             diagram.DiagramObjects.Count(o => o.Style == "Rack").Should().Be(2);
-            diagram.DiagramObjects.Count(o => o.Style == "SubrackSpace").Should().Be(2);
             diagram.DiagramObjects.Count(o => o.Style == "RackLabel").Should().Be(2);
             diagram.DiagramObjects.Count(o => o.Style == "RackUnitLabel").Should().Be(162);
         }

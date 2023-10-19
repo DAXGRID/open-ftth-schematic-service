@@ -1,5 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
+using System.Collections.Generic;
 
 namespace OpenFTTH.Schematic.API.Model.DiagramLayout
 {
@@ -23,6 +24,7 @@ namespace OpenFTTH.Schematic.API.Model.DiagramLayout
         public string Style { get; set; }
         public string Label { get; set; }
         public double Rotation { get; set; }
+        public List<KeyValuePair<string, string>> Properties { get; set; }
 
         public DiagramObject(Diagram diagram)
         {
